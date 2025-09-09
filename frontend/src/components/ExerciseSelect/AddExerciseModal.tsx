@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { css } from "../../../styled-system/css";
-import { flex } from "../../../styled-system/patterns";
 import { useCreateExerciseMutation } from "../../generated/graphql";
 import { Modal } from "../shared";
 
@@ -158,19 +157,6 @@ export const AddExerciseModal: React.FC<Props> = ({
             })}
             required
           />
-        </label>
-      </div>
-
-      <div className={css({ marginBottom: "4" })}>
-        <label className={flex({ alignItems: "center", gap: "2" })}>
-          <input
-            type="checkbox"
-            checked={formData.isFavorite}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, isFavorite: e.target.checked }))
-            }
-          />
-          Favorite
         </label>
       </div>
     </Modal>

@@ -1,0 +1,17 @@
+mutation AddStep($workoutDate: String!, $exerciseIds: [ID!]!) {
+  addStep(input: { workoutDate: $workoutDate, exerciseIds: $exerciseIds }) {
+    step {
+      id
+      exercises {
+        id
+        name
+      }
+      sets {
+        id
+        reps
+        weightMcg
+      }
+    }
+    errors
+  }
+}

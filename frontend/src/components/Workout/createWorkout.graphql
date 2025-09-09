@@ -16,9 +16,6 @@ mutation CreateWorkout($date: ISO8601DateTime!) {
         }
       }
     }
-    errors {
-      field
-      message
-    }
+    errors
   }
 }
