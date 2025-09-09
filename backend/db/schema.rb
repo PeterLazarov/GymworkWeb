@@ -10,43 +10,81 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 4) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_08_111917) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
-  create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "user_id", null: false
-    t.string "ip_address"
-    t.string "user_agent"
+  create_table "exercises", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "images", default: [], array: true
+    t.string "equipment", default: [], array: true
+    t.string "position"
+    t.string "stance"
+    t.string "instructions", default: [], array: true
+    t.string "tips", array: true
+    t.string "muscle_areas", default: [], array: true
+    t.string "muscles", default: [], array: true
+    t.jsonb "measurements", default: {"reps" => nil, "speed" => nil, "weight" => nil, "distance" => nil, "duration" => nil}
+    t.boolean "is_favorite", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_sessions_on_user_id"
+    t.index ["name"], name: "index_exercises_on_name"
   end
 
-  create_table "user_database_authentications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "user_id", null: false
-    t.string "password_digest", null: false
+  create_table "workout_sets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "workout_step_id", null: false
+    t.uuid "exercise_id", null: false
+    t.boolean "is_warmup", default: false, null: false
+    t.date "date", null: false
+    t.boolean "is_weak_ass_record", default: false, null: false
+    t.integer "reps"
+    t.bigint "weight_mcg"
+    t.integer "distance_mm"
+    t.integer "duration_ms"
+    t.decimal "speed_kph", precision: 10, scale: 2
+    t.integer "rest_ms"
+    t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_user_database_authentications_on_user_id", unique: true
+    t.index ["date"], name: "index_workout_sets_on_date"
+    t.index ["exercise_id"], name: "index_workout_sets_on_exercise_id"
+    t.index ["is_weak_ass_record"], name: "index_workout_sets_on_is_weak_ass_record"
+    t.index ["workout_step_id"], name: "index_workout_sets_on_workout_step_id"
   end
 
-  create_table "user_emails", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "user_id", null: false
-    t.string "email_address", null: false
-    t.datetime "confirmed_at"
+  create_table "workout_step_exercises", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "workout_step_id", null: false
+    t.uuid "exercise_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["email_address"], name: "index_user_emails_on_email_address", unique: true
-    t.index ["user_id"], name: "index_user_emails_on_user_id", unique: true
+    t.index ["exercise_id"], name: "index_workout_step_exercises_on_exercise_id"
+    t.index ["workout_step_id"], name: "index_workout_step_exercises_on_workout_step_id"
   end
 
-  create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "workout_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "workout_id", null: false
+    t.string "type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["workout_id"], name: "index_workout_steps_on_workout_id"
   end
 
-  add_foreign_key "sessions", "users"
-  add_foreign_key "user_database_authentications", "users"
-  add_foreign_key "user_emails", "users"
+  create_table "workouts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.date "date", null: false
+    t.text "notes"
+    t.string "feeling"
+    t.string "pain"
+    t.integer "rpe"
+    t.datetime "ended_at"
+    t.integer "duration_ms"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["date"], name: "index_workouts_on_date"
+  end
+
+  add_foreign_key "workout_sets", "exercises"
+  add_foreign_key "workout_sets", "workout_steps"
+  add_foreign_key "workout_step_exercises", "exercises"
+  add_foreign_key "workout_step_exercises", "workout_steps"
+  add_foreign_key "workout_steps", "workouts"
 end

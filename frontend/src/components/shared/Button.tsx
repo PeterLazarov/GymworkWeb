@@ -1,20 +1,18 @@
 import React from "react";
 import { css } from "../../../styled-system/css";
 
-type Props = {
-  onClick: () => void;
-  children: React.ReactNode;
-};
-export const Button: React.FC<Props> = ({ onClick, children }) => (
+export const Button: React.FC<
+  React.ButtonHTMLAttributes<HTMLButtonElement>
+> = ({ disabled, ...props }) => (
   <button
-    onClick={onClick}
+    disabled={disabled}
     className={css({
-      cursor: "pointer",
+      cursor: disabled ? "not-allowed" : "pointer",
       padding: "2",
       borderRadius: "md",
-      _hover: { bg: "gray.100" },
+      opacity: disabled ? 0.5 : 1,
+      _hover: { bg: disabled ? undefined : "gray.100" },
     })}
-  >
-    {children}
-  </button>
+    {...props}
+  />
 );

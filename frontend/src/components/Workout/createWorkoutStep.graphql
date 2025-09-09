@@ -1,0 +1,22 @@
+mutation CreateWorkoutStep($workoutId: ID!) {
+  createWorkoutStep(input: { workoutId: $workoutId }) {
+    workoutStep {
+      id
+      exercises {
+        id
+        name
+      }
+      sets {
+        id
+        reps
+        weightMcg
+      }
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
+
+

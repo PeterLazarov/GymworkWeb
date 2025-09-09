@@ -12,4 +12,6 @@ generates:
       schema: zod
       scalars:
         ISO8601DateTime: 'string'
+        ISO8601Date: 'string'
+        JSON: 'any'
       strictScalars: true

@@ -1,13 +1,17 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { css } from "../../../styled-system/css";
 import { flex } from "../../../styled-system/patterns";
 import { WorkoutsByDateQuery } from "../../generated/graphql";
+import { Button } from "../shared";
 
 type Props = {
   workout: NonNullable<WorkoutsByDateQuery["workouts"][0]>;
 };
 
 export const WorkoutView: React.FC<Props> = ({ workout }) => {
+  const navigate = useNavigate();
+
   return (
     <div className={css({ padding: "4" })}>
       {workout.steps.map((step) => (
@@ -39,6 +43,7 @@ export const WorkoutView: React.FC<Props> = ({ workout }) => {
           </div>
         </div>
       ))}
+      <Button onClick={() => navigate("/exercises")}>+</Button>
     </div>
   );
 };

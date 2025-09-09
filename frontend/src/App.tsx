@@ -1,6 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { css } from "../styled-system/css";
+import { ExerciseList } from "./components/ExerciseSelect";
 import { Workout } from "./components/Workout";
 import { ROUTES } from "./routes";
 
@@ -13,6 +14,7 @@ function App() {
 
       <Routes>
         <Route path={ROUTES.WORKOUT} element={<Workout />} />
+        <Route path={ROUTES.EXERCISES} element={<ExerciseList />} />
       </Routes>
     </>
   );

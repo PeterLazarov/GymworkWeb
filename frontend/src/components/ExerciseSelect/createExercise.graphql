@@ -1,0 +1,21 @@
+mutation CreateExercise(
+  $name: String!
+  $muscleAreas: [String!]!
+  $muscles: [String!]!
+  $instructions: [String!]!
+) {
+  createExercise(
+    input: {
+      name: $name
+      muscleAreas: $muscleAreas
+      muscles: $muscles
+      instructions: $instructions
+    }
+  ) {
+    exercise {
+      id
+      name
+    }
+    errors
+  }
+}

@@ -1,7 +1,13 @@
 """
-Objects which may be commented on
+Custom scalar types
 """
-# TODO comment on the union
+scalar JSON
+scalar ISO8601Date
+scalar ISO8601DateTime
+
+"""
+Objects which may be commented on
+""" # TODO comment on the union
 union LoginError = SomethingWrong
 
 """
@@ -47,6 +53,136 @@ type LogoutPayload {
   """
   clientMutationId: String
   logout: Boolean!
+}
+
+"""
+Exercise type representing a workout exercise
+"""
+type Exercise implements Node {
+  id: ID!
+  name: String!
+  equipment: [String!]
+  position: String
+  stance: String
+  muscleAreas: [String!]
+  muscles: [String!]
+  instructions: [String!]
+  tips: [String!]
+  measurements: JSON
+  isFavorite: Boolean
+}
+
+"""
+Input type for creating an exercise
+"""
+input CreateExerciseInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+  name: String!
+  equipment: [String!]
+  position: String
+  stance: String
+  muscleAreas: [String!]
+  muscles: [String!]
+  instructions: [String!]
+  tips: [String!]
+  measurements: JSON
+  isFavorite: Boolean
+}
+
+"""
+Return type for creating an exercise
+"""
+type CreateExercisePayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+  exercise: Exercise
+  errors: [String!]
+}
+
+"""
+Workout set type representing a set in a workout step
+"""
+type WorkoutSet implements Node {
+  id: ID!
+  reps: Int!
+  weightMcg: Int!
+}
+
+"""
+Workout step type representing a step in a workout
+"""
+type WorkoutStep implements Node {
+  id: ID!
+  exercises: [Exercise!]!
+  sets: [WorkoutSet!]!
+}
+
+"""
+Input type for creating a workout step
+"""
+input CreateWorkoutStepInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+  workoutId: ID!
+}
+
+"""
+Return type for creating a workout step
+"""
+type CreateWorkoutStepPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+  workoutStep: WorkoutStep
+  errors: [ValidationError!]
+}
+
+"""
+Validation error type
+"""
+type ValidationError {
+  field: String!
+  message: String!
+}
+
+"""
+Workout type representing a workout session
+"""
+type Workout implements Node {
+  id: ID!
+  date: ISO8601DateTime!
+  steps: [WorkoutStep!]!
+}
+
+"""
+Input type for creating a workout
+"""
+input CreateWorkoutInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+  date: ISO8601DateTime!
+}
+
+"""
+Return type for creating a workout
+"""
+type CreateWorkoutPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+  workout: Workout
+  errors: [ValidationError!]
 }
 
 type Mutation {
@@ -99,6 +235,36 @@ type Mutation {
     """
     input: VerifyEmailAddressInput!
   ): VerifyEmailAddressPayload!
+
+  """
+  Create a new exercise
+  """
+  createExercise(
+    """
+    Parameters for creating an exercise
+    """
+    input: CreateExerciseInput!
+  ): CreateExercisePayload!
+
+  """
+  Create a new workout
+  """
+  createWorkout(
+    """
+    Parameters for creating a workout
+    """
+    input: CreateWorkoutInput!
+  ): CreateWorkoutPayload!
+
+  """
+  Create a new workout step
+  """
+  createWorkoutStep(
+    """
+    Parameters for creating a workout step
+    """
+    input: CreateWorkoutStepInput!
+  ): CreateWorkoutStepPayload!
 }
 
 """
@@ -136,6 +302,16 @@ type Query {
     """
     ids: [ID!]!
   ): [Node]
+
+  """
+  Fetch all exercises
+  """
+  exercises: [Exercise!]!
+
+  """
+  Fetch workouts by date
+  """
+  workouts(date: ISO8601Date!): [Workout!]!
 }
 
 """
@@ -162,8 +338,7 @@ type SetPasswordPayload {
 
 """
 Objects which may be commented on
-"""
-# TODO comment on the union
+""" # TODO comment on the union
 union SignupError = Taken
 
 """

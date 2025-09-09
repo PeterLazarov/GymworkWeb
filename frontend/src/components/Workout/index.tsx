@@ -65,7 +65,7 @@ export const Workout = () => {
         },
       });
 
-      if (result.data?.createWorkout?.errors.length) {
+      if (result.data?.createWorkout?.errors?.length) {
         console.error(
           "Failed to create workout:",
           result.data.createWorkout.errors
