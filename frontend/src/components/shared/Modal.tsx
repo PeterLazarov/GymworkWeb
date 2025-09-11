@@ -1,12 +1,19 @@
-import React, { useEffect } from "react";
-import { css } from "../../../styled-system/css";
-import { flex } from "../../../styled-system/patterns";
+import React from "react";
 import { Button } from "./Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./Dialog";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
+  description?: string;
   children: React.ReactNode;
   onSubmit: () => void;
   confirmText?: string;
@@ -17,111 +24,38 @@ export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   title,
+  description,
   children,
   onSubmit,
   confirmDisabled,
   confirmText,
 }) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     onSubmit();
   };
 
   return (
-    <div
-      onClick={onClose}
-      className={css({
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 50,
-      })}
-    >
-      <dialog
-        open
-        onClick={(e) => e.stopPropagation()}
-        className={css({
-          maxHeight: "90vh",
-          display: "flex",
-          flexDirection: "column",
-          position: "relative",
-          backgroundColor: "white",
-          padding: "6",
-          borderRadius: "lg",
-          width: "90%",
-          maxWidth: "600px",
-          border: "none",
-          margin: 0,
-          _focus: {
-            outline: "none",
-          },
-        })}
-      >
-        {title && (
-          <h2
-            className={css({
-              fontSize: "xl",
-              marginBottom: "4",
-              fontWeight: "bold",
-            })}
-          >
-            {title}
-          </h2>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[90vh] flex flex-col">
+        {(title || description) && (
+          <DialogHeader>
+            {title && <DialogTitle>{title}</DialogTitle>}
+            {description && (
+              <DialogDescription>{description}</DialogDescription>
+            )}
+          </DialogHeader>
         )}
-        <form
-          onSubmit={handleSubmit}
-          className={css({
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-            minHeight: 0, // Important for flex child to respect parent's height
-          })}
-        >
-          <div
-            className={css({
-              overflowY: "auto",
-              flex: 1,
-              minHeight: 0, // Important for scroll to work properly
-            })}
-          >
-            {children}
-          </div>
-          <div
-            className={flex({
-              justifyContent: "flex-end",
-              gap: "2",
-            })}
-          >
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="overflow-y-auto flex-1 min-h-0">{children}</div>
+          <DialogFooter>
             <Button onClick={onClose}>Cancel</Button>
             <Button type="submit" disabled={confirmDisabled}>
               {confirmText || "Submit"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </dialog>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

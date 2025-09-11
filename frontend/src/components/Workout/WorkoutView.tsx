@@ -119,6 +119,7 @@ const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={step.exercises[0]?.name}
+      description={`Add a set for ${step.exercises[0]?.name}`}
       onSubmit={onSubmit}
     >
       <div>
