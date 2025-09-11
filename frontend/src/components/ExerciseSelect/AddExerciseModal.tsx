@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { css } from "../../../styled-system/css";
 import { useCreateExerciseMutation } from "../../generated/graphql";
 import { Modal } from "../shared";
 
@@ -72,14 +71,10 @@ export const AddExerciseModal: React.FC<Props> = ({
       onSubmit={onSubmit}
       confirmDisabled={loading}
     >
-      {error && (
-        <div className={css({ color: "red.500", marginBottom: "4" })}>
-          {error.message}
-        </div>
-      )}
+      {error && <div className="text-red-500 mb-4">{error.message}</div>}
 
-      <div className={css({ marginBottom: "4" })}>
-        <label className={css({ display: "block", marginBottom: "2" })}>
+      <div className="mb-4">
+        <label className="block mb-2">
           Name *
           <input
             type="text"
@@ -87,74 +82,45 @@ export const AddExerciseModal: React.FC<Props> = ({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, name: e.target.value }))
             }
-            className={css({
-              width: "100%",
-              padding: "2",
-              border: "1px solid",
-              borderColor: "gray.300",
-              borderRadius: "md",
-              marginTop: "1",
-            })}
+            className="w-full p-2 border border-gray-300 rounded-md mt-1"
             required
           />
         </label>
       </div>
 
-      <div className={css({ marginBottom: "4" })}>
-        <label className={css({ display: "block", marginBottom: "2" })}>
+      <div className="mb-4">
+        <label className="block mb-2">
           Muscle Areas (comma-separated) *
           <input
             type="text"
             value={formData.muscleAreas.join(", ")}
             onChange={(e) => handleArrayInput("muscleAreas", e.target.value)}
-            className={css({
-              width: "100%",
-              padding: "2",
-              border: "1px solid",
-              borderColor: "gray.300",
-              borderRadius: "md",
-              marginTop: "1",
-            })}
+            className="w-full p-2 border border-gray-300 rounded-md mt-1"
             required
           />
         </label>
       </div>
 
-      <div className={css({ marginBottom: "4" })}>
-        <label className={css({ display: "block", marginBottom: "2" })}>
+      <div className="mb-4">
+        <label className="block mb-2">
           Muscles (comma-separated) *
           <input
             type="text"
             value={formData.muscles.join(", ")}
             onChange={(e) => handleArrayInput("muscles", e.target.value)}
-            className={css({
-              width: "100%",
-              padding: "2",
-              border: "1px solid",
-              borderColor: "gray.300",
-              borderRadius: "md",
-              marginTop: "1",
-            })}
+            className="w-full p-2 border border-gray-300 rounded-md mt-1"
             required
           />
         </label>
       </div>
 
-      <div className={css({ marginBottom: "4" })}>
-        <label className={css({ display: "block", marginBottom: "2" })}>
+      <div className="mb-4">
+        <label className="block mb-2">
           Instructions (comma-separated) *
           <textarea
             value={formData.instructions.join(", ")}
             onChange={(e) => handleArrayInput("instructions", e.target.value)}
-            className={css({
-              width: "100%",
-              padding: "2",
-              border: "1px solid",
-              borderColor: "gray.300",
-              borderRadius: "md",
-              marginTop: "1",
-              minHeight: "100px",
-            })}
+            className="w-full p-2 border border-gray-300 rounded-md mt-1 min-h-[100px]"
             required
           />
         </label>

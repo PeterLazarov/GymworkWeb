@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { css } from "../../../styled-system/css";
-import { flex } from "../../../styled-system/patterns";
 import {
   WorkoutsByDateQuery,
   useAddSetMutation,
@@ -21,30 +19,17 @@ export const WorkoutView: React.FC<Props> = ({ workout }) => {
   console.log(workout.steps);
 
   return (
-    <div className={css({ padding: "4" })}>
+    <div className="p-4">
       {workout.steps.map((step) => (
         <div
           key={step.id}
           onClick={() => setFocusedStep(step)}
-          className={css({
-            marginBottom: "4",
-            padding: "4",
-            borderRadius: "md",
-            backgroundColor: "gray.100",
-          })}
+          className="mb-4 p-4 rounded-md bg-gray-100"
         >
-          <div className={css({ fontWeight: "bold", marginBottom: "2" })}>
-            {step.exercises[0]?.name}
-          </div>
-          <div className={flex({ direction: "column", gap: "2" })}>
+          <div className="font-bold mb-2">{step.exercises[0]?.name}</div>
+          <div className="flex flex-col gap-2">
             {step.sets.map((set) => (
-              <div
-                key={set.id}
-                className={flex({
-                  gap: "4",
-                  alignItems: "center",
-                })}
-              >
+              <div key={set.id} className="flex gap-4 items-center">
                 {set.reps && <span>{set.reps} reps</span>}
                 {set.weightMcg && <span>{set.weightMcg / 1000000} kg</span>}
               </div>
@@ -124,7 +109,7 @@ const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
     >
       <div>
         {step.sets.map((set, index) => (
-          <div key={set.id} className={flex({ gap: "2" })}>
+          <div key={set.id} className="flex gap-2">
             <span>{index + 1}.</span>
             {set.reps !== undefined && <h2>{set.reps} reps</h2>}
             {set.weightMcg && <h2>{set.weightMcg / 1000000} kg</h2>}

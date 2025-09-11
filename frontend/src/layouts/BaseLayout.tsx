@@ -1,6 +1,4 @@
 import React, { ReactNode } from "react";
-import { css } from "../../styled-system/css";
-import { flex, vstack } from "../../styled-system/patterns";
 
 interface BaseLayoutProps {
   children: ReactNode;
@@ -9,41 +7,18 @@ interface BaseLayoutProps {
 export function BaseLayout({ children }: BaseLayoutProps) {
   return (
     // Using flex pattern for the main container
-    <div className={flex({ direction: "column", minH: "100vh" })}>
+    <div className="flex flex-col min-h-screen">
       {/* Using css function for custom styles */}
-      <header
-        className={css({
-          bg: "gray.800",
-          color: "white",
-          p: "4",
-          borderBottom: "1px solid token(colors.gray.700)",
-        })}
-      >
-        <h1 className={css({ fontSize: "xl", fontWeight: "bold" })}>
-          GymworkWeb
-        </h1>
+      <header className="bg-gray-800 text-white p-4 border-b border-gray-700">
+        <h1 className="text-xl font-bold">GymworkWeb</h1>
       </header>
 
       {/* Using vstack pattern for main content */}
-      <main
-        className={vstack({
-          flex: "1",
-          p: "4",
-          gap: "4",
-          alignItems: "stretch",
-        })}
-      >
+      <main className="flex flex-col flex-1 p-4 gap-4 items-stretch">
         {children}
       </main>
 
-      <footer
-        className={css({
-          bg: "gray.800",
-          color: "gray.300",
-          p: "4",
-          textAlign: "center",
-        })}
-      >
+      <footer className="bg-gray-800 text-gray-300 p-4 text-center">
         © {new Date().getFullYear()} GymworkWeb
       </footer>
     </div>

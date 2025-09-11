@@ -1,8 +1,6 @@
 import { DateTime } from "luxon";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { css } from "../../../styled-system/css";
-import { flex } from "../../../styled-system/patterns";
 import {
   useCreateWorkoutMutation,
   useWorkoutsByDateQuery,
@@ -31,12 +29,7 @@ const WorkoutHeader: React.FC<Props> = ({ date }) => {
   };
 
   return (
-    <Header
-      className={flex({
-        justifyContent: "space-around",
-        gap: "4",
-      })}
-    >
+    <Header className="flex justify-around gap-4">
       <Button onClick={() => navigateToDate(-1)}>{"<"}</Button>
       <span>{dateLabel}</span>
       <Button onClick={() => navigateToDate(1)}>{">"}</Button>
@@ -80,15 +73,13 @@ export const Workout = () => {
   };
 
   return (
-    <div className={css({})}>
+    <div>
       <WorkoutHeader date={date} />
       {(loading || creating) && <div>Loading...</div>}
       {(error || createError) && <div>Error loading workout</div>}
       {!loading && !error && !workout && !creating && (
-        <div className={css({ textAlign: "center", padding: "4" })}>
-          <div className={css({ marginBottom: "4" })}>
-            No workout found for this date
-          </div>
+        <div className="text-center p-4">
+          <div className="mb-4">No workout found for this date</div>
           <Button onClick={handleCreateWorkout}>Create Workout</Button>
         </div>
       )}

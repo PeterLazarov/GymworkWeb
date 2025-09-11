@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { css } from "../../../styled-system/css";
-import { flex } from "../../../styled-system/patterns";
 import {
   Exercise,
   useAddStepMutation,
@@ -20,20 +18,12 @@ export const ExerciseList: React.FC = () => {
 
   return (
     <div>
-      <div
-        className={flex({
-          justifyContent: "space-between",
-          padding: "4",
-          alignItems: "center",
-        })}
-      >
-        <h1 className={css({ fontSize: "xl", fontWeight: "bold" })}>
-          Exercises
-        </h1>
+      <div className="flex justify-between p-4 items-center">
+        <h1 className="text-xl font-bold">Exercises</h1>
         <Button onClick={() => setShowCreateForm(true)}>Create Exercise</Button>
       </div>
 
-      <div className={css({ padding: "4" })}>
+      <div className="p-4">
         {data?.exercises.map((exercise) => (
           <ExerciseItem key={exercise.id} exercise={exercise} />
         ))}
@@ -89,28 +79,11 @@ const ExerciseItem: React.FC<{ exercise: Exercise }> = ({ exercise }) => {
     <div
       key={exercise.id}
       onClick={handleClick}
-      className={css({
-        padding: "4",
-        marginBottom: "2",
-        borderRadius: "md",
-        border: "1px solid",
-        borderColor: "gray.200",
-        _hover: {
-          backgroundColor: "gray.50",
-          cursor: "pointer",
-        },
-      })}
+      className="p-4 mb-2 rounded-md border border-gray-200 hover:bg-gray-50 hover:cursor-pointer"
     >
-      <div
-        className={flex({
-          justifyContent: "space-between",
-          alignItems: "center",
-        })}
-      >
+      <div className="flex justify-between items-center">
         <div>
-          <h3 className={css({ fontSize: "lg", fontWeight: "semibold" })}>
-            {exercise.name}
-          </h3>
+          <h3 className="text-lg font-semibold">{exercise.name}</h3>
         </div>
       </div>
     </div>

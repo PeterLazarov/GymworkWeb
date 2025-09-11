@@ -1,7 +1,5 @@
 import React from "react";
 import { Button, Input } from ".";
-import { flex } from "../../../styled-system/patterns";
-
 type Props = {
   value: number;
   onChange: (value: number) => void;
@@ -15,7 +13,7 @@ export const IncrementalEditor: React.FC<Props> = ({
   step = 1,
   unit,
 }) => (
-  <div className={flex({ width: "100%" })}>
+  <div className="flex w-full">
     <Button
       variant="secondary"
       className="rounded-r-none"
