@@ -1,13 +1,58 @@
+import { gql, useMutation } from "@apollo/client";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  WorkoutsByDateQuery,
-  useAddSetMutation,
-  useDeleteSetMutation,
-  useUpdateSetMutation,
-} from "../../generated/graphql";
+import { WorkoutsByDateQuery } from "../../generated/graphql";
 import { cn } from "../../lib/utils";
 import { Button, IncrementalEditor, Modal } from "../shared";
+
+const ADD_SET_MUTATION = gql`
+  mutation AddSet(
+    $workoutStepId: ID!
+    $exerciseId: ID!
+    $date: ISO8601DateTime!
+    $reps: Int
+    $weightMcg: Int
+  ) {
+    addSet(
+      input: {
+        workoutStepId: $workoutStepId
+        exerciseId: $exerciseId
+        date: $date
+        reps: $reps
+        weightMcg: $weightMcg
+      }
+    ) {
+      set {
+        id
+        reps
+        weightMcg
+      }
+      errors
+    }
+  }
+`;
+
+const UPDATE_SET_MUTATION = gql`
+  mutation UpdateSet($input: UpdateSetInput!) {
+    updateSet(input: $input) {
+      set {
+        id
+        reps
+        weightMcg
+      }
+      errors
+    }
+  }
+`;
+
+const DELETE_SET_MUTATION = gql`
+  mutation DeleteSet($input: DeleteSetInput!) {
+    deleteSet(input: $input) {
+      success
+      errors
+    }
+  }
+`;
 
 type Workout = NonNullable<WorkoutsByDateQuery["workouts"][number]>;
 type WorkoutStep = Workout["steps"][number];
@@ -71,9 +116,9 @@ const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
 
   const [focusedSet, setFocusedSet] = useState<Set | undefined>();
 
-  const [addSet] = useAddSetMutation();
-  const [updateSet] = useUpdateSetMutation();
-  const [deleteSet] = useDeleteSetMutation();
+  const [addSet] = useMutation(ADD_SET_MUTATION);
+  const [updateSet] = useMutation(UPDATE_SET_MUTATION);
+  const [deleteSet] = useMutation(DELETE_SET_MUTATION);
 
   const handleUpdateSet = async () => {
     if (!focusedSet) return;

@@ -1,6 +1,30 @@
+import { gql, useMutation } from "@apollo/client";
 import React, { useState } from "react";
-import { useCreateExerciseMutation } from "../../generated/graphql";
 import { Modal } from "../shared";
+
+const CREATE_EXERCISE_MUTATION = gql`
+  mutation CreateExercise(
+    $name: String!
+    $muscleAreas: [String!]!
+    $muscles: [String!]!
+    $instructions: [String!]!
+  ) {
+    createExercise(
+      input: {
+        name: $name
+        muscleAreas: $muscleAreas
+        muscles: $muscles
+        instructions: $instructions
+      }
+    ) {
+      exercise {
+        id
+        name
+      }
+      errors
+    }
+  }
+`;
 
 type FormData = {
   name: string;
@@ -27,7 +51,9 @@ export const AddExerciseModal: React.FC<Props> = ({
     instructions: [""],
   });
 
-  const [createExercise, { loading, error }] = useCreateExerciseMutation();
+  const [createExercise, { loading, error }] = useMutation(
+    CREATE_EXERCISE_MUTATION
+  );
 
   const onSubmit = async () => {
     try {

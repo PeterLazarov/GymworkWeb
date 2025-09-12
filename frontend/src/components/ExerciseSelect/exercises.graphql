@@ -1,6 +1,0 @@
-query Exercises {
-  exercises {
-    id
-    name
-  }
-}

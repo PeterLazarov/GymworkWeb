@@ -1,16 +1,42 @@
+import { gql, useMutation, useQuery } from "@apollo/client";
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  Exercise,
-  useAddStepMutation,
-  useExercisesQuery,
-} from "../../generated/graphql";
+import { Exercise } from "../../generated/graphql";
 import { Button } from "../shared";
 import { AddExerciseModal } from "./AddExerciseModal";
 
+const EXERCISES_QUERY = gql`
+  query Exercises {
+    exercises {
+      id
+      name
+    }
+  }
+`;
+
+const ADD_STEP_MUTATION = gql`
+  mutation AddStep($workoutDate: String!, $exerciseIds: [ID!]!) {
+    addStep(input: { workoutDate: $workoutDate, exerciseIds: $exerciseIds }) {
+      step {
+        id
+        exercises {
+          id
+          name
+        }
+        sets {
+          id
+          reps
+          weightMcg
+        }
+      }
+      errors
+    }
+  }
+`;
+
 export const ExerciseList: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const { data, refetch, loading, error } = useExercisesQuery();
+  const { data, refetch, loading, error } = useQuery(EXERCISES_QUERY);
   const navigate = useNavigate();
 
   if (loading) return <div>Loading exercises...</div>;
@@ -45,7 +71,7 @@ export const ExerciseList: React.FC = () => {
 const ExerciseItem: React.FC<{ exercise: Exercise }> = ({ exercise }) => {
   const navigate = useNavigate();
   const { date } = useParams();
-  const [addStep] = useAddStepMutation();
+  const [addStep] = useMutation(ADD_STEP_MUTATION);
 
   const handleClick = async () => {
     if (!date) {

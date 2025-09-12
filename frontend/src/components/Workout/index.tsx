@@ -1,10 +1,7 @@
+import { gql, useMutation, useQuery } from "@apollo/client";
 import { DateTime } from "luxon";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  useCreateWorkoutMutation,
-  useWorkoutsByDateQuery,
-} from "../../generated/graphql";
 import {
   formatDate,
   formatDateIso,
@@ -12,6 +9,52 @@ import {
 } from "../../utils/date";
 import { Button, Header } from "../shared";
 import { WorkoutView } from "./WorkoutView";
+
+const WORKOUTS_BY_DATE_QUERY = gql`
+  query WorkoutsByDate($date: ISO8601Date!) {
+    workouts(date: $date) {
+      id
+      date
+      steps {
+        id
+        exercises {
+          id
+          name
+          measurements
+        }
+        sets {
+          id
+          reps
+          weightMcg
+        }
+      }
+    }
+  }
+`;
+
+const CREATE_WORKOUT_MUTATION = gql`
+  mutation CreateWorkout($date: ISO8601DateTime!) {
+    createWorkout(input: { date: $date }) {
+      workout {
+        id
+        date
+        steps {
+          id
+          exercises {
+            id
+            name
+          }
+          sets {
+            id
+            reps
+            weightMcg
+          }
+        }
+      }
+      errors
+    }
+  }
+`;
 
 type Props = {
   date?: string;
@@ -40,13 +83,13 @@ const WorkoutHeader: React.FC<Props> = ({ date }) => {
 export const Workout = () => {
   const { date } = useParams();
   const currentDate = date || DateTime.now().toISODate();
-  const { data, loading, error, refetch } = useWorkoutsByDateQuery({
+  const { data, loading, error, refetch } = useQuery(WORKOUTS_BY_DATE_QUERY, {
     variables: { date: currentDate },
     skip: !currentDate,
   });
 
   const [createWorkout, { loading: creating, error: createError }] =
-    useCreateWorkoutMutation();
+    useMutation(CREATE_WORKOUT_MUTATION);
 
   const workout = data?.workouts[0];
 
