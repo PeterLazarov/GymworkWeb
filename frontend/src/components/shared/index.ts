@@ -5,3 +5,4 @@ export * from "./Header";
 export * from "./IncrementalEditor";
 export * from "./Input";
 export * from "./Modal";
+export * from "./NumericInput";

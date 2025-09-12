@@ -1,0 +1,10 @@
+mutation UpdateSet($input: UpdateSetInput!) {
+  updateSet(input: $input) {
+    set {
+      id
+      reps
+      weightMcg
+    }
+    errors
+  }
+}

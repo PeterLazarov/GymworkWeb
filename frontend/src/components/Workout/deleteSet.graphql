@@ -1,0 +1,6 @@
+mutation DeleteSet($input: DeleteSetInput!) {
+  deleteSet(input: $input) {
+    success
+    errors
+  }
+}

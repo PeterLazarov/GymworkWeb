@@ -3,11 +3,15 @@ import { useNavigate } from "react-router-dom";
 import {
   WorkoutsByDateQuery,
   useAddSetMutation,
+  useDeleteSetMutation,
+  useUpdateSetMutation,
 } from "../../generated/graphql";
+import { cn } from "../../lib/utils";
 import { Button, IncrementalEditor, Modal } from "../shared";
 
-type Workout = NonNullable<WorkoutsByDateQuery["workouts"][0]>;
-type WorkoutStep = Workout["steps"][0];
+type Workout = NonNullable<WorkoutsByDateQuery["workouts"][number]>;
+type WorkoutStep = Workout["steps"][number];
+type Set = WorkoutStep["sets"][number];
 
 type Props = {
   workout: NonNullable<WorkoutsByDateQuery["workouts"][0]>;
@@ -16,7 +20,6 @@ type Props = {
 export const WorkoutView: React.FC<Props> = ({ workout }) => {
   const navigate = useNavigate();
   const [focusedStep, setFocusedStep] = useState<WorkoutStep | undefined>();
-  console.log(workout.steps);
 
   return (
     <div className="p-4">
@@ -66,12 +69,63 @@ const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
   const [reps, setReps] = useState(0);
   const [weight, setWeight] = useState(0);
 
-  const onSubmit = async () => {
-    console.log("onSubmit");
-  };
+  const [focusedSet, setFocusedSet] = useState<Set | undefined>();
 
   const [addSet] = useAddSetMutation();
-  console.log(step);
+  const [updateSet] = useUpdateSetMutation();
+  const [deleteSet] = useDeleteSetMutation();
+
+  const handleUpdateSet = async () => {
+    if (!focusedSet) return;
+
+    const weightMcg = weight * 1000000; // Convert kg to mcg
+    const result = await updateSet({
+      variables: {
+        input: {
+          setId: focusedSet.id,
+          reps,
+          weightMcg,
+        },
+      },
+    });
+
+    if (result.data?.updateSet?.errors.length) {
+      console.error("Failed to update set:", result.data.updateSet.errors);
+      return;
+    }
+
+    if (!result.data?.updateSet?.set) {
+      console.error("Failed to update set: No set data returned");
+      return;
+    }
+
+    setFocusedSet(undefined);
+  };
+
+  const handleDeleteSet = async () => {
+    if (!focusedSet) return;
+
+    const result = await deleteSet({
+      variables: {
+        input: {
+          setId: focusedSet.id,
+        },
+      },
+    });
+
+    if (result.data?.deleteSet?.errors.length) {
+      console.error("Failed to delete set:", result.data.deleteSet.errors);
+      return;
+    }
+
+    if (!result.data?.deleteSet?.success) {
+      console.error("Failed to delete set");
+      return;
+    }
+
+    setFocusedSet(undefined);
+  };
+
   const handleAddSet = async () => {
     const weightMcg = weight * 1000000; // Convert kg to mcg
     const result = await addSet({
@@ -94,7 +148,6 @@ const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
       return;
     }
 
-    // Reset form
     setReps(0);
     setWeight(0);
   };
@@ -105,26 +158,57 @@ const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
       onClose={onClose}
       title={step.exercises[0]?.name}
       description={`Add a set for ${step.exercises[0]?.name}`}
-      onSubmit={onSubmit}
+      hideFooter
     >
-      <div>
-        {step.sets.map((set, index) => (
-          <div key={set.id} className="flex gap-2">
-            <span>{index + 1}.</span>
-            {set.reps !== undefined && <h2>{set.reps} reps</h2>}
-            {set.weightMcg && <h2>{set.weightMcg / 1000000} kg</h2>}
-          </div>
-        ))}
-      </div>
+      <div className="flex flex-col gap-2">
+        <div>
+          {step.sets.map((set, index) => (
+            <div
+              key={set.id}
+              className={cn(
+                "flex gap-2",
+                focusedSet?.id === set.id && "bg-gray-200"
+              )}
+              onClick={() => {
+                setFocusedSet(focusedSet?.id === set.id ? undefined : set);
+                setReps(set.reps ?? 0);
+                setWeight(set.weightMcg / 1000000 ?? 0);
+              }}
+            >
+              <span>{index + 1}.</span>
+              {set.reps !== undefined && <h2>{set.reps} reps</h2>}
+              {set.weightMcg && <h2>{set.weightMcg / 1000000} kg</h2>}
+            </div>
+          ))}
+        </div>
 
-      <IncrementalEditor value={reps} onChange={setReps} unit="reps" />
-      <IncrementalEditor
-        value={weight}
-        onChange={setWeight}
-        step={5}
-        unit="kg"
-      />
-      <Button onClick={handleAddSet}>Add Set</Button>
+        <IncrementalEditor
+          value={reps}
+          onChange={(value) => setReps(value ?? 0)}
+          unit="reps"
+        />
+        <IncrementalEditor
+          value={weight}
+          onChange={(value) => setWeight(value ?? 0)}
+          step={5}
+          unit="kg"
+        />
+        {focusedSet && (
+          <div className="w-full flex gap-2">
+            <Button className="flex-1" onClick={handleUpdateSet}>
+              Update Set
+            </Button>
+            <Button
+              variant="destructive"
+              className="flex-1"
+              onClick={handleDeleteSet}
+            >
+              Remove Set
+            </Button>
+          </div>
+        )}
+        {!focusedSet && <Button onClick={handleAddSet}>Add Set</Button>}
+      </div>
     </Modal>
   );
 };

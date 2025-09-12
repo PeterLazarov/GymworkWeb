@@ -15,9 +15,10 @@ interface ModalProps {
   title?: string;
   description?: string;
   children: React.ReactNode;
-  onSubmit: () => void;
+  onSubmit?: () => void;
   confirmText?: string;
   confirmDisabled?: boolean;
+  hideFooter?: boolean;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -29,10 +30,11 @@ export const Modal: React.FC<ModalProps> = ({
   onSubmit,
   confirmDisabled,
   confirmText,
+  hideFooter,
 }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit();
+    onSubmit?.();
   };
 
   return (
@@ -48,12 +50,14 @@ export const Modal: React.FC<ModalProps> = ({
         )}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="overflow-y-auto flex-1 min-h-0">{children}</div>
-          <DialogFooter>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={confirmDisabled}>
-              {confirmText || "Submit"}
-            </Button>
-          </DialogFooter>
+          {!hideFooter && (
+            <DialogFooter className="mt-2">
+              <Button onClick={onClose}>Cancel</Button>
+              <Button type="submit" disabled={confirmDisabled}>
+                {confirmText || "Submit"}
+              </Button>
+            </DialogFooter>
+          )}
         </form>
       </DialogContent>
     </Dialog>
