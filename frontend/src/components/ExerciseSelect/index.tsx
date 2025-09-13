@@ -1,4 +1,5 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
+import { ChevronLeft } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Exercise } from "../../generated/graphql";
@@ -42,9 +43,16 @@ export const ExerciseList: React.FC = () => {
   if (loading) return <div>Loading exercises...</div>;
   if (error) return <div>Error loading exercises: {error.message}</div>;
 
+  const handleBack = () => {
+    navigate(-1);
+  };
   return (
     <div>
       <div className="flex justify-between p-4 items-center">
+        <Button variant="default" size="icon" onClick={handleBack}>
+          <ChevronLeft />
+          <span className="sr-only">Go back</span>
+        </Button>
         <h1 className="text-xl font-bold">Exercises</h1>
         <Button onClick={() => setShowCreateForm(true)}>Create Exercise</Button>
       </div>
