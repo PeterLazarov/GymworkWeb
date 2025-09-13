@@ -1,9 +1,17 @@
-import { gql, useMutation } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { WorkoutsByDateQuery } from "../../generated/graphql";
 import { cn } from "../../lib/utils";
-import { Button, IncrementalEditor, Modal } from "../shared";
+import {
+  Button,
+  IncrementalEditor,
+  Modal,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../shared";
 
 const ADD_SET_MUTATION = gql`
   mutation AddSet(
@@ -111,10 +119,38 @@ const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
   step,
   workout,
 }) => {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={step.exercises[0]?.name}
+      description={`Add a set for ${step.exercises[0]?.name}`}
+      hideFooter
+    >
+      <Tabs defaultValue="track">
+        <TabsList>
+          <TabsTrigger value="track">Track</TabsTrigger>
+          <TabsTrigger value="records">Records</TabsTrigger>
+        </TabsList>
+        <TabsContent value="track">
+          <TrackStepTab step={step} workout={workout} />
+        </TabsContent>
+        <TabsContent value="records">
+          <RecordsStepTab step={step} />
+        </TabsContent>
+      </Tabs>
+    </Modal>
+  );
+};
+
+const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
+  step,
+  workout,
+}) => {
+  const [focusedSet, setFocusedSet] = useState<Set | undefined>();
+
   const [reps, setReps] = useState(0);
   const [weight, setWeight] = useState(0);
-
-  const [focusedSet, setFocusedSet] = useState<Set | undefined>();
 
   const [addSet] = useMutation(ADD_SET_MUTATION);
   const [updateSet] = useMutation(UPDATE_SET_MUTATION);
@@ -198,62 +234,99 @@ const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={step.exercises[0]?.name}
-      description={`Add a set for ${step.exercises[0]?.name}`}
-      hideFooter
-    >
-      <div className="flex flex-col gap-2">
-        <div>
-          {step.sets.map((set, index) => (
-            <div
-              key={set.id}
-              className={cn(
-                "flex gap-2",
-                focusedSet?.id === set.id && "bg-gray-200"
-              )}
-              onClick={() => {
-                setFocusedSet(focusedSet?.id === set.id ? undefined : set);
-                setReps(set.reps ?? 0);
-                setWeight(set.weightMcg / 1000000 ?? 0);
-              }}
-            >
-              <span>{index + 1}.</span>
-              {set.reps !== undefined && <h2>{set.reps} reps</h2>}
-              {set.weightMcg && <h2>{set.weightMcg / 1000000} kg</h2>}
-            </div>
-          ))}
-        </div>
-
-        <IncrementalEditor
-          value={reps}
-          onChange={(value) => setReps(value ?? 0)}
-          unit="reps"
-        />
-        <IncrementalEditor
-          value={weight}
-          onChange={(value) => setWeight(value ?? 0)}
-          step={5}
-          unit="kg"
-        />
-        {focusedSet && (
-          <div className="w-full flex gap-2">
-            <Button className="flex-1" onClick={handleUpdateSet}>
-              Update Set
-            </Button>
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={handleDeleteSet}
-            >
-              Remove Set
-            </Button>
+    <div className="flex flex-col gap-2">
+      <div>
+        {step.sets.map((set, index) => (
+          <div
+            key={set.id}
+            className={cn(
+              "flex gap-2",
+              focusedSet?.id === set.id && "bg-gray-200"
+            )}
+            onClick={() => {
+              setFocusedSet(focusedSet?.id === set.id ? undefined : set);
+              setReps(set.reps ?? 0);
+              setWeight((set.weightMcg ?? 0) / 1000000);
+            }}
+          >
+            <span>{index + 1}.</span>
+            {set.reps !== undefined && <h2>{set.reps} reps</h2>}
+            {set.weightMcg && <h2>{set.weightMcg / 1000000} kg</h2>}
           </div>
-        )}
-        {!focusedSet && <Button onClick={handleAddSet}>Add Set</Button>}
+        ))}
       </div>
-    </Modal>
+
+      <IncrementalEditor
+        value={reps}
+        onChange={(value) => setReps(value ?? 0)}
+        unit="reps"
+      />
+      <IncrementalEditor
+        value={weight}
+        onChange={(value) => setWeight(value ?? 0)}
+        step={5}
+        unit="kg"
+      />
+      {focusedSet && (
+        <div className="w-full flex gap-2">
+          <Button className="flex-1" onClick={handleUpdateSet}>
+            Update Set
+          </Button>
+          <Button
+            variant="destructive"
+            className="flex-1"
+            onClick={handleDeleteSet}
+          >
+            Remove Set
+          </Button>
+        </div>
+      )}
+      {!focusedSet && <Button onClick={handleAddSet}>Add Set</Button>}
+    </div>
+  );
+};
+
+const EXERCISE_RECORDS_QUERY = gql`
+  query ExerciseRecords($exerciseId: ID!) {
+    exerciseRecords(exerciseId: $exerciseId) {
+      id
+      reps
+      weightMcg
+      date
+    }
+  }
+`;
+
+const RecordsStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
+  const { data, loading, error } = useQuery(EXERCISE_RECORDS_QUERY, {
+    variables: { exerciseId: step.exercises[0]!.id },
+  });
+
+  if (loading) return <div>Loading records...</div>;
+  if (error) return <div>Error loading records</div>;
+  if (!data?.exerciseRecords) return <div>No records found</div>;
+
+  return (
+    <div className="space-y-4">
+      <h3 className="font-semibold text-lg">Personal Records</h3>
+      <div className="space-y-2">
+        {data.exerciseRecords.map((record) => (
+          <div
+            key={record.id}
+            className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+          >
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{record.reps} reps</span>
+              <span className="font-medium">
+                {record.weightMcg / 1000000} kg
+              </span>
+            </div>
+            <div className="text-sm text-gray-500">
+              {new Date(record.date).toLocaleDateString()}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };

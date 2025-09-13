@@ -6,3 +6,4 @@ export * from "./IncrementalEditor";
 export * from "./Input";
 export * from "./Modal";
 export * from "./NumericInput";
+export * from "./Tabs";

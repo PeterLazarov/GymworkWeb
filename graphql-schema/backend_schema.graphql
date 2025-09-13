@@ -372,9 +372,29 @@ interface Node {
   id: ID!
 }
 
+type ExerciseRecord {
+  id: ID!
+  exercise: Exercise!
+  reps: Int!
+  weightMcg: Int!
+  date: ISO8601Date!
+}
+
 type Query {
-  exercises(equipment: [String!], isFavorite: Boolean, muscleAreas: [String!], muscles: [String!]): [Exercise!]!
-  workouts(date: ISO8601Date, feeling: String, fromDate: ISO8601Date, pain: String, toDate: ISO8601Date): [Workout!]!
+  exercises(
+    equipment: [String!]
+    isFavorite: Boolean
+    muscleAreas: [String!]
+    muscles: [String!]
+  ): [Exercise!]!
+  workouts(
+    date: ISO8601Date
+    feeling: String
+    fromDate: ISO8601Date
+    pain: String
+    toDate: ISO8601Date
+  ): [Workout!]!
+  exerciseRecords(exerciseId: ID): [ExerciseRecord!]!
 }
 
 """
