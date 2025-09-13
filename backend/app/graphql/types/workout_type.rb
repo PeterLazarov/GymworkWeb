@@ -16,5 +16,11 @@ module Types
     # Relationships
     field :steps, [Types::WorkoutStepType], null: false
     field :workout_sets, [Types::WorkoutSetType], null: false
+
+    field :has_comments, Boolean, null: false
+
+    def has_comments
+      object.notes.present? || object.feeling.present? || object.rpe.present? || object.pain.present?
+    end
   end
 end

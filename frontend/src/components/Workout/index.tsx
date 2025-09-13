@@ -15,6 +15,11 @@ const WORKOUTS_BY_DATE_QUERY = gql`
     workouts(date: $date) {
       id
       date
+      feeling
+      rpe
+      notes
+      pain
+      hasComments
       steps {
         id
         exercises {
@@ -38,6 +43,11 @@ const CREATE_WORKOUT_MUTATION = gql`
       workout {
         id
         date
+        feeling
+        rpe
+        notes
+        pain
+        hasComments
         steps {
           id
           exercises {

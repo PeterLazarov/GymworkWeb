@@ -6,12 +6,34 @@ import { cn } from "../../lib/utils";
 import {
   Button,
   IncrementalEditor,
+  Label,
   Modal,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
+  Textarea,
 } from "../shared";
+
+const UPDATE_WORKOUT_MUTATION = gql`
+  mutation UpdateWorkout($input: UpdateWorkoutInput!) {
+    updateWorkout(input: $input) {
+      workout {
+        id
+        feeling
+        rpe
+        notes
+        pain
+      }
+      errors
+    }
+  }
+`;
 
 const ADD_SET_MUTATION = gql`
   mutation AddSet(
@@ -73,9 +95,33 @@ type Props = {
 export const WorkoutView: React.FC<Props> = ({ workout }) => {
   const navigate = useNavigate();
   const [focusedStep, setFocusedStep] = useState<WorkoutStep | undefined>();
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [updateWorkout] = useMutation(UPDATE_WORKOUT_MUTATION);
 
   return (
     <div className="p-4">
+      {workout.hasComments && (
+        <div
+          className="mb-4 p-4 rounded-md bg-gray-100"
+          onClick={() => setIsDetailsModalOpen(true)}
+        >
+          <div className="font-bold mb-2">Comments</div>
+          <div className="flex flex-col gap-2">
+            {workout.notes && (
+              <div className="text-sm text-gray-500">{workout.notes}</div>
+            )}
+            {workout.feeling && (
+              <div className="text-sm text-gray-500">{workout.feeling}</div>
+            )}
+            {workout.rpe && (
+              <div className="text-sm text-gray-500">RPE: {workout.rpe}</div>
+            )}
+            {workout.pain && (
+              <div className="text-sm text-gray-500">Pain: {workout.pain}</div>
+            )}
+          </div>
+        </div>
+      )}
       {workout.steps.map((step) => (
         <div
           key={step.id}
@@ -93,7 +139,12 @@ export const WorkoutView: React.FC<Props> = ({ workout }) => {
           </div>
         </div>
       ))}
-      <Button onClick={() => navigate(`/${workout.date}/exercises`)}>+</Button>
+      <div className="flex gap-2">
+        <Button onClick={() => navigate(`/${workout.date}/exercises`)}>
+          Add Exercise
+        </Button>
+        <Button onClick={() => setIsDetailsModalOpen(true)}>Add Comment</Button>
+      </div>
       {focusedStep && (
         <WorkoutStepModal
           isOpen={!!focusedStep}
@@ -102,6 +153,31 @@ export const WorkoutView: React.FC<Props> = ({ workout }) => {
           workout={workout}
         />
       )}
+      <WorkoutDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        workout={workout}
+        onSave={async (details) => {
+          const result = await updateWorkout({
+            variables: {
+              input: {
+                workoutId: workout.id,
+                ...details,
+              },
+            },
+          });
+
+          if (result.data?.updateWorkout?.errors?.length) {
+            console.error(
+              "Failed to update workout:",
+              result.data.updateWorkout.errors
+            );
+            return;
+          }
+
+          setIsDetailsModalOpen(false);
+        }}
+      />
     </div>
   );
 };
@@ -111,6 +187,115 @@ type WorkoutStepModalProps = {
   onClose: () => void;
   step: WorkoutStep;
   workout: Workout;
+};
+
+type WorkoutDetailsModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  workout: Workout;
+  onSave: (details: {
+    feeling?: string;
+    rpe?: number;
+    notes?: string;
+    pain?: string;
+  }) => void;
+};
+
+const WorkoutDetailsModal: React.FC<WorkoutDetailsModalProps> = ({
+  isOpen,
+  onClose,
+  workout,
+  onSave,
+}) => {
+  const [feeling, setFeeling] = useState(workout.feeling || "");
+  const [rpe, setRpe] = useState(workout.rpe?.toString() || "");
+  const [notes, setNotes] = useState(workout.notes || "");
+  const [pain, setPain] = useState(workout.pain || "");
+
+  const handleSave = () => {
+    onSave({
+      feeling: feeling || undefined,
+      rpe: rpe ? parseInt(rpe, 10) : undefined,
+      notes: notes || undefined,
+      pain: pain || undefined,
+    });
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Workout Details"
+      description="Enter notes about your workout"
+      hideFooter
+    >
+      <div className="space-y-4">
+        <div>
+          <Label>Feeling</Label>
+          <Select value={feeling} onValueChange={setFeeling}>
+            <SelectTrigger>
+              <SelectValue placeholder="How are you feeling?" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="great">Great</SelectItem>
+              <SelectItem value="good">Good</SelectItem>
+              <SelectItem value="okay">Okay</SelectItem>
+              <SelectItem value="tired">Tired</SelectItem>
+              <SelectItem value="exhausted">Exhausted</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>RPE (Rate of Perceived Exertion)</Label>
+          <Select value={rpe} onValueChange={setRpe}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select RPE (1-10)" />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 10 }, (_, i) => (
+                <SelectItem key={i + 1} value={(i + 1).toString()}>
+                  {i + 1}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Pain Level</Label>
+          <Select value={pain} onValueChange={setPain}>
+            <SelectTrigger>
+              <SelectValue placeholder="Any pain?" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">None</SelectItem>
+              <SelectItem value="mild">Mild</SelectItem>
+              <SelectItem value="moderate">Moderate</SelectItem>
+              <SelectItem value="severe">Severe</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Notes</Label>
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add any notes about your workout..."
+            className="h-32"
+          />
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave}>Save</Button>
+        </div>
+      </div>
+    </Modal>
+  );
 };
 
 const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({

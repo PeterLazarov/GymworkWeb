@@ -39,11 +39,6 @@ input AddStepInput {
   """
   clientMutationId: String
   exerciseIds: [ID!]!
-
-  """
-  Type of step: superset, circuit, or regular
-  """
-  type: String
   workoutDate: String!
 }
 
@@ -235,6 +230,14 @@ type Exercise implements Node {
   workoutSteps: [WorkoutStep!]!
 }
 
+type ExerciseRecord {
+  date: ISO8601Date!
+  exercise: Exercise!
+  id: ID!
+  reps: Int!
+  weightMcg: Int!
+}
+
 """
 An ISO 8601-encoded date
 """
@@ -352,7 +355,7 @@ type Mutation {
   ): UpdateSetPayload
 
   """
-  Update a workout's date
+  Update a workout's details
   """
   updateWorkout(
     """
@@ -372,29 +375,10 @@ interface Node {
   id: ID!
 }
 
-type ExerciseRecord {
-  id: ID!
-  exercise: Exercise!
-  reps: Int!
-  weightMcg: Int!
-  date: ISO8601Date!
-}
-
 type Query {
-  exercises(
-    equipment: [String!]
-    isFavorite: Boolean
-    muscleAreas: [String!]
-    muscles: [String!]
-  ): [Exercise!]!
-  workouts(
-    date: ISO8601Date
-    feeling: String
-    fromDate: ISO8601Date
-    pain: String
-    toDate: ISO8601Date
-  ): [Workout!]!
   exerciseRecords(exerciseId: ID): [ExerciseRecord!]!
+  exercises(equipment: [String!], isFavorite: Boolean, muscleAreas: [String!], muscles: [String!]): [Exercise!]!
+  workouts(date: ISO8601Date, feeling: String, fromDate: ISO8601Date, pain: String, toDate: ISO8601Date): [Workout!]!
 }
 
 """
@@ -469,7 +453,11 @@ input UpdateWorkoutInput {
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
-  date: ISO8601DateTime!
+  date: ISO8601DateTime
+  feeling: String
+  notes: String
+  pain: String
+  rpe: Int
   workoutId: ID!
 }
 
@@ -491,6 +479,7 @@ type Workout implements Node {
   durationMs: Int
   endedAt: ISO8601DateTime
   feeling: String
+  hasComments: Boolean!
   id: ID!
   notes: String
   pain: String
