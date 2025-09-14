@@ -1,4 +1,5 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { DateTime } from "luxon";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -82,10 +83,15 @@ const WorkoutHeader: React.FC<Props> = ({ date }) => {
   };
 
   return (
-    <Header className="flex justify-around gap-4">
-      <Button onClick={() => navigateToDate(-1)}>{"<"}</Button>
+    <Header className="flex justify-between gap-4">
+      <Button variant="secondary" onClick={() => navigateToDate(-1)}>
+        <ChevronLeftIcon /> {formatDate(currentDate.minus({ days: 1 }), "long")}
+      </Button>
       <span>{dateLabel}</span>
-      <Button onClick={() => navigateToDate(1)}>{">"}</Button>
+      <Button variant="secondary" onClick={() => navigateToDate(1)}>
+        {formatDate(currentDate.plus({ days: 1 }), "long")}
+        <ChevronRightIcon />
+      </Button>
     </Header>
   );
 };
@@ -126,7 +132,7 @@ export const Workout = () => {
   };
 
   return (
-    <div>
+    <>
       <WorkoutHeader date={date} />
       {(loading || creating) && <div>Loading...</div>}
       {(error || createError) && <div>Error loading workout</div>}
@@ -137,6 +143,6 @@ export const Workout = () => {
         </div>
       )}
       {workout && <WorkoutView workout={workout} />}
-    </div>
+    </>
   );
 };

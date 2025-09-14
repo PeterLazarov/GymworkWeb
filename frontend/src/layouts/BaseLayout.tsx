@@ -7,7 +7,7 @@ interface BaseLayoutProps {
 export function BaseLayout({ children }: BaseLayoutProps) {
   return (
     // Using flex pattern for the main container
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen min-h-screen">
       {/* Using css function for custom styles */}
       <header className="bg-primary text-white p-4 border-b border-gray-700">
         <a href="/">
@@ -16,7 +16,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
       </header>
 
       {/* Using vstack pattern for main content */}
-      <main className="flex flex-col flex-1 p-4 gap-4 items-stretch">
+      <main className="flex flex-col flex-1 p-4 gap-4 items-stretch overflow-hidden">
         {children}
       </main>
     </div>

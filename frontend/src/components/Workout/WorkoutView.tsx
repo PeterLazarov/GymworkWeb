@@ -1,4 +1,5 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
+import { NotebookPenIcon, PlusIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { WorkoutsByDateQuery } from "../../generated/graphql";
@@ -103,52 +104,47 @@ export const WorkoutView: React.FC<Props> = ({ workout }) => {
   const [updateWorkout] = useMutation(UPDATE_WORKOUT_MUTATION);
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      {workout.hasComments && (
-        <Card onClick={() => setIsDetailsModalOpen(true)} variant="outline">
-          <CardHeader>
-            <CardTitle>Comments</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            {workout.notes && (
-              <div className="text-sm text-gray-500">{workout.notes}</div>
-            )}
-            {workout.feeling && (
-              <div className="text-sm text-gray-500">{workout.feeling}</div>
-            )}
-            {workout.rpe && (
-              <div className="text-sm text-gray-500">RPE: {workout.rpe}</div>
-            )}
-            {workout.pain && (
-              <div className="text-sm text-gray-500">Pain: {workout.pain}</div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-      {workout.steps.map((step) => (
-        <Card
-          key={step.id}
-          onClick={() => setFocusedStep(step)}
-          variant="secondary"
-        >
-          <CardHeader>
-            <CardTitle>{step.exercises[0]?.name}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            {step.sets.map((set) => (
-              <div key={set.id} className="flex gap-4 items-center">
-                {set.reps && <span>{set.reps} reps</span>}
-                {set.weightMcg && <span>{set.weightMcg / 1000000} kg</span>}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ))}
-      <div className="flex gap-2">
+    <div className="p-4 flex-1 overflow-hidden flex flex-col gap-4">
+      <div className="flex overflow-y-auto flex-col gap-4 flex-1">
+        {workout.hasComments && (
+          <Card onClick={() => setIsDetailsModalOpen(true)} variant="outline">
+            <CardHeader>
+              <CardTitle>Comments</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-2">
+              {workout.notes && (
+                <div className="text-sm text-gray-500">{workout.notes}</div>
+              )}
+              {workout.feeling && (
+                <div className="text-sm text-gray-500">{workout.feeling}</div>
+              )}
+              {workout.rpe && (
+                <div className="text-sm text-gray-500">RPE: {workout.rpe}</div>
+              )}
+              {workout.pain && (
+                <div className="text-sm text-gray-500">
+                  Pain: {workout.pain}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+        {workout.steps.map((step) => (
+          <WorkoutStepCard
+            key={step.id}
+            step={step}
+            onClick={() => setFocusedStep(step)}
+          />
+        ))}
+      </div>
+
+      <div className="flex gap-2 justify-center">
         <Button onClick={() => navigate(`/${workout.date}/exercises`)}>
-          Add Exercise
+          <PlusIcon /> Add Exercise
         </Button>
-        <Button onClick={() => setIsDetailsModalOpen(true)}>Add Comment</Button>
+        <Button onClick={() => setIsDetailsModalOpen(true)}>
+          <NotebookPenIcon /> Add Comment
+        </Button>
       </div>
       {focusedStep && (
         <WorkoutStepModal
@@ -186,6 +182,25 @@ export const WorkoutView: React.FC<Props> = ({ workout }) => {
     </div>
   );
 };
+
+const WorkoutStepCard: React.FC<{ step: WorkoutStep; onClick: () => void }> = ({
+  step,
+  onClick,
+}) => (
+  <Card onClick={onClick} variant="secondary">
+    <CardHeader>
+      <CardTitle>{step.exercises[0]?.name}</CardTitle>
+    </CardHeader>
+    <CardContent className="flex flex-col gap-2">
+      {step.sets.map((set) => (
+        <div key={set.id} className="flex gap-4 items-center">
+          {set.reps && <span>{set.reps} reps</span>}
+          {set.weightMcg && <span>{set.weightMcg / 1000000} kg</span>}
+        </div>
+      ))}
+    </CardContent>
+  </Card>
+);
 
 type WorkoutStepModalProps = {
   isOpen: boolean;
