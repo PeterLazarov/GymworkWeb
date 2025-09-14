@@ -21,6 +21,5 @@ module Types
     field :exercises, resolver: Resolvers::ExercisesResolver
     field :workouts, resolver: Resolvers::WorkoutsResolver
     field :exercise_records, resolver: Resolvers::ExerciseRecordsResolver
-    field :workout_sets, resolver: Resolvers::WorkoutSetsResolver
   end
 end

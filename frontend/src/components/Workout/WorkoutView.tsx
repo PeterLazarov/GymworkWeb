@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { WorkoutsByDateQuery } from "../../generated/graphql";
 import { cn } from "../../lib/utils";
+import { formatDateIso } from "../../utils/date";
 import {
   Button,
   Card,
@@ -183,15 +184,15 @@ export const WorkoutView: React.FC<Props> = ({ workout }) => {
   );
 };
 
-const WorkoutStepCard: React.FC<{ step: WorkoutStep; onClick: () => void }> = ({
-  step,
-  onClick,
-}) => (
+const WorkoutStepCard: React.FC<{
+  step: WorkoutStep;
+  onClick?: () => void;
+}> = ({ step, onClick }) => (
   <Card onClick={onClick} variant="secondary">
     <CardHeader>
       <CardTitle>{step.exercises[0]?.name}</CardTitle>
     </CardHeader>
-    <CardContent className="flex flex-col gap-2">
+    <CardContent className="flex flex-col gap-1">
       {step.sets.map((set) => (
         <div key={set.id} className="flex gap-4 items-center">
           {set.reps && <span>{set.reps} reps</span>}
@@ -344,7 +345,7 @@ const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
         <TabsContent value="records">
           <RecordsStepTab step={step} />
         </TabsContent>
-        <TabsContent value="history">
+        <TabsContent value="history" className="flex-1 overflow-hidden">
           <HistoryStepTab step={step} />
         </TabsContent>
       </Tabs>
@@ -542,11 +543,17 @@ const RecordsStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
 
 const EXERCISE_SETS_QUERY = gql`
   query ExerciseSets($exerciseId: ID!) {
-    workoutSets(exerciseId: $exerciseId) {
+    exercises(id: $exerciseId) {
       id
-      reps
-      weightMcg
-      date
+      history {
+        id
+        sets {
+          id
+          reps
+          weightMcg
+          date
+        }
+      }
     }
   }
 `;
@@ -558,16 +565,28 @@ const HistoryStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
 
   if (loading) return <div>Loading sets...</div>;
   if (error) return <div>Error loading sets</div>;
-  if (!data?.workoutSets) return <div>No sets found</div>;
+  if (!data?.exercises) return <div>No sets found</div>;
+
+  const exercise = data.exercises[0];
 
   return (
     <div className="space-y-4">
       <h3 className="font-semibold text-lg">History</h3>
       <div className="space-y-2">
-        {data.workoutSets.map((set) => (
-          <div key={set.id}>
-            {set.date} - {set.reps} reps - {set.weightMcg / 1000000} kg
-          </div>
+        {exercise.history.map((step) => (
+          <Card key={step.id} variant="secondary">
+            <CardHeader>
+              <CardTitle>{formatDateIso(step.sets[0].date, "long")}</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-1">
+              {step.sets?.map((set) => (
+                <div key={set.id} className="flex gap-4 items-center">
+                  {set.reps && <span>{set.reps} reps</span>}
+                  {set.weightMcg && <span>{set.weightMcg / 1000000} kg</span>}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>

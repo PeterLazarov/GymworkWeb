@@ -20,6 +20,10 @@ module Types
     # Relationships
     field :workout_steps, [Types::WorkoutStepType], null: false
     field :workout_sets, [Types::WorkoutSetType], null: false
+    field :history, [Types::WorkoutStepType], null: false
 
+    def history
+      object.workout_steps.joins(:workout).order('workouts.date DESC')
+    end
   end
 end
