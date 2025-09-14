@@ -94,7 +94,7 @@ type WorkoutStep = Workout["steps"][number];
 type Set = WorkoutStep["sets"][number];
 
 type Props = {
-  workout: NonNullable<WorkoutsByDateQuery["workouts"][0]>;
+  workout: Workout;
 };
 
 export const WorkoutView: React.FC<Props> = ({ workout }) => {
@@ -336,12 +336,16 @@ const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
         <TabsList>
           <TabsTrigger value="track">Track</TabsTrigger>
           <TabsTrigger value="records">Records</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
         <TabsContent value="track">
           <TrackStepTab step={step} workout={workout} />
         </TabsContent>
         <TabsContent value="records">
           <RecordsStepTab step={step} />
+        </TabsContent>
+        <TabsContent value="history">
+          <HistoryStepTab step={step} />
         </TabsContent>
       </Tabs>
     </Modal>
@@ -529,6 +533,40 @@ const RecordsStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
             <div className="text-sm text-gray-500">
               {new Date(record.date).toLocaleDateString()}
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const EXERCISE_SETS_QUERY = gql`
+  query ExerciseSets($exerciseId: ID!) {
+    workoutSets(exerciseId: $exerciseId) {
+      id
+      reps
+      weightMcg
+      date
+    }
+  }
+`;
+
+const HistoryStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
+  const { data, loading, error } = useQuery(EXERCISE_SETS_QUERY, {
+    variables: { exerciseId: step.exercises[0]!.id },
+  });
+
+  if (loading) return <div>Loading sets...</div>;
+  if (error) return <div>Error loading sets</div>;
+  if (!data?.workoutSets) return <div>No sets found</div>;
+
+  return (
+    <div className="space-y-4">
+      <h3 className="font-semibold text-lg">History</h3>
+      <div className="space-y-2">
+        {data.workoutSets.map((set) => (
+          <div key={set.id}>
+            {set.date} - {set.reps} reps - {set.weightMcg / 1000000} kg
           </div>
         ))}
       </div>

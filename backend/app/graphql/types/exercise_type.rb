@@ -20,5 +20,6 @@ module Types
     # Relationships
     field :workout_steps, [Types::WorkoutStepType], null: false
     field :workout_sets, [Types::WorkoutSetType], null: false
+
   end
 end
