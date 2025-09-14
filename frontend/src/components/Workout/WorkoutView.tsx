@@ -5,6 +5,10 @@ import { WorkoutsByDateQuery } from "../../generated/graphql";
 import { cn } from "../../lib/utils";
 import {
   Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   IncrementalEditor,
   Label,
   Modal,
@@ -99,14 +103,13 @@ export const WorkoutView: React.FC<Props> = ({ workout }) => {
   const [updateWorkout] = useMutation(UPDATE_WORKOUT_MUTATION);
 
   return (
-    <div className="p-4">
+    <div className="p-4 flex flex-col gap-4">
       {workout.hasComments && (
-        <div
-          className="mb-4 p-4 rounded-md bg-gray-100"
-          onClick={() => setIsDetailsModalOpen(true)}
-        >
-          <div className="font-bold mb-2">Comments</div>
-          <div className="flex flex-col gap-2">
+        <Card onClick={() => setIsDetailsModalOpen(true)} variant="outline">
+          <CardHeader>
+            <CardTitle>Comments</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
             {workout.notes && (
               <div className="text-sm text-gray-500">{workout.notes}</div>
             )}
@@ -119,25 +122,27 @@ export const WorkoutView: React.FC<Props> = ({ workout }) => {
             {workout.pain && (
               <div className="text-sm text-gray-500">Pain: {workout.pain}</div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
       {workout.steps.map((step) => (
-        <div
+        <Card
           key={step.id}
           onClick={() => setFocusedStep(step)}
-          className="mb-4 p-4 rounded-md bg-gray-100"
+          variant="secondary"
         >
-          <div className="font-bold mb-2">{step.exercises[0]?.name}</div>
-          <div className="flex flex-col gap-2">
+          <CardHeader>
+            <CardTitle>{step.exercises[0]?.name}</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
             {step.sets.map((set) => (
               <div key={set.id} className="flex gap-4 items-center">
                 {set.reps && <span>{set.reps} reps</span>}
                 {set.weightMcg && <span>{set.weightMcg / 1000000} kg</span>}
               </div>
             ))}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ))}
       <div className="flex gap-2">
         <Button onClick={() => navigate(`/${workout.date}/exercises`)}>
