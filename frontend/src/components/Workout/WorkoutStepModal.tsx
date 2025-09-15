@@ -1,6 +1,6 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import React, { useState } from "react";
-import { WorkoutsByDateQuery } from "../../generated/graphql";
+import { WorkoutByDateQuery } from "../../generated/graphql";
 import { cn } from "../../lib/utils";
 import { formatDateIso } from "../../utils/date";
 import {
@@ -17,7 +17,7 @@ import {
   TabsTrigger,
 } from "../shared";
 
-type Workout = NonNullable<WorkoutsByDateQuery["workouts"][number]>;
+type Workout = WorkoutByDateQuery["workouts"][number];
 type WorkoutStep = Workout["steps"][number];
 type Set = WorkoutStep["sets"][number];
 

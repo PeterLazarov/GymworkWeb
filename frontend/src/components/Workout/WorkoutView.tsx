@@ -2,7 +2,7 @@ import { gql, useMutation } from "@apollo/client";
 import { NotebookPenIcon, PlusIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { WorkoutsByDateQuery } from "../../generated/graphql";
+import { WorkoutByDateQuery } from "../../generated/graphql";
 import {
   Button,
   Card,
@@ -34,14 +34,18 @@ const UPDATE_WORKOUT_MUTATION = gql`
     }
   }
 `;
-type Workout = NonNullable<WorkoutsByDateQuery["workouts"][number]>;
+type Workout = WorkoutByDateQuery["workouts"][number];
 type WorkoutStep = Workout["steps"][number];
 
 type WorkoutViewProps = {
   workout: Workout;
+  readonly?: boolean;
 };
 
-export const WorkoutView: React.FC<WorkoutViewProps> = ({ workout }) => {
+export const WorkoutView: React.FC<WorkoutViewProps> = ({
+  workout,
+  readonly,
+}) => {
   const navigate = useNavigate();
   const [focusedStep, setFocusedStep] = useState<WorkoutStep | undefined>();
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -51,7 +55,10 @@ export const WorkoutView: React.FC<WorkoutViewProps> = ({ workout }) => {
     <div className="p-4 flex-1 overflow-hidden flex flex-col gap-4">
       <div className="flex overflow-y-auto flex-col gap-4 flex-1">
         {workout.hasComments && (
-          <Card onClick={() => setIsDetailsModalOpen(true)} variant="outline">
+          <Card
+            onClick={() => !readonly && setIsDetailsModalOpen(true)}
+            variant="outline"
+          >
             <CardHeader>
               <CardTitle>Comments</CardTitle>
             </CardHeader>
@@ -77,19 +84,21 @@ export const WorkoutView: React.FC<WorkoutViewProps> = ({ workout }) => {
           <WorkoutStepCard
             key={step.id}
             step={step}
-            onClick={() => setFocusedStep(step)}
+            onClick={() => !readonly && setFocusedStep(step)}
           />
         ))}
       </div>
 
-      <div className="flex gap-2 justify-center">
-        <Button onClick={() => navigate(`/${workout.date}/exercises`)}>
-          <PlusIcon /> Add Exercise
-        </Button>
-        <Button onClick={() => setIsDetailsModalOpen(true)}>
-          <NotebookPenIcon /> Add Comment
-        </Button>
-      </div>
+      {!readonly && (
+        <div className="flex gap-2 justify-center">
+          <Button onClick={() => navigate(`/${workout.date}/exercises`)}>
+            <PlusIcon /> Add Exercise
+          </Button>
+          <Button onClick={() => setIsDetailsModalOpen(true)}>
+            <NotebookPenIcon /> Add Comment
+          </Button>
+        </div>
+      )}
       {focusedStep && (
         <WorkoutStepModal
           isOpen={!!focusedStep}

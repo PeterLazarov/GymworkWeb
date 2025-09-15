@@ -1,0 +1,24 @@
+query WorkoutByDate($date: ISO8601Date!) {
+  workouts(date: $date) {
+    id
+    date
+    feeling
+    rpe
+    notes
+    pain
+    hasComments
+    steps {
+      id
+      exercises {
+        id
+        name
+        measurements
+      }
+      sets {
+        id
+        reps
+        weightMcg
+      }
+    }
+  }
+}

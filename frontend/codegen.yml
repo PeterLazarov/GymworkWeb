@@ -9,7 +9,7 @@ generates:
     plugins:
       - 'typescript'
       - 'typescript-operations'
-      - 'typescript-react-apollo'
+      - 'typescript-document-nodes'
       - 'typescript-validation-schema'
     config:
       schema: zod

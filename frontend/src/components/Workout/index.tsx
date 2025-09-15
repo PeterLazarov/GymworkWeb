@@ -1,8 +1,9 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { DateTime } from "luxon";
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { WorkoutByDate } from "../../generated/graphql";
 import {
   formatDate,
   formatDateIso,
@@ -10,33 +11,6 @@ import {
 } from "../../utils/date";
 import { Button, Header } from "../shared";
 import { WorkoutView } from "./WorkoutView";
-
-const WORKOUTS_BY_DATE_QUERY = gql`
-  query WorkoutsByDate($date: ISO8601Date!) {
-    workouts(date: $date) {
-      id
-      date
-      feeling
-      rpe
-      notes
-      pain
-      hasComments
-      steps {
-        id
-        exercises {
-          id
-          name
-          measurements
-        }
-        sets {
-          id
-          reps
-          weightMcg
-        }
-      }
-    }
-  }
-`;
 
 const CREATE_WORKOUT_MUTATION = gql`
   mutation CreateWorkout($date: ISO8601DateTime!) {
@@ -87,7 +61,14 @@ const WorkoutHeader: React.FC<Props> = ({ date }) => {
       <Button variant="secondary" onClick={() => navigateToDate(-1)}>
         <ChevronLeftIcon /> {formatDate(currentDate.minus({ days: 1 }), "long")}
       </Button>
-      <span>{dateLabel}</span>
+      <div className="flex items-center gap-2">
+        <span>{dateLabel}</span>
+        <Button variant="ghost" size="icon">
+          <Link to={`/${currentDate.toISODate()}/calendar`}>
+            <CalendarIcon />
+          </Link>
+        </Button>
+      </div>
       <Button variant="secondary" onClick={() => navigateToDate(1)}>
         {formatDate(currentDate.plus({ days: 1 }), "long")}
         <ChevronRightIcon />
@@ -99,7 +80,7 @@ const WorkoutHeader: React.FC<Props> = ({ date }) => {
 export const Workout = () => {
   const { date } = useParams();
   const currentDate = date || DateTime.now().toISODate();
-  const { data, loading, error, refetch } = useQuery(WORKOUTS_BY_DATE_QUERY, {
+  const { data, loading, error, refetch } = useQuery(WorkoutByDate, {
     variables: { date: currentDate },
     skip: !currentDate,
   });
