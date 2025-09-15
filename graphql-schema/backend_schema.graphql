@@ -214,7 +214,6 @@ type DeleteWorkoutPayload {
 type Exercise implements Node {
   createdAt: ISO8601DateTime!
   equipment: [String!]!
-  history: [WorkoutStep!]!
   id: ID!
   images: [String!]!
   instructions: [String!]!
@@ -225,6 +224,7 @@ type Exercise implements Node {
   name: String!
   position: String
   stance: String
+  steps: [WorkoutStep!]!
   tips: [String!]
   updatedAt: ISO8601DateTime!
   workoutSets: [WorkoutSet!]!
@@ -379,7 +379,6 @@ interface Node {
 type Query {
   exerciseRecords(exerciseId: ID): [ExerciseRecord!]!
   exercises(equipment: [String!], id: ID, isFavorite: Boolean, muscleAreas: [String!], muscles: [String!]): [Exercise!]!
-  workoutSets(exerciseId: ID): [WorkoutSet!]!
   workouts(date: ISO8601Date, feeling: String, fromDate: ISO8601Date, pain: String, toDate: ISO8601Date): [Workout!]!
 }
 

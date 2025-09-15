@@ -1,6 +1,6 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import React, { useState } from "react";
-import { WorkoutByDateQuery } from "../../generated/graphql";
+import { ExerciseSets, WorkoutByDateQuery } from "../../generated/graphql";
 import { cn } from "../../lib/utils";
 import { formatDateIso } from "../../utils/date";
 import {
@@ -16,6 +16,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../shared";
+import { ExerciseStatsChart } from "./ExerciseStatsChart";
 
 type Workout = WorkoutByDateQuery["workouts"][number];
 type WorkoutStep = Workout["steps"][number];
@@ -92,11 +93,14 @@ export const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
       hideFooter
     >
       <Tabs defaultValue="track">
-        <TabsList>
-          <TabsTrigger value="track">Track</TabsTrigger>
-          <TabsTrigger value="records">Records</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-center">
+          <TabsList>
+            <TabsTrigger value="track">Track</TabsTrigger>
+            <TabsTrigger value="records">Records</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+            <TabsTrigger value="chart">Chart</TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent value="track">
           <TrackStepTab step={step} workout={workout} />
         </TabsContent>
@@ -105,6 +109,9 @@ export const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
         </TabsContent>
         <TabsContent value="history" className="flex-1 overflow-hidden">
           <HistoryStepTab step={step} />
+        </TabsContent>
+        <TabsContent value="chart">
+          <ExerciseStatsChart exerciseId={step.exercises[0]!.id} />
         </TabsContent>
       </Tabs>
     </Modal>
@@ -299,25 +306,8 @@ const RecordsStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
   );
 };
 
-const EXERCISE_SETS_QUERY = gql`
-  query ExerciseSets($exerciseId: ID!) {
-    exercises(id: $exerciseId) {
-      id
-      history {
-        id
-        sets {
-          id
-          reps
-          weightMcg
-          date
-        }
-      }
-    }
-  }
-`;
-
 const HistoryStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
-  const { data, loading, error } = useQuery(EXERCISE_SETS_QUERY, {
+  const { data, loading, error } = useQuery(ExerciseSets, {
     variables: { exerciseId: step.exercises[0]!.id },
   });
 
@@ -331,7 +321,7 @@ const HistoryStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
     <div className="space-y-4">
       <h3 className="font-semibold text-lg">History</h3>
       <div className="space-y-2">
-        {exercise.history.map((step) => (
+        {exercise.steps.map((step) => (
           <Card key={step.id} variant="secondary">
             <CardHeader>
               <CardTitle>{formatDateIso(step.sets[0].date, "long")}</CardTitle>

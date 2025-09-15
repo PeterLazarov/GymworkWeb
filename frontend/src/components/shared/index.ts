@@ -2,6 +2,7 @@
 export * from "./Button";
 export * from "./Calendar";
 export * from "./Card";
+export * from "./Chart";
 export * from "./Dialog";
 export * from "./Header";
 export * from "./IncrementalEditor";
@@ -12,3 +13,5 @@ export * from "./NumericInput";
 export * from "./Select";
 export * from "./Tabs";
 export * from "./Textarea";
+export * from "./Toggle";
+export * from "./ToggleGroup";

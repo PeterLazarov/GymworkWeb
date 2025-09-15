@@ -1,0 +1,14 @@
+query ExerciseSets($exerciseId: ID!) {
+  exercises(id: $exerciseId) {
+    id
+    steps {
+      id
+      sets {
+        id
+        reps
+        weightMcg
+        date
+      }
+    }
+  }
+}
