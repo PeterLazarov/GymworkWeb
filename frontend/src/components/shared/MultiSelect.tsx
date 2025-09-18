@@ -176,19 +176,19 @@ export function MultiSelectValue({
     checkOverflow();
   }, [selectedValues, checkOverflow, shouldWrap]);
 
-  const handleResize = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (!node) return;
+  const containerRef = useRef<HTMLDivElement>(null);
 
-      const observer = new ResizeObserver(checkOverflow);
-      observer.observe(node);
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
 
-      return () => {
-        observer.disconnect();
-      };
-    },
-    [checkOverflow]
-  );
+    const observer = new ResizeObserver(checkOverflow);
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [checkOverflow]);
 
   if (selectedValues.size === 0 && placeholder) {
     return (
@@ -201,7 +201,7 @@ export function MultiSelectValue({
   return (
     <div
       {...props}
-      ref={handleResize}
+      ref={containerRef}
       className={cn(
         "flex w-full gap-1.5 overflow-hidden",
         shouldWrap && "h-full flex-wrap",

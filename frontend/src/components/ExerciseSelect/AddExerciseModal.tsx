@@ -28,6 +28,7 @@ const CREATE_EXERCISE_MUTATION = gql`
     $muscleAreas: [String!]!
     $muscles: [String!]!
     $instructions: [String!]!
+    $measurements: JSON!
   ) {
     createExercise(
       input: {
@@ -35,6 +36,7 @@ const CREATE_EXERCISE_MUTATION = gql`
         muscleAreas: $muscleAreas
         muscles: $muscles
         instructions: $instructions
+        measurements: $measurements
       }
     ) {
       exercise {
@@ -139,6 +141,7 @@ export const AddExerciseModal: React.FC<Props> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Create New Exercise"
+      description="Create a new exercise to track your progress"
       onSubmit={onSubmit}
       confirmDisabled={loading}
     >
