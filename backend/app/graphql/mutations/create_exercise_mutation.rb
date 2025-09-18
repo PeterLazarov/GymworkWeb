@@ -7,6 +7,7 @@ module Mutations
     argument :muscles, [String], required: false, description: "Scientific muscle names"
     argument :muscle_areas, [String], required: false, description: "General muscle groups"
     argument :instructions, [String], required: false, description: "Optional instructions of the exercise"
+    argument :measurements, GraphQL::Types::JSON, required: false, description: "Optional measurements of the exercise"
 
     field :exercise, Types::ExerciseType, null: true
     field :errors, [String], null: false

@@ -69,6 +69,11 @@ input CreateExerciseInput {
   instructions: [String!]
 
   """
+  Optional measurements of the exercise
+  """
+  measurements: JSON
+
+  """
   General muscle groups
   """
   muscleAreas: [String!]

@@ -92,7 +92,7 @@ export const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
       description={`Add a set for ${step.exercises[0]?.name}`}
       hideFooter
     >
-      <Tabs defaultValue="track">
+      <Tabs defaultValue="track" className="flex flex-col flex-1 gap-2">
         <div className="flex items-center justify-center">
           <TabsList>
             <TabsTrigger value="track">Track</TabsTrigger>
@@ -101,18 +101,20 @@ export const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
             <TabsTrigger value="chart">Chart</TabsTrigger>
           </TabsList>
         </div>
-        <TabsContent value="track">
-          <TrackStepTab step={step} workout={workout} />
-        </TabsContent>
-        <TabsContent value="records">
-          <RecordsStepTab step={step} />
-        </TabsContent>
-        <TabsContent value="history" className="flex-1 overflow-hidden">
-          <HistoryStepTab step={step} />
-        </TabsContent>
-        <TabsContent value="chart">
-          <ExerciseStatsChart exerciseId={step.exercises[0]!.id} />
-        </TabsContent>
+        <div className="flex-1 overflow-y-auto">
+          <TabsContent value="track">
+            <TrackStepTab step={step} workout={workout} />
+          </TabsContent>
+          <TabsContent value="records">
+            <RecordsStepTab step={step} />
+          </TabsContent>
+          <TabsContent value="history" className="flex-1 overflow-hidden">
+            <HistoryStepTab step={step} />
+          </TabsContent>
+          <TabsContent value="chart">
+            <ExerciseStatsChart exerciseId={step.exercises[0]!.id} />
+          </TabsContent>
+        </div>
       </Tabs>
     </Modal>
   );
@@ -210,12 +212,12 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <div>
+      <div className="flex flex-col gap-1">
         {step.sets.map((set, index) => (
           <div
             key={set.id}
             className={cn(
-              "flex gap-2",
+              "flex gap-2 px-2 py-0.5 rounded-md",
               focusedSet?.id === set.id && "bg-gray-200"
             )}
             onClick={() => {
