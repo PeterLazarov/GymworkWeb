@@ -84,24 +84,23 @@ export const AddExerciseModal: React.FC<Props> = ({
 
   const onSubmit = async () => {
     try {
-      console.log(formData);
-      // const result = await createExercise({
-      //   variables: {
-      //     ...formData,
-      //   },
-      // });
+      const result = await createExercise({
+        variables: {
+          ...formData,
+        },
+      });
 
-      // if (result.data?.createExercise?.errors?.length) {
-      //   // Handle errors
-      //   console.error(
-      //     "Failed to create exercise:",
-      //     result.data.createExercise.errors
-      //   );
-      //   return;
-      // }
+      if (result.data?.createExercise?.errors?.length) {
+        // Handle errors
+        console.error(
+          "Failed to create exercise:",
+          result.data.createExercise.errors
+        );
+        return;
+      }
 
-      // onSuccess();
-      // onClose();
+      onSuccess();
+      onClose();
     } catch (err) {
       console.error("Failed to create exercise:", err);
     }

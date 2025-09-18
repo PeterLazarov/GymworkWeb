@@ -389,7 +389,7 @@ interface Node {
 
 type Query {
   exerciseRecords(exerciseId: ID): [ExerciseRecord!]!
-  exercises(equipment: [String!], id: ID, isFavorite: Boolean, muscleAreas: [String!], muscles: [String!]): [Exercise!]!
+  exercises(equipment: [String!], id: ID, isFavorite: Boolean, muscleAreas: [String!], muscles: [String!], name: String): [Exercise!]!
   workouts(date: ISO8601Date, feeling: String, fromDate: ISO8601Date, pain: String, toDate: ISO8601Date): [Workout!]!
 }
 

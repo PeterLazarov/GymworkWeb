@@ -17,4 +17,5 @@ generates:
         ISO8601DateTime: 'string'
         ISO8601Date: 'string'
         JSON: 'any'
+        BigInt: 'number'
       strictScalars: true
