@@ -7,7 +7,7 @@ module Types
     field :is_warmup, Boolean, null: false
     field :is_weak_ass_record, Boolean, null: false
     field :reps, Integer, null: true
-    field :weight_mcg, Integer, null: true
+    field :weight_mcg, GraphQL::Types::BigInt, null: true
     field :distance_mm, Integer, null: true
     field :duration_ms, Integer, null: true
     field :speed_kph, Float, null: true

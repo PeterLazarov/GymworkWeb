@@ -28,7 +28,7 @@ const ADD_SET_MUTATION = gql`
     $exerciseId: ID!
     $date: ISO8601DateTime!
     $reps: Int
-    $weightMcg: Int
+    $weightMcg: BigInt
   ) {
     addSet(
       input: {
@@ -136,7 +136,7 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
   const handleUpdateSet = async () => {
     if (!focusedSet) return;
 
-    const weightMcg = weight * 1000000; // Convert kg to mcg
+    const weightMcg = weight * 1000000000; // Convert kg to mcg
     const result = await updateSet({
       variables: {
         input: {
@@ -185,7 +185,7 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
   };
 
   const handleAddSet = async () => {
-    const weightMcg = weight * 1000000; // Convert kg to mcg
+    const weightMcg = weight * 1000000000; // Convert kg to mcg
     const result = await addSet({
       variables: {
         workoutStepId: step.id,
@@ -223,12 +223,12 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
             onClick={() => {
               setFocusedSet(focusedSet?.id === set.id ? undefined : set);
               setReps(set.reps ?? 0);
-              setWeight((set.weightMcg ?? 0) / 1000000);
+              setWeight((set.weightMcg ?? 0) / 1000000000);
             }}
           >
             <span>{index + 1}.</span>
             {set.reps !== undefined && <h2>{set.reps} reps</h2>}
-            {set.weightMcg && <h2>{set.weightMcg / 1000000} kg</h2>}
+            {set.weightMcg && <h2>{set.weightMcg / 1000000000} kg</h2>}
           </div>
         ))}
       </div>
@@ -295,7 +295,7 @@ const RecordsStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
             <div className="flex items-center gap-2">
               <span className="font-medium">{record.reps} reps</span>
               <span className="font-medium">
-                {record.weightMcg / 1000000} kg
+                {record.weightMcg / 1000000000} kg
               </span>
             </div>
             <div className="text-sm text-gray-500">
@@ -332,7 +332,9 @@ const HistoryStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
               {step.sets?.map((set) => (
                 <div key={set.id} className="flex gap-4 items-center">
                   {set.reps && <span>{set.reps} reps</span>}
-                  {set.weightMcg && <span>{set.weightMcg / 1000000} kg</span>}
+                  {set.weightMcg && (
+                    <span>{set.weightMcg / 1000000000} kg</span>
+                  )}
                 </div>
               ))}
             </CardContent>

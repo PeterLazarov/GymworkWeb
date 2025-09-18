@@ -148,7 +148,7 @@ const WorkoutStepCard: React.FC<{
       {step.sets.map((set) => (
         <div key={set.id} className="flex gap-4 items-center">
           {set.reps && <span>{set.reps} reps</span>}
-          {set.weightMcg && <span>{set.weightMcg / 1000000} kg</span>}
+          {set.weightMcg && <span>{set.weightMcg / 1000000000} kg</span>}
         </div>
       ))}
     </CardContent>

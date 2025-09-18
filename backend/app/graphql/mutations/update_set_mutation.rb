@@ -7,7 +7,7 @@ module Mutations
     argument :date, GraphQL::Types::ISO8601DateTime, required: false
     argument :is_warmup, Boolean, required: false
     argument :reps, Integer, required: false
-    argument :weight_mcg, Integer, required: false
+    argument :weight_mcg, GraphQL::Types::BigInt, required: false
     argument :distance_mm, Integer, required: false
     argument :duration_ms, Integer, required: false
     argument :speed_kph, Float, required: false
