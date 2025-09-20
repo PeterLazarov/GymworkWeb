@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
   Textarea,
+  ToggleGroup,
+  ToggleGroupItem,
 } from "../shared";
 import { WorkoutStepModal } from "./WorkoutStepModal";
 
@@ -36,6 +38,15 @@ const UPDATE_WORKOUT_MUTATION = gql`
 `;
 type Workout = WorkoutByDateQuery["workouts"][number];
 type WorkoutStep = Workout["steps"][number];
+
+const rpeTexts = {
+  5: "Feels pretty easy, I could keep going for a while.",
+  6: "Starting to feel some effort, but still comfortable.",
+  7: "Getting tough now, but I can hang in there.",
+  8: "This is hard, I'm pushing, but can still manage.",
+  9: "Really tough, almost maxed out, I'm barely hanging on.",
+  10: "All-out effort, I've got nothing left to give!",
+};
 
 type WorkoutViewProps = {
   workout: Workout;
@@ -203,29 +214,32 @@ const WorkoutDetailsModal: React.FC<WorkoutDetailsModalProps> = ({
               <SelectValue placeholder="How are you feeling?" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="great">Great</SelectItem>
-              <SelectItem value="good">Good</SelectItem>
-              <SelectItem value="okay">Okay</SelectItem>
-              <SelectItem value="tired">Tired</SelectItem>
-              <SelectItem value="exhausted">Exhausted</SelectItem>
+              <SelectItem value="sad">Bad</SelectItem>
+              <SelectItem value="neutral">Good</SelectItem>
+              <SelectItem value="happy">Great</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <div>
-          <Label>RPE (Rate of Perceived Exertion)</Label>
-          <Select value={rpe} onValueChange={setRpe}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select RPE (1-10)" />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 10 }, (_, i) => (
-                <SelectItem key={i + 1} value={(i + 1).toString()}>
-                  {i + 1}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex flex-col gap-2 items-center">
+          <Label className="w-full">RPE (Rate of Perceived Exertion)</Label>
+
+          <div className="flex">
+            <ToggleGroup
+              type="single"
+              value={rpe}
+              onValueChange={setRpe}
+              className="border border-input rounded-md flex"
+            >
+              <ToggleGroupItem value="5">5</ToggleGroupItem>
+              <ToggleGroupItem value="6">6</ToggleGroupItem>
+              <ToggleGroupItem value="7">7</ToggleGroupItem>
+              <ToggleGroupItem value="8">8</ToggleGroupItem>
+              <ToggleGroupItem value="9">9</ToggleGroupItem>
+              <ToggleGroupItem value="10">10</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+          {rpe && <span>{rpeTexts[rpe]}</span>}
         </div>
 
         <div>
@@ -235,10 +249,9 @@ const WorkoutDetailsModal: React.FC<WorkoutDetailsModalProps> = ({
               <SelectValue placeholder="Any pain?" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">None</SelectItem>
-              <SelectItem value="mild">Mild</SelectItem>
-              <SelectItem value="moderate">Moderate</SelectItem>
-              <SelectItem value="severe">Severe</SelectItem>
+              <SelectItem value="noPain">None</SelectItem>
+              <SelectItem value="discomfort">Discomfort</SelectItem>
+              <SelectItem value="pain">Pain</SelectItem>
             </SelectContent>
           </Select>
         </div>

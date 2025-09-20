@@ -68,7 +68,7 @@ const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps>(
     };
 
     return (
-      <div className="relative flex w-full items-center">
+      <div className="relative w-full">
         <Input
           type="text"
           value={stringValue}

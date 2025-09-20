@@ -401,17 +401,32 @@ input UpdateExerciseInput {
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
+  exerciseId: ID!
 
   """
-  Description of the exercise
+  Optional instructions of the exercise
   """
-  description: String
-  exerciseId: ID!
+  instructions: [String!]
+
+  """
+  Optional measurements of the exercise
+  """
+  measurements: JSON
+
+  """
+  General muscle groups
+  """
+  muscleAreas: [String!]
+
+  """
+  Scientific muscle names
+  """
+  muscles: [String!]
 
   """
   Name of the exercise
   """
-  name: String
+  name: String!
 }
 
 """

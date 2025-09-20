@@ -2,11 +2,11 @@ require 'json'
 
 module ExerciseSeed
   MEASUREMENT_DEFAULTS = {
-    weight: { min: 0, max: 500, step: 2.5, unit: 'kg' },
-    reps: { min: 0, max: 100, step: 1 },
-    duration: { min: 0, max: 3600, step: 1, unit: 'sec' },
-    speed: { min: 0, max: 30, step: 0.1, unit: 'km/h' },
-    distance: { min: 0, max: 100, step: 0.01, unit: 'km' }
+    weight: { min: 0, max: 500, step: 2.5, unit: 'kg', more_is_better: true },
+    reps: { min: 0, max: 100, step: 1, more_is_better: true },
+    duration: { min: 0, max: 3600, step: 1, unit: 'sec', more_is_better: false },
+    speed: { min: 0, max: 30, step: 0.1, unit: 'km/h', more_is_better: true },
+    distance: { min: 0, max: 100, step: 0.01, unit: 'km', more_is_better: true }
   }
 
   def self.load_exercises

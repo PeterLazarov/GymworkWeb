@@ -1,12 +1,13 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { debounce } from "lodash";
-import { ChevronLeft, SearchIcon } from "lucide-react";
+import { ChevronLeft, InfoIcon, PencilIcon, SearchIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Exercise } from "../../generated/graphql";
 import { exerciseImages } from "../../utils/exerciseImages";
-import { Button, Input } from "../shared";
+import { Button, Card, CardHeader, CardTitle, Input } from "../shared";
 import { AddExerciseModal } from "./AddExerciseModal";
+import { EditExerciseModal } from "./EditExerciseModal";
 
 const EXERCISES_QUERY = gql`
   query Exercises($name: String) {
@@ -40,6 +41,7 @@ const ADD_STEP_MUTATION = gql`
 
 export const ExerciseList: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingExerciseId, setEditingExerciseId] = useState<string>();
   const { data, refetch, loading, error } = useQuery(EXERCISES_QUERY);
   const navigate = useNavigate();
 
@@ -71,9 +73,13 @@ export const ExerciseList: React.FC = () => {
         icon={<SearchIcon />}
       />
 
-      <div className="p-4 flex-1 overflow-y-auto">
+      <div className="p-4 flex-1 overflow-y-auto flex flex-col gap-2">
         {data?.exercises.map((exercise) => (
-          <ExerciseItem key={exercise.id} exercise={exercise} />
+          <ExerciseItem
+            key={exercise.id}
+            exercise={exercise}
+            onEdit={setEditingExerciseId}
+          />
         ))}
       </div>
 
@@ -82,15 +88,30 @@ export const ExerciseList: React.FC = () => {
         onClose={() => setShowCreateForm(false)}
         onSuccess={() => {
           setShowCreateForm(false);
-          // Refetch the exercises list
           refetch();
         }}
       />
+      {editingExerciseId && (
+        <EditExerciseModal
+          isOpen={!!editingExerciseId}
+          onClose={() => setEditingExerciseId(undefined)}
+          onSuccess={() => {
+            setEditingExerciseId(undefined);
+            refetch();
+          }}
+          exerciseId={editingExerciseId}
+        />
+      )}
     </>
   );
 };
 
-const ExerciseItem: React.FC<{ exercise: Exercise }> = ({ exercise }) => {
+type ExerciseItemProps = {
+  exercise: Exercise;
+  onEdit: (id: string) => void;
+};
+
+const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, onEdit }) => {
   const navigate = useNavigate();
   const { date } = useParams();
   const [addStep] = useMutation(ADD_STEP_MUTATION);
@@ -151,24 +172,42 @@ const ExerciseItem: React.FC<{ exercise: Exercise }> = ({ exercise }) => {
     }
   };
 
+  const onInfoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+  };
+
+  const onEditClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    onEdit(exercise.id);
+  };
+
   return (
-    <div
+    <Card
       key={exercise.id}
       onClick={handleClick}
-      className="p-4 mb-2 rounded-md border border-gray-200 hover:bg-gray-50 hover:cursor-pointer"
+      variant="secondary"
+      className="p-1 flex"
     >
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          {imageUrl && (
-            <img
-              src={imageUrl}
-              alt={exercise.name}
-              className="w-10 h-10 rounded-md object-cover"
-            />
-          )}
-          <h3 className="text-lg font-semibold">{exercise.name}</h3>
-        </div>
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt={exercise.name}
+          className="h-16 w-16 rounded-md object-cover"
+        />
+      )}
+      <CardHeader className="p-2 flex justify-between w-full flex-row">
+        <CardTitle>{exercise.name}</CardTitle>
+      </CardHeader>
+      <div className="flex gap-2">
+        <Button variant="secondary" size="icon" onClick={onEditClick}>
+          <PencilIcon className="text-muted-foreground" />
+          <span className="sr-only">Edit exercise</span>
+        </Button>
+        <Button variant="secondary" size="icon" onClick={onInfoClick}>
+          <InfoIcon className="text-muted-foreground" />
+          <span className="sr-only">Exercise info</span>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 };
