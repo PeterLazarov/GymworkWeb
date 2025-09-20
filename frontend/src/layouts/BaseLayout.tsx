@@ -1,3 +1,4 @@
+import { SettingsIcon } from "lucide-react";
 import React, { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/shared";
@@ -14,6 +15,12 @@ export function BaseLayout({ children }: BaseLayoutProps) {
         <Button variant="ghost" asChild>
           <Link to="/">
             <h1 className="text-xl font-bold">Gymwork</h1>
+          </Link>
+        </Button>
+
+        <Button variant="ghost" asChild>
+          <Link to="/settings">
+            <SettingsIcon />
           </Link>
         </Button>
       </header>

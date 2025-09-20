@@ -16,5 +16,7 @@ module Types
 
     field :add_step, mutation: Mutations::AddStepMutation
     field :delete_step, mutation: Mutations::DeleteStepMutation
+
+    field :update_settings, mutation: Mutations::UpdateSettingsMutation
   end
 end

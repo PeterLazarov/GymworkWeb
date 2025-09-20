@@ -105,6 +105,22 @@ CREATE TABLE public.schema_migrations (
 
 
 --
+-- Name: settings; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.settings (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    theme character varying DEFAULT 'light'::character varying NOT NULL,
+    scientific_muscle_names_enabled boolean DEFAULT false NOT NULL,
+    show_set_completion boolean DEFAULT true NOT NULL,
+    preview_next_set boolean DEFAULT true NOT NULL,
+    measure_rest boolean DEFAULT true NOT NULL,
+    show_comments_card boolean DEFAULT true NOT NULL,
+    show_workout_timer boolean DEFAULT true NOT NULL
+);
+
+
+--
 -- Name: workout_step_exercises; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -170,6 +186,14 @@ ALTER TABLE ONLY public.exercises
 
 ALTER TABLE ONLY public.schema_migrations
     ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+
+
+--
+-- Name: settings settings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.settings
+    ADD CONSTRAINT settings_pkey PRIMARY KEY (id);
 
 
 --
@@ -310,16 +334,4 @@ ALTER TABLE ONLY public.workout_step_exercises
 --
 -- PostgreSQL database dump complete
 --
-
-SET search_path TO "$user", public;
-
-INSERT INTO "schema_migrations" (version) VALUES
-('4'),
-('3'),
-('20250913000001'),
-('20250909120951'),
-('20250908111917'),
-('20250908105942'),
-('2'),
-('1');
 
