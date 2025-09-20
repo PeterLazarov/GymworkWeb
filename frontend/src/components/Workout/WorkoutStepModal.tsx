@@ -315,15 +315,13 @@ const HistoryStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
 
   if (loading) return <div>Loading sets...</div>;
   if (error) return <div>Error loading sets</div>;
-  if (!data?.exercises) return <div>No sets found</div>;
-
-  const exercise = data.exercises[0];
+  if (!data?.exercise) return <div>No sets found</div>;
 
   return (
     <div className="space-y-4">
       <h3 className="font-semibold text-lg">History</h3>
       <div className="space-y-2">
-        {exercise.steps.map((step) => (
+        {data.exercise.steps.map((step) => (
           <Card key={step.id} variant="secondary">
             <CardHeader>
               <CardTitle>{formatDateIso(step.sets[0].date, "long")}</CardTitle>

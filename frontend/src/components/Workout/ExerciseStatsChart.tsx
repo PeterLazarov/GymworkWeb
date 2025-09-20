@@ -12,8 +12,9 @@ import {
 import { ExerciseSets, ExerciseSetsQuery } from "../../generated/graphql";
 import { ChartContainer, ToggleGroup, ToggleGroupItem } from "../shared";
 
-type WorkoutSet =
-  ExerciseSetsQuery["exercises"][number]["steps"][number]["sets"][number];
+type WorkoutSet = NonNullable<
+  ExerciseSetsQuery["exercise"]
+>["steps"][number]["sets"][number];
 
 type ExerciseStatsChartProps = {
   exerciseId: string;
@@ -28,9 +29,9 @@ export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
   const [metric, setMetric] = useState<"reps" | "weight">("reps");
 
   const chartData = useMemo(() => {
-    if (!data?.exercises || data.exercises.length === 0) return [];
+    if (!data?.exercise) return [];
 
-    const allSets: WorkoutSet[] = data.exercises[0].steps.flatMap(
+    const allSets: WorkoutSet[] = data.exercise.steps.flatMap(
       (step) => step.sets
     );
 
@@ -45,7 +46,7 @@ export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
 
   if (loading) return <div>Loading data...</div>;
   if (error) return <div>Error loading data</div>;
-  if (!data?.exercises) return <div>No data found</div>;
+  if (!data?.exercise) return <div>No data found</div>;
 
   return (
     <div>

@@ -5,7 +5,7 @@ import { ExerciseForm, ExerciseFormData } from "./ExerciseForm";
 
 const EXERCISE_QUERY = gql`
   query Exercise($id: ID!) {
-    exercises(id: $id) {
+    exercise(id: $id) {
       id
       name
       muscleAreas
@@ -74,8 +74,8 @@ export const EditExerciseModal: React.FC<Props> = ({
     skip: !isOpen || !exerciseId,
   });
   useEffect(() => {
-    if (data?.exercises?.[0]) {
-      setFormData(data.exercises[0]);
+    if (data?.exercise) {
+      setFormData(data.exercise);
     }
   }, [data]);
 
@@ -122,7 +122,7 @@ export const EditExerciseModal: React.FC<Props> = ({
     >
       {queryLoading && <div>Loading exercise...</div>}
       {queryError && <div>Error loading exercise: {queryError.message}</div>}
-      {!data?.exercises?.[0] && <div>Exercise not found</div>}
+      {!data?.exercise && <div>Exercise not found</div>}
       {isLoaded && formData && (
         <ExerciseForm
           exercise={formData}

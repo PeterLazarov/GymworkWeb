@@ -18,6 +18,14 @@ module Types
       ids.map { |id| context.schema.object_from_id(id, context) }
     end
 
+    field :exercise, Types::ExerciseType, null: true do
+      argument :id, ID, required: true
+    end
+
+    def exercise(id:)
+      Exercise.find_by(id: id)
+    end
+
     field :exercises, resolver: Resolvers::ExercisesResolver
     field :workouts, resolver: Resolvers::WorkoutsResolver
     field :exercise_records, resolver: Resolvers::ExerciseRecordsResolver
