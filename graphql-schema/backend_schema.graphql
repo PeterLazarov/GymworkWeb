@@ -674,6 +674,8 @@ type Workout implements Node {
   feeling: String
   hasComments: Boolean!
   id: ID!
+  muscleAreas: [String!]!
+  muscles: [String!]!
   notes: String
   pain: String
   rpe: Int

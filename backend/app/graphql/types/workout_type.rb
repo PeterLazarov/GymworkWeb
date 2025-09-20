@@ -17,10 +17,20 @@ module Types
     field :steps, [Types::WorkoutStepType], null: false
     field :workout_sets, [Types::WorkoutSetType], null: false
 
+    field :muscles, [String], null: false
+    field :muscle_areas, [String], null: false
     field :has_comments, Boolean, null: false
 
     def has_comments
       object.notes.present? || object.feeling.present? || object.rpe.present? || object.pain.present?
+    end
+
+    def muscles
+      object.sets.map { |set| set.exercise.muscles }.flatten.uniq
+    end
+
+    def muscle_areas
+      object.sets.map { |set| set.exercise.muscle_areas }.flatten.uniq
     end
   end
 end

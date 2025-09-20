@@ -96,7 +96,7 @@ type WorkoutDayModalProps = {
   onClose: () => void;
   date: Date;
 };
-const WorkoutDayModal: React.FC<WorkoutDayModalProps> = ({
+export const WorkoutDayModal: React.FC<WorkoutDayModalProps> = ({
   isOpen,
   onClose,
   date,

@@ -109,7 +109,7 @@ export const EditExerciseModal: React.FC<Props> = ({
     }
   };
 
-  const isLoaded = !queryLoading && !queryError && data?.exercises?.[0];
+  const isLoaded = !queryLoading && !queryError && data?.exercise;
 
   return (
     <Modal

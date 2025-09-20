@@ -3,5 +3,5 @@ class Workout < ApplicationRecord
   validates :date, presence: true
   # Relationships
   has_many :steps, dependent: :destroy, class_name: :WorkoutStep
-  has_many :workout_sets, through: :steps
+  has_many :sets, through: :steps
 end
