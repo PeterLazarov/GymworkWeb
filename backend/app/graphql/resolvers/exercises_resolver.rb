@@ -2,7 +2,7 @@
 
 module Resolvers
   class ExercisesResolver < BaseResolver
-    type [Types::ExerciseType], null: false
+    type Types::ExerciseType.connection_type, null: false
 
     argument :id, ID, required: false
     argument :is_favorite, Boolean, required: false

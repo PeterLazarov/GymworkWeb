@@ -5,16 +5,26 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Exercise } from "../../generated/graphql";
 import { exerciseImages } from "../../utils/exerciseImages";
+import { useInfiniteScroll } from "../../utils/useInfiniteScroll";
 import { Button, Card, CardHeader, CardTitle, Input } from "../shared";
 import { AddExerciseModal } from "./AddExerciseModal";
 import { EditExerciseModal } from "./EditExerciseModal";
 
 const EXERCISES_QUERY = gql`
-  query Exercises($name: String) {
-    exercises(name: $name) {
-      id
-      name
-      images
+  query Exercises($name: String, $first: Int, $after: String) {
+    exercises(name: $name, first: $first, after: $after) {
+      edges {
+        node {
+          id
+          name
+          images
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
     }
   }
 `;
@@ -42,14 +52,23 @@ const ADD_STEP_MUTATION = gql`
 export const ExerciseList: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingExerciseId, setEditingExerciseId] = useState<string>();
-  const { data, refetch, loading, error } = useQuery(EXERCISES_QUERY);
+  const { data, fetchMore, loading, error, refetch } = useQuery(
+    EXERCISES_QUERY,
+    { variables: { first: 20 } }
+  );
   const navigate = useNavigate();
+  const { containerRef, loading: infiniteScrollLoading } = useInfiniteScroll({
+    data: data?.exercises,
+    loading,
+    fetchMore,
+    pageSize: 20,
+  });
 
   if (loading) return <div>Loading exercises...</div>;
   if (error) return <div>Error loading exercises: {error.message}</div>;
 
   const debouncedSearch = debounce((value: string) => {
-    refetch({ name: value });
+    refetch({ name: value, first: 20 });
   }, 500);
 
   const handleBack = () => {
@@ -73,8 +92,11 @@ export const ExerciseList: React.FC = () => {
         icon={<SearchIcon />}
       />
 
-      <div className="p-4 flex-1 overflow-y-auto flex flex-col gap-2">
-        {data?.exercises.map((exercise) => (
+      <div
+        ref={containerRef}
+        className="p-4 flex-1 overflow-y-auto flex flex-col gap-2"
+      >
+        {data?.exercises.edges.map(({ node: exercise }) => (
           <ExerciseItem
             key={exercise.id}
             exercise={exercise}
@@ -83,6 +105,11 @@ export const ExerciseList: React.FC = () => {
         ))}
       </div>
 
+      {infiniteScrollLoading && (
+        <div className="flex justify-center py-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      )}
       <AddExerciseModal
         isOpen={showCreateForm}
         onClose={() => setShowCreateForm(false)}
