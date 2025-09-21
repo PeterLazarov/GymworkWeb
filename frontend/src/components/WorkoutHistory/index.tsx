@@ -1,6 +1,7 @@
 import { gql, useQuery } from "@apollo/client";
 import { FilterIcon, SearchIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import { muscleAreas, muscles } from "../../constants/muscles";
 import { WorkoutsHistoryQuery } from "../../generated/graphql";
 import { formatDateIso } from "../../utils/date";
 import {
@@ -95,26 +96,6 @@ export const WorkoutHistory: React.FC = () => {
     dateTo: "",
   });
 
-  const filterOptions = useMemo((): {
-    muscles: string[];
-    muscleAreas: string[];
-  } => {
-    if (!data?.workouts)
-      return {
-        muscles: [],
-        muscleAreas: [],
-      };
-
-    const muscles: string[] = [
-      ...new Set(data.workouts.flatMap((w) => w.muscles)),
-    ] as string[];
-    const muscleAreas: string[] = [
-      ...new Set(data.workouts.flatMap((w) => w.muscleAreas)),
-    ] as string[];
-
-    return { muscles, muscleAreas };
-  }, [data]);
-
   const onFilterChange = (filters: Filter) => {
     setFilters(filters);
     refetch({
@@ -149,7 +130,6 @@ export const WorkoutHistory: React.FC = () => {
           scientificMuscleNamesEnabled={
             data?.settings.scientificMuscleNamesEnabled
           }
-          filterOptions={filterOptions}
         />
       </div>
 
@@ -239,16 +219,11 @@ type AdvancedWorkoutFiltersProps = {
   filters: Filter;
   setFilters: (filters: Filter) => void;
   scientificMuscleNamesEnabled?: boolean;
-  filterOptions: {
-    muscles: string[];
-    muscleAreas: string[];
-  };
 };
 const AdvancedWorkoutFilter: React.FC<AdvancedWorkoutFiltersProps> = ({
   filters,
   setFilters,
   scientificMuscleNamesEnabled,
-  filterOptions,
 }) => {
   const appliedFiltersCount = useMemo(() => {
     return (
@@ -437,7 +412,7 @@ const AdvancedWorkoutFilter: React.FC<AdvancedWorkoutFiltersProps> = ({
               </MultiSelectTrigger>
               <MultiSelectContent>
                 <MultiSelectGroup>
-                  {filterOptions.muscles.map((muscle) => (
+                  {muscles.map((muscle) => (
                     <MultiSelectItem key={muscle} value={muscle}>
                       {muscle}
                     </MultiSelectItem>
@@ -462,7 +437,7 @@ const AdvancedWorkoutFilter: React.FC<AdvancedWorkoutFiltersProps> = ({
               </MultiSelectTrigger>
               <MultiSelectContent>
                 <MultiSelectGroup>
-                  {filterOptions.muscleAreas.map((area) => (
+                  {muscleAreas.map((area) => (
                     <MultiSelectItem key={area} value={area}>
                       {area}
                     </MultiSelectItem>

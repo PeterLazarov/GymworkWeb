@@ -17,7 +17,11 @@ function getMappedClasses(muscles: string[]) {
     new Set(
       muscles.flatMap((m) => {
         const normalized = m.trim().replace(/\s+/g, " ");
-        return mappings[normalized as keyof typeof mappings] ?? [];
+        return (
+          muscleMappings[normalized as keyof typeof muscleMappings] ??
+          muscleAreaMappings[normalized as keyof typeof muscleAreaMappings] ??
+          []
+        );
       })
     )
   );
@@ -79,7 +83,7 @@ const MuscleMapComponent = ({
 
 export const MuscleMap = memo(MuscleMapComponent);
 
-const mappings = {
+const muscleMappings = {
   "Abductor Brevis": ["Hip-Abductors"],
   "Adductor Brevis": ["Hip-Adductors"],
   "Adductor Longus": ["Hip-Adductors"],
@@ -124,7 +128,9 @@ const mappings = {
   "Triceps Brachii": ["Triceps"],
   "Wrist Extensors": ["Wrist-Extensors", "Forearms"],
   "Wrist Flexors": ["Wrist-Flexors", "Forearms"],
-  // New entries
+};
+
+const muscleAreaMappings = {
   Abdominals: ["Rectus-Abdominis", "Obliques", "Core"],
   Abductors: ["Hip-Abductors"],
   Adductors: ["Hip-Adductors"],

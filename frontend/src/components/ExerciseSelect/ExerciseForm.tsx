@@ -1,12 +1,18 @@
-import React from "react";
+import { BicepsFlexedIcon } from "lucide-react";
+import React, { useState } from "react";
 import {
   measurementDefaults,
   measurementUnits,
 } from "../../constants/measurements";
+import { muscleAreas, muscles } from "../../constants/muscles";
 import {
+  Button,
   Checkbox,
+  Input,
+  Label,
   MultiSelect,
   MultiSelectContent,
+  MultiSelectGroup,
   MultiSelectItem,
   MultiSelectTrigger,
   MultiSelectValue,
@@ -16,7 +22,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Textarea,
 } from "../shared";
+import { MuscleMap } from "../WorkoutHistory/MuscleMap";
 import { ExerciseMeasurementType } from "./ExerciseMeasurementType";
 
 export type ExerciseFormData = {
@@ -30,14 +38,17 @@ export type ExerciseFormData = {
 type Props = {
   exercise: ExerciseFormData;
   onChange: (data: ExerciseFormData) => void;
+  scientificMuscleNamesEnabled?: boolean;
   error?: Error;
 };
 
 export const ExerciseForm: React.FC<Props> = ({
   exercise,
   onChange,
+  scientificMuscleNamesEnabled,
   error,
 }) => {
+  const [showMuscleMap, setShowMuscleMap] = useState(false);
   const handleMeasurementsInput = (measurements: string[]) => {
     onChange({
       ...exercise,
@@ -73,76 +84,140 @@ export const ExerciseForm: React.FC<Props> = ({
       {error && <div className="text-red-500 mb-4">{error.message}</div>}
 
       <div className="mb-4">
-        <label className="block mb-2">
-          Name *
-          <input
-            type="text"
-            value={exercise.name}
-            onChange={(e) => onChange({ ...exercise, name: e.target.value })}
-            className="w-full p-2 border border-gray-300 rounded-md mt-1"
-            required
-          />
-        </label>
+        <Label htmlFor="name">Name</Label>
+        <Input
+          id="name"
+          value={exercise.name}
+          onChange={(e) => onChange({ ...exercise, name: e.target.value })}
+          required
+        />
       </div>
 
       <div className="mb-4">
-        <label className="block mb-2">
-          Measurements
+        <Label htmlFor="measurements">Measurements</Label>
+        <MultiSelect
+          values={Object.keys(exercise.measurements)}
+          onValuesChange={handleMeasurementsInput}
+        >
+          <MultiSelectTrigger id="measurements" className="w-full">
+            <MultiSelectValue placeholder="Select measurements" />
+          </MultiSelectTrigger>
+          <MultiSelectContent>
+            <MultiSelectItem value="reps">Repetitions</MultiSelectItem>
+            <MultiSelectItem value="weight">Weight</MultiSelectItem>
+            <MultiSelectItem value="duration">Duration</MultiSelectItem>
+            <MultiSelectItem value="distance">Distance</MultiSelectItem>
+            <MultiSelectItem value="speed">Speed</MultiSelectItem>
+          </MultiSelectContent>
+        </MultiSelect>
+      </div>
+
+      {!scientificMuscleNamesEnabled && (
+        <div className="mb-4">
+          <div className="flex justify-between">
+            <Label htmlFor="muscleAreas">Muscle Areas</Label>
+            <Button
+              variant={showMuscleMap ? "default" : "ghost"}
+              size="sm"
+              className="ml-auto h-auto p-1 text-xs"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowMuscleMap(!showMuscleMap);
+              }}
+            >
+              <BicepsFlexedIcon />
+            </Button>
+          </div>
+
           <MultiSelect
-            values={Object.keys(exercise.measurements)}
-            onValuesChange={handleMeasurementsInput}
+            values={exercise.muscleAreas}
+            onValuesChange={(values) =>
+              onChange({ ...exercise, muscleAreas: values })
+            }
           >
-            <MultiSelectTrigger className="w-full">
-              <MultiSelectValue placeholder="Select measurements" />
+            <MultiSelectTrigger id="muscleAreas" className="w-full">
+              <MultiSelectValue placeholder="Select muscle areas..." />
             </MultiSelectTrigger>
             <MultiSelectContent>
-              <MultiSelectItem value="reps">Repetitions</MultiSelectItem>
-              <MultiSelectItem value="weight">Weight</MultiSelectItem>
-              <MultiSelectItem value="duration">Duration</MultiSelectItem>
-              <MultiSelectItem value="distance">Distance</MultiSelectItem>
-              <MultiSelectItem value="speed">Speed</MultiSelectItem>
+              <MultiSelectGroup>
+                {muscleAreas.map((muscleArea) => (
+                  <MultiSelectItem key={muscleArea} value={muscleArea}>
+                    {muscleArea}
+                  </MultiSelectItem>
+                ))}
+              </MultiSelectGroup>
             </MultiSelectContent>
           </MultiSelect>
-        </label>
-      </div>
+        </div>
+      )}
 
-      <div className="mb-4">
-        <label className="block mb-2">
-          Muscle Areas
-          <input
-            type="text"
-            value={exercise.muscleAreas?.join(", ")}
-            onChange={(e) => handleArrayInput("muscleAreas", e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md mt-1"
-            required
-          />
-        </label>
-      </div>
+      {scientificMuscleNamesEnabled && (
+        <div className="mb-4">
+          <div className="flex justify-between">
+            <Label htmlFor="muscles">Muscles</Label>
+            <Button
+              variant={showMuscleMap ? "default" : "ghost"}
+              size="sm"
+              className="ml-auto h-auto p-1 text-xs"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowMuscleMap(!showMuscleMap);
+              }}
+            >
+              <BicepsFlexedIcon />
+            </Button>
+          </div>
 
-      <div className="mb-4">
-        <label className="block mb-2">
-          Muscles
-          <input
-            type="text"
-            value={exercise.muscles?.join(", ")}
-            onChange={(e) => handleArrayInput("muscles", e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md mt-1"
-            required
-          />
-        </label>
-      </div>
-
-      <div className="mb-4">
-        <label className="block mb-2">
-          Instructions
-          <textarea
-            value={exercise.instructions.join(",")}
-            onChange={(e) =>
-              onChange({ ...exercise, instructions: e.target.value.split(",") })
+          <MultiSelect
+            values={exercise.muscles}
+            onValuesChange={(values) =>
+              onChange({ ...exercise, muscles: values })
             }
-            className="w-full p-2 border border-gray-300 rounded-md mt-1 min-h-[100px]"
+          >
+            <MultiSelectTrigger id="muscles" className="w-full">
+              <MultiSelectValue placeholder="Select muscles..." />
+            </MultiSelectTrigger>
+            <MultiSelectContent>
+              <MultiSelectGroup>
+                {muscles.map((muscle) => (
+                  <MultiSelectItem key={muscle} value={muscle}>
+                    {muscle}
+                  </MultiSelectItem>
+                ))}
+              </MultiSelectGroup>
+            </MultiSelectContent>
+          </MultiSelect>
+        </div>
+      )}
+
+      {showMuscleMap && (
+        <div className="mb-4 flex gap-4 justify-center">
+          <MuscleMap
+            id="muscle-map"
+            muscles={exercise.muscles}
+            muscleAreas={exercise.muscleAreas}
+            className="h-24"
           />
-        </label>
+          <MuscleMap
+            id="muscle-map"
+            muscles={exercise.muscles}
+            muscleAreas={exercise.muscleAreas}
+            className="h-24"
+            back
+          />
+        </div>
+      )}
+
+      <div className="mb-4">
+        <Label htmlFor="instructions">Instructions</Label>
+        <Textarea
+          id="instructions"
+          value={exercise.instructions.join(",")}
+          onChange={(e) =>
+            onChange({ ...exercise, instructions: e.target.value.split(",") })
+          }
+          className="w-full"
+        />
       </div>
 
       {Object.keys(exercise.measurements).map((measurement) => (
