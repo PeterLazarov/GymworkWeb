@@ -191,6 +191,7 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
   const [updateSet] = useMutation(UPDATE_SET_MUTATION);
   const [deleteSet] = useMutation(DELETE_SET_MUTATION);
 
+  const exercise = step.exercises[0]!;
   const handleUpdateSet = async () => {
     if (!focusedSet) return;
 
@@ -291,17 +292,21 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
         ))}
       </div>
 
-      <IncrementalEditor
-        value={reps}
-        onChange={(value) => setReps(value ?? 0)}
-        unit="reps"
-      />
-      <IncrementalEditor
-        value={weight}
-        onChange={(value) => setWeight(value ?? 0)}
-        step={5}
-        unit="kg"
-      />
+      {exercise.measurements.reps && (
+        <IncrementalEditor
+          value={reps}
+          onChange={(value) => setReps(value ?? 0)}
+          unit={exercise.measurements.reps.unit}
+        />
+      )}
+      {exercise.measurements.weight && (
+        <IncrementalEditor
+          value={weight}
+          onChange={(value) => setWeight(value ?? 0)}
+          step={exercise.measurements.weight.step}
+          unit={exercise.measurements.weight.unit}
+        />
+      )}
       {focusedSet && (
         <div className="w-full flex gap-2">
           <Button className="flex-1" onClick={handleUpdateSet}>

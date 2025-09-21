@@ -488,7 +488,7 @@ type Query {
     name: String
   ): ExerciseConnection!
   settings: Settings!
-  workouts(date: ISO8601Date, feeling: String, fromDate: ISO8601Date, pain: String, toDate: ISO8601Date): [Workout!]!
+  workouts(date: ISO8601Date, feeling: String, fromDate: ISO8601Date, muscleAreas: [String!], muscles: [String!], pain: String, rpe: String, toDate: ISO8601Date): [Workout!]!
 }
 
 type Settings implements Node {

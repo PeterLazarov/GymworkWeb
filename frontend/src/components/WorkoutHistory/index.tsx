@@ -1,7 +1,6 @@
 import { gql, useQuery } from "@apollo/client";
 import { FilterIcon, SearchIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { WorkoutsHistoryQuery } from "../../generated/graphql";
 import { formatDateIso } from "../../utils/date";
 import {
@@ -22,16 +21,39 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "../shared";
 import { WorkoutDayModal } from "../WorkoutCalendar";
 import { MuscleMap } from "./MuscleMap";
 
 const WORKOUTS_QUERY = gql`
-  query WorkoutsHistory {
+  query WorkoutsHistory(
+    $feeling: String
+    $fromDate: ISO8601Date
+    $pain: String
+    $toDate: ISO8601Date
+    $rpe: String
+    $muscles: [String!]
+    $muscleAreas: [String!]
+    $notes: String
+  ) {
     settings {
       scientificMuscleNamesEnabled
     }
-    workouts {
+    workouts(
+      feeling: $feeling
+      fromDate: $fromDate
+      pain: $pain
+      toDate: $toDate
+      rpe: $rpe
+      muscles: $muscles
+      muscleAreas: $muscleAreas
+      notes: $notes
+    ) {
       id
       date
       feeling
@@ -47,72 +69,42 @@ const WORKOUTS_QUERY = gql`
 
 type Workout = WorkoutsHistoryQuery["workouts"][number];
 
-// Filter state interface
-interface FilterState {
+type Filter = {
   notes: string;
-  feeling: string[];
-  pain: string[];
-  rpe: string[];
+  feeling: string;
+  pain: string;
+  rpe: string;
   muscles: string[];
   muscleAreas: string[];
   dateFrom: string;
   dateTo: string;
-}
+};
 
 export const WorkoutHistory: React.FC = () => {
   const { data, refetch, loading, error } = useQuery(WORKOUTS_QUERY);
-  const navigate = useNavigate();
   const [openedWorkoutDate, setOpenedWorkoutDate] = useState<Date | null>(null);
 
-  // Filter state
-  const [filters, setFilters] = useState<FilterState>({
+  const [filters, setFilters] = useState<Filter>({
     notes: "",
-    feeling: [],
-    pain: [],
-    rpe: [],
+    feeling: "",
+    pain: "",
+    rpe: "",
     muscles: [],
     muscleAreas: [],
     dateFrom: "",
     dateTo: "",
   });
 
-  // Get unique values for filter options
   const filterOptions = useMemo((): {
-    feelings: string[];
-    pains: string[];
-    rpes: string[];
     muscles: string[];
     muscleAreas: string[];
   } => {
     if (!data?.workouts)
       return {
-        feelings: [],
-        pains: [],
-        rpes: [],
         muscles: [],
         muscleAreas: [],
       };
 
-    const feelings: string[] = [
-      ...new Set(
-        data.workouts
-          .map((w) => w.feeling)
-          .filter((f): f is string => Boolean(f))
-      ),
-    ] as string[];
-    const pains: string[] = [
-      ...new Set(
-        data.workouts.map((w) => w.pain).filter((p): p is string => Boolean(p))
-      ),
-    ] as string[];
-    const rpes: string[] = [
-      ...new Set(
-        data.workouts
-          .map((w) => w.rpe)
-          .filter((r): r is number => Boolean(r))
-          .map(String)
-      ),
-    ] as string[];
     const muscles: string[] = [
       ...new Set(data.workouts.flatMap((w) => w.muscles)),
     ] as string[];
@@ -120,78 +112,16 @@ export const WorkoutHistory: React.FC = () => {
       ...new Set(data.workouts.flatMap((w) => w.muscleAreas)),
     ] as string[];
 
-    return { feelings, pains, rpes, muscles, muscleAreas };
+    return { muscles, muscleAreas };
   }, [data]);
 
-  // Filter workouts based on current filters
-  const filteredWorkouts = useMemo(() => {
-    if (!data?.workouts) return [];
-
-    return data.workouts.filter((workout) => {
-      // Filter by date range
-      if (filters.dateFrom && workout.date < filters.dateFrom) {
-        return false;
-      }
-      if (filters.dateTo && workout.date > filters.dateTo) {
-        return false;
-      }
-
-      // Filter by notes
-      if (
-        filters.notes &&
-        !workout.notes?.toLowerCase().includes(filters.notes.toLowerCase())
-      ) {
-        return false;
-      }
-
-      // Filter by feeling
-      if (
-        filters.feeling.length > 0 &&
-        (!workout.feeling || !filters.feeling.includes(workout.feeling))
-      ) {
-        return false;
-      }
-
-      // Filter by pain
-      if (
-        filters.pain.length > 0 &&
-        (!workout.pain || !filters.pain.includes(workout.pain))
-      ) {
-        return false;
-      }
-
-      // Filter by RPE
-      if (
-        filters.rpe.length > 0 &&
-        (!workout.rpe || !filters.rpe.includes(String(workout.rpe)))
-      ) {
-        return false;
-      }
-
-      // Filter by muscles
-      if (
-        filters.muscles.length > 0 &&
-        !filters.muscles.some((muscle) => workout.muscles.includes(muscle))
-      ) {
-        return false;
-      }
-
-      // Filter by muscle areas
-      if (
-        filters.muscleAreas.length > 0 &&
-        !filters.muscleAreas.some((area) => workout.muscleAreas.includes(area))
-      ) {
-        return false;
-      }
-
-      return true;
+  const onFilterChange = (filters: Filter) => {
+    setFilters(filters);
+    refetch({
+      ...filters,
     });
-  }, [data, filters]);
+  };
 
-  const workoutDates = useMemo(
-    () => data?.workouts.map((workout) => workout.date),
-    [data]
-  );
   if (loading) return <div>Loading workouts...</div>;
   if (error) return <div>Error loading workouts: {error.message}</div>;
 
@@ -207,7 +137,7 @@ export const WorkoutHistory: React.FC = () => {
             placeholder="Filter by notes..."
             value={filters.notes}
             onChange={(e) =>
-              setFilters((prev) => ({ ...prev, notes: e.target.value }))
+              onFilterChange({ ...filters, notes: e.target.value })
             }
             icon={<SearchIcon className="h-4 w-4" />}
           />
@@ -215,7 +145,7 @@ export const WorkoutHistory: React.FC = () => {
 
         <AdvancedWorkoutFilter
           filters={filters}
-          setFilters={setFilters}
+          setFilters={onFilterChange}
           scientificMuscleNamesEnabled={
             data?.settings.scientificMuscleNamesEnabled
           }
@@ -224,7 +154,7 @@ export const WorkoutHistory: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-4 px-4 items-center overflow-y-auto">
-        {filteredWorkouts.map((workout) => (
+        {data?.workouts.map((workout) => (
           <WorkoutItem
             key={workout.id}
             workout={workout}
@@ -234,7 +164,7 @@ export const WorkoutHistory: React.FC = () => {
       </div>
       <div className="h-4">
         <span className="text-sm text-muted-foreground">
-          {filteredWorkouts.length} workouts
+          {data?.workouts.length || 0} workouts
         </span>
       </div>
       {openedWorkoutDate && (
@@ -306,13 +236,10 @@ const WorkoutItem: React.FC<WorkoutItemProps> = ({ workout, onClick }) => {
 };
 
 type AdvancedWorkoutFiltersProps = {
-  filters: FilterState;
-  setFilters: (filters: FilterState) => void;
+  filters: Filter;
+  setFilters: (filters: Filter) => void;
   scientificMuscleNamesEnabled?: boolean;
   filterOptions: {
-    feelings: string[];
-    pains: string[];
-    rpes: string[];
     muscles: string[];
     muscleAreas: string[];
   };
@@ -323,136 +250,177 @@ const AdvancedWorkoutFilter: React.FC<AdvancedWorkoutFiltersProps> = ({
   scientificMuscleNamesEnabled,
   filterOptions,
 }) => {
+  const appliedFiltersCount = useMemo(() => {
+    return (
+      filters.feeling.length +
+      filters.pain.length +
+      filters.rpe.length +
+      filters.muscles.length +
+      filters.muscleAreas.length +
+      (filters.dateFrom ? 1 : 0) +
+      (filters.dateTo ? 1 : 0)
+    );
+  }, [filters]);
+
+  const rpeOptions = [
+    { value: "5", label: "5" },
+    { value: "6", label: "6" },
+    { value: "7", label: "7" },
+    { value: "8", label: "8" },
+    { value: "9", label: "9" },
+    { value: "10", label: "10" },
+  ];
+  const painOptions = [
+    { value: "noPain", label: "No Pain" },
+    { value: "discomfort", label: "Discomfort" },
+    { value: "pain", label: "Pain" },
+  ];
+  const feelingOptions = [
+    { value: "sad", label: "Neutral" },
+    { value: "neutral", label: "Good" },
+    { value: "happy", label: "Great" },
+  ];
+
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline">
           <FilterIcon className="h-4 w-4 mr-2" />
           Advanced Filters
-          {(filters.notes ? 1 : 0) +
-            filters.feeling.length +
-            filters.pain.length +
-            filters.rpe.length +
-            filters.muscles.length +
-            filters.muscleAreas.length +
-            (filters.dateFrom ? 1 : 0) +
-            (filters.dateTo ? 1 : 0) >
-            0 && (
+          {appliedFiltersCount > 0 && (
             <span className="ml-2 bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
-              {(filters.notes ? 1 : 0) +
-                filters.feeling.length +
-                filters.pain.length +
-                filters.rpe.length +
-                filters.muscles.length +
-                filters.muscleAreas.length +
-                (filters.dateFrom ? 1 : 0) +
-                (filters.dateTo ? 1 : 0)}
+              {appliedFiltersCount}
             </span>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-4 mr-4 flex flex-col gap-2">
+        <div className="flex-1">
+          <Label className="text-sm font-medium">DateFrom</Label>
+          <Datepicker
+            date={filters.dateFrom ? new Date(filters.dateFrom) : undefined}
+            setDate={(date) =>
+              setFilters({
+                ...filters,
+                dateFrom: date.toISOString(),
+              })
+            }
+            className="w-full"
+          />
+        </div>
+        <div className="flex-1">
+          <Label className="text-sm font-medium">Date To</Label>
+          <Datepicker
+            date={filters.dateTo ? new Date(filters.dateTo) : undefined}
+            setDate={(date) =>
+              setFilters({
+                ...filters,
+                dateTo: date.toISOString(),
+              })
+            }
+            className="w-full"
+          />
+        </div>
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Date Range</Label>
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Label className="text-xs text-muted-foreground mb-1 block">
-                From
-              </Label>
-              <Datepicker
-                date={filters.dateFrom ? new Date(filters.dateFrom) : undefined}
-                setDate={(date) =>
-                  setFilters({
-                    ...filters,
-                    dateFrom: date.toISOString(),
-                  })
-                }
-                className="w-full"
-              />
-            </div>
-            <div className="flex-1">
-              <Label className="text-xs text-muted-foreground mb-1 block">
-                To
-              </Label>
-              <Datepicker
-                date={filters.dateTo ? new Date(filters.dateTo) : undefined}
-                setDate={(date) =>
-                  setFilters({
-                    ...filters,
-                    dateTo: date.toISOString(),
-                  })
-                }
-                className="w-full"
-              />
-            </div>
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">Feeling</Label>
+            {filters.feeling && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto p-1 text-xs"
+                onClick={() => setFilters({ ...filters, feeling: "" })}
+              >
+                Clear
+              </Button>
+            )}
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Feeling</Label>
-          <MultiSelect
-            values={filters.feeling}
-            onValuesChange={(values) =>
-              setFilters({ ...filters, feeling: values })
+          <Select
+            key={filters.feeling}
+            value={filters.feeling === "" ? undefined : filters.feeling}
+            onValueChange={(values) =>
+              setFilters({ ...filters, feeling: values || "" })
             }
           >
-            <MultiSelectTrigger className="w-full">
-              <MultiSelectValue placeholder="Select feelings..." />
-            </MultiSelectTrigger>
-            <MultiSelectContent>
-              <MultiSelectGroup>
-                {filterOptions.feelings.map((feeling) => (
-                  <MultiSelectItem key={feeling} value={feeling}>
-                    {feeling}
-                  </MultiSelectItem>
-                ))}
-              </MultiSelectGroup>
-            </MultiSelectContent>
-          </MultiSelect>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select feeling" />
+            </SelectTrigger>
+            <SelectContent>
+              {feelingOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Pain</Label>
-          <MultiSelect
-            values={filters.pain}
-            onValuesChange={(values) =>
-              setFilters({ ...filters, pain: values })
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">Pain</Label>
+            {filters.pain && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto p-1 text-xs"
+                onClick={() => setFilters({ ...filters, pain: "" })}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+          <Select
+            key={filters.pain}
+            value={filters.pain === "" ? undefined : filters.pain}
+            onValueChange={(values) =>
+              setFilters({ ...filters, pain: values || "" })
             }
           >
-            <MultiSelectTrigger className="w-full">
-              <MultiSelectValue placeholder="Select pain levels..." />
-            </MultiSelectTrigger>
-            <MultiSelectContent>
-              <MultiSelectGroup>
-                {filterOptions.pains.map((pain) => (
-                  <MultiSelectItem key={pain} value={pain}>
-                    {pain}
-                  </MultiSelectItem>
-                ))}
-              </MultiSelectGroup>
-            </MultiSelectContent>
-          </MultiSelect>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select pain level" />
+            </SelectTrigger>
+            <SelectContent>
+              {painOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium">RPE</Label>
-          <MultiSelect
-            values={filters.rpe}
-            onValuesChange={(values) => setFilters({ ...filters, rpe: values })}
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">RPE</Label>
+            {filters.rpe && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto p-1 text-xs"
+                onClick={() => setFilters({ ...filters, rpe: "" })}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+          <Select
+            key={filters.rpe}
+            value={filters.rpe === "" ? undefined : filters.rpe}
+            onValueChange={(values) =>
+              setFilters({ ...filters, rpe: values || "" })
+            }
           >
-            <MultiSelectTrigger className="w-full">
-              <MultiSelectValue placeholder="Select RPE values..." />
-            </MultiSelectTrigger>
-            <MultiSelectContent>
-              <MultiSelectGroup>
-                {filterOptions.rpes.map((rpe) => (
-                  <MultiSelectItem key={rpe} value={rpe}>
-                    {rpe}
-                  </MultiSelectItem>
-                ))}
-              </MultiSelectGroup>
-            </MultiSelectContent>
-          </MultiSelect>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select RPE" />
+            </SelectTrigger>
+            <SelectContent>
+              {rpeOptions.map((option) => (
+                <SelectItem key={option.label} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {scientificMuscleNamesEnabled && (
@@ -511,10 +479,10 @@ const AdvancedWorkoutFilter: React.FC<AdvancedWorkoutFiltersProps> = ({
           className="w-full"
           onClick={() =>
             setFilters({
-              notes: "",
-              feeling: [],
-              pain: [],
-              rpe: [],
+              notes: filters.notes,
+              feeling: "",
+              pain: "",
+              rpe: "",
               muscles: [],
               muscleAreas: [],
               dateFrom: "",
@@ -522,7 +490,7 @@ const AdvancedWorkoutFilter: React.FC<AdvancedWorkoutFiltersProps> = ({
             })
           }
         >
-          Clear All Filters
+          Clear Filters
         </Button>
       </PopoverContent>
     </Popover>

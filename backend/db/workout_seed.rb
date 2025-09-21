@@ -49,16 +49,19 @@ module WorkoutSeed
 
       def generate_random_exercises(date, workout_time)
         Array.new(between(3, 8)) do |i|
-          exercise_id = Exercise.offset(rand(Exercise.count)).first&.id
+          exercise = Exercise.offset(rand(Exercise.count)).first
           rest_ms = i > 0 ? REST_DURATION : 0
           workout_time += (rest_ms * i + SET_DURATION * i) / 1000.0
 
           sets = Array.new(between(2, 5)) do |j|
             {
-              exercise: exercise_id,
+              exercise: exercise.id,
               is_warmup: j == 0,
-              reps: between(3, 12),
-              weight_mcg: (between(8, 40) * WEIGHT_INCREMENT_KG * 1_000_000_000).to_i, # kg to mcg
+              reps: exercise.measurements.reps ? between(3, 12) : nil,
+              weight_mcg: exercise.measurements.weight ? (between(8, 40) * WEIGHT_INCREMENT_KG * 1_000_000_000).to_i : nil,
+              distance_mm: exercise.measurements.distance ? between(1, 10) * 1_000_000 : nil,
+              duration_ms: exercise.measurements.duration ? between(1, 10) * 60 * 1000 : nil,
+              speed_kph: exercise.measurements.speed ? between(1, 10) : nil,
               date: date,
               created_at: workout_time.to_i * 1000
             }
