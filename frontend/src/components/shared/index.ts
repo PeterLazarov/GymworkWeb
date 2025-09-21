@@ -6,6 +6,7 @@ export * from "./Card";
 export * from "./Chart";
 export * from "./Checkbox";
 export * from "./Command";
+export * from "./Datepicker";
 export * from "./Dialog";
 export * from "./Header";
 export * from "./IncrementalEditor";

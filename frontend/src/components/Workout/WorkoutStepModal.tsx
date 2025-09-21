@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { ExerciseSets, WorkoutByDateQuery } from "../../generated/graphql";
 import { cn } from "../../lib/utils";
 import { formatDateIso } from "../../utils/date";
+import { EditExerciseModal } from "../ExerciseSelect/EditExerciseModal";
 import {
   Button,
   Card,
@@ -71,6 +72,15 @@ const DELETE_SET_MUTATION = gql`
   }
 `;
 
+const DELETE_STEP_MUTATION = gql`
+  mutation DeleteStep($stepId: ID!) {
+    deleteStep(input: { stepId: $stepId }) {
+      success
+      errors
+    }
+  }
+`;
+
 type WorkoutStepModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -84,39 +94,87 @@ export const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
   step,
   workout,
 }) => {
+  const [isEditExerciseOpen, setIsEditExerciseOpen] = useState(false);
+  const [deleteStep] = useMutation(DELETE_STEP_MUTATION);
+
+  const handleDeleteStep = async () => {
+    if (!window.confirm("Are you sure you want to delete this step?")) return;
+
+    const result = await deleteStep({
+      variables: {
+        stepId: step.id,
+      },
+    });
+
+    if (result.data?.deleteStep?.errors?.length) {
+      console.error("Failed to delete step:", result.data.deleteStep.errors);
+      return;
+    }
+
+    if (!result.data?.deleteStep?.success) {
+      console.error("Failed to delete step");
+      return;
+    }
+
+    onClose();
+  };
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={step.exercises[0]?.name}
-      description={`Add a set for ${step.exercises[0]?.name}`}
-      hideFooter
-    >
-      <Tabs defaultValue="track" className="flex flex-col flex-1 gap-2">
-        <div className="flex items-center justify-center">
-          <TabsList>
-            <TabsTrigger value="track">Track</TabsTrigger>
-            <TabsTrigger value="records">Records</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-            <TabsTrigger value="chart">Chart</TabsTrigger>
-          </TabsList>
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={step.exercises[0]?.name}
+        description={`Add a set for ${step.exercises[0]?.name}`}
+        hideFooter
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setIsEditExerciseOpen(true)}
+            >
+              Edit Exercise
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteStep}>
+              Remove Step
+            </Button>
+          </div>
+
+          <Tabs defaultValue="track" className="flex flex-col flex-1 gap-2">
+            <div className="flex items-center justify-center">
+              <TabsList>
+                <TabsTrigger value="track">Track</TabsTrigger>
+                <TabsTrigger value="records">Records</TabsTrigger>
+                <TabsTrigger value="history">History</TabsTrigger>
+                <TabsTrigger value="chart">Chart</TabsTrigger>
+              </TabsList>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <TabsContent value="track">
+                <TrackStepTab step={step} workout={workout} />
+              </TabsContent>
+              <TabsContent value="records">
+                <RecordsStepTab step={step} />
+              </TabsContent>
+              <TabsContent value="history" className="flex-1 overflow-hidden">
+                <HistoryStepTab step={step} />
+              </TabsContent>
+              <TabsContent value="chart">
+                <ExerciseStatsChart exerciseId={step.exercises[0]!.id} />
+              </TabsContent>
+            </div>
+          </Tabs>
         </div>
-        <div className="flex-1 overflow-y-auto">
-          <TabsContent value="track">
-            <TrackStepTab step={step} workout={workout} />
-          </TabsContent>
-          <TabsContent value="records">
-            <RecordsStepTab step={step} />
-          </TabsContent>
-          <TabsContent value="history" className="flex-1 overflow-hidden">
-            <HistoryStepTab step={step} />
-          </TabsContent>
-          <TabsContent value="chart">
-            <ExerciseStatsChart exerciseId={step.exercises[0]!.id} />
-          </TabsContent>
-        </div>
-      </Tabs>
-    </Modal>
+      </Modal>
+
+      <EditExerciseModal
+        isOpen={isEditExerciseOpen}
+        onClose={() => setIsEditExerciseOpen(false)}
+        onSuccess={() => setIsEditExerciseOpen(false)}
+        exerciseId={step.exercises[0]?.id || ""}
+      />
+    </>
   );
 };
 

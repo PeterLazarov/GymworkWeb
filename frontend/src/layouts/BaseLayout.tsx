@@ -63,7 +63,7 @@ export function BaseLayout({ children }: BaseLayoutProps) {
         </Button>
       </header>
 
-      <main className="flex flex-col flex-1 p-4 gap-4 items-stretch overflow-hidden">
+      <main className="flex flex-col flex-1 p-4 gap-4 overflow-hidden">
         {children}
       </main>
     </div>
