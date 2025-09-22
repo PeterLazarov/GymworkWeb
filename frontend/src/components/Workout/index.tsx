@@ -88,8 +88,6 @@ export const Workout = () => {
   const [createWorkout, { loading: creating, error: createError }] =
     useMutation(CREATE_WORKOUT_MUTATION);
 
-  const workout = data?.workouts[0];
-
   const handleCreateWorkout = async () => {
     try {
       const result = await createWorkout({
@@ -117,13 +115,13 @@ export const Workout = () => {
       <WorkoutHeader date={date} />
       {(loading || creating) && <div>Loading...</div>}
       {(error || createError) && <div>Error loading workout</div>}
-      {!loading && !error && !workout && !creating && (
+      {!loading && !error && !data?.workout && !creating && (
         <div className="text-center p-4">
           <div className="mb-4">No workout found for this date</div>
           <Button onClick={handleCreateWorkout}>Create Workout</Button>
         </div>
       )}
-      {workout && <WorkoutView workout={workout} />}
+      {data?.workout && <WorkoutView workout={data.workout} />}
     </>
   );
 };

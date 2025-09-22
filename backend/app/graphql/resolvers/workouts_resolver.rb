@@ -2,7 +2,7 @@
 
 module Resolvers
   class WorkoutsResolver < BaseResolver
-    type [Types::WorkoutType], null: false
+    type Types::WorkoutType.connection_type, null: false
 
     argument :from_date, GraphQL::Types::ISO8601Date, required: false
     argument :to_date, GraphQL::Types::ISO8601Date, required: false

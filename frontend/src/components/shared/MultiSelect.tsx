@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import React, {
   createContext,
   useCallback,
@@ -122,7 +122,7 @@ export function MultiSelectTrigger({
         )}
       >
         {children}
-        <ChevronsUpDownIcon className="size-4 shrink-0 opacity-50" />
+        <ChevronDownIcon className="size-4 shrink-0 opacity-50" />
       </Button>
     </PopoverTrigger>
   );

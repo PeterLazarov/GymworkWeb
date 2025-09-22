@@ -8,22 +8,64 @@ import { Button, Calendar, Modal } from "../shared";
 import { WorkoutView } from "../Workout/WorkoutView";
 
 const WORKOUTS_QUERY = gql`
-  query Workouts {
-    workouts {
-      id
-      date
+  query Workouts($first: Int, $after: String) {
+    workouts(first: $first, after: $after) {
+      edges {
+        cursor
+        node {
+          id
+          date
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
     }
   }
 `;
 
 export const WorkoutCalendar: React.FC = () => {
-  const { data, refetch, loading, error } = useQuery(WORKOUTS_QUERY);
+  const [hasMore, setHasMore] = useState(true);
   const navigate = useNavigate();
   const { date } = useParams();
   const [openedWorkoutDate, setOpenedWorkoutDate] = useState<Date | null>(null);
 
+  const { data, loading, error, fetchMore } = useQuery(WORKOUTS_QUERY, {
+    variables: {
+      first: 50,
+    },
+  });
+
+  const loadMore = () => {
+    if (!hasMore || loading || !data?.workouts.pageInfo.hasNextPage) return;
+
+    fetchMore({
+      variables: {
+        first: 50,
+        after: data.workouts.pageInfo.endCursor,
+      },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!fetchMoreResult) return prev;
+
+        setHasMore(fetchMoreResult.workouts.pageInfo.hasNextPage);
+
+        return {
+          ...prev,
+          workouts: {
+            ...fetchMoreResult.workouts,
+            edges: [
+              ...(prev.workouts?.edges || []),
+              ...(fetchMoreResult.workouts?.edges || []),
+            ],
+          },
+        };
+      },
+    });
+  };
+
   const workoutDates = useMemo(
-    () => data?.workouts.map((workout) => workout.date),
+    () => data?.workouts.edges.map(({ node }) => node.date),
     [data]
   );
   if (loading) return <div>Loading workouts...</div>;
@@ -108,7 +150,7 @@ export const WorkoutDayModal: React.FC<WorkoutDayModalProps> = ({
     variables: { date: day.toISODate() },
   });
 
-  const workout = data?.workouts[0];
+  const workout = data?.workout;
 
   return (
     <Modal

@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { muscleAreas, muscles } from "../../constants/muscles";
 import { WorkoutsHistoryQuery } from "../../generated/graphql";
 import { formatDateIso } from "../../utils/date";
+import { useInfiniteScroll } from "../../utils/useInfiniteScroll";
 import {
   Button,
   Card,
@@ -41,6 +42,8 @@ const WORKOUTS_QUERY = gql`
     $muscles: [String!]
     $muscleAreas: [String!]
     $notes: String
+    $first: Int
+    $after: String
   ) {
     settings {
       scientificMuscleNamesEnabled
@@ -54,21 +57,37 @@ const WORKOUTS_QUERY = gql`
       muscles: $muscles
       muscleAreas: $muscleAreas
       notes: $notes
+      first: $first
+      after: $after
     ) {
-      id
-      date
-      feeling
-      rpe
-      notes
-      pain
-      hasComments
-      muscles
-      muscleAreas
+      totalCount
+      edges {
+        cursor
+        node {
+          id
+          date
+          feeling
+          rpe
+          notes
+          pain
+          hasComments
+          muscles
+          muscleAreas
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
     }
   }
 `;
 
-type Workout = WorkoutsHistoryQuery["workouts"][number];
+type Workout = NonNullable<
+  NonNullable<
+    NonNullable<WorkoutsHistoryQuery["workouts"]["edges"]>[number]
+  >["node"]
+>;
 
 type Filter = {
   notes: string;
@@ -82,7 +101,6 @@ type Filter = {
 };
 
 export const WorkoutHistory: React.FC = () => {
-  const { data, refetch, loading, error } = useQuery(WORKOUTS_QUERY);
   const [openedWorkoutDate, setOpenedWorkoutDate] = useState<Date | null>(null);
 
   const [filters, setFilters] = useState<Filter>({
@@ -96,14 +114,52 @@ export const WorkoutHistory: React.FC = () => {
     dateTo: "",
   });
 
+  const { data, fetchMore, refetch, loading, error } = useQuery(
+    WORKOUTS_QUERY,
+    {
+      variables: {
+        ...filters,
+        first: 10,
+      },
+    }
+  );
+
+  const { containerRef, loading: infiniteScrollLoading } = useInfiniteScroll({
+    data: data?.workouts,
+    loading,
+    fetchMore: (options) =>
+      fetchMore({
+        variables: {
+          ...filters,
+          ...options.variables,
+        },
+        updateQuery: (prev, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return prev;
+          return {
+            ...prev,
+            workouts: {
+              ...fetchMoreResult.workouts,
+              edges: [
+                ...(prev.workouts?.edges || []),
+                ...(fetchMoreResult.workouts?.edges || []),
+              ],
+            },
+          };
+        },
+      }),
+    pageSize: 20,
+    threshold: 200,
+  });
+
   const onFilterChange = (filters: Filter) => {
     setFilters(filters);
     refetch({
       ...filters,
+      first: 20,
     });
   };
 
-  if (loading) return <div>Loading workouts...</div>;
+  if (loading && !infiniteScrollLoading) return <div>Loading workouts...</div>;
   if (error) return <div>Error loading workouts: {error.message}</div>;
 
   return (
@@ -133,8 +189,11 @@ export const WorkoutHistory: React.FC = () => {
         />
       </div>
 
-      <div className="flex flex-col gap-4 px-4 items-center overflow-y-auto">
-        {data?.workouts.map((workout) => (
+      <div
+        className="flex flex-col gap-4 px-4 items-center overflow-y-auto"
+        ref={containerRef}
+      >
+        {data?.workouts.edges.map(({ node: workout }) => (
           <WorkoutItem
             key={workout.id}
             workout={workout}
@@ -142,9 +201,14 @@ export const WorkoutHistory: React.FC = () => {
           />
         ))}
       </div>
+      {infiniteScrollLoading && (
+        <div className="flex justify-center py-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      )}
       <div className="h-4">
         <span className="text-sm text-muted-foreground">
-          {data?.workouts.length || 0} workouts
+          {data?.workouts.totalCount || 0} workouts
         </span>
       </div>
       {openedWorkoutDate && (
@@ -227,11 +291,11 @@ const AdvancedWorkoutFilter: React.FC<AdvancedWorkoutFiltersProps> = ({
 }) => {
   const appliedFiltersCount = useMemo(() => {
     return (
-      filters.feeling.length +
-      filters.pain.length +
-      filters.rpe.length +
-      filters.muscles.length +
-      filters.muscleAreas.length +
+      (filters.feeling !== "" ? 1 : 0) +
+      (filters.pain !== "" ? 1 : 0) +
+      (filters.rpe !== "" ? 1 : 0) +
+      (filters.muscles.length > 0 ? 1 : 0) +
+      (filters.muscleAreas.length > 0 ? 1 : 0) +
       (filters.dateFrom ? 1 : 0) +
       (filters.dateTo ? 1 : 0)
     );

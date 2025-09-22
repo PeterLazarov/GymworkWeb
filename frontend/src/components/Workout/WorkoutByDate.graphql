@@ -1,5 +1,5 @@
 query WorkoutByDate($date: ISO8601Date!) {
-  workouts(date: $date) {
+  workout(date: $date) {
     id
     date
     feeling
