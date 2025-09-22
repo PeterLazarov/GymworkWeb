@@ -12,7 +12,7 @@ import {
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
+  title: string;
   description?: string;
   children: React.ReactNode;
   onSubmit?: () => void;
@@ -20,6 +20,7 @@ interface ModalProps {
   confirmText?: string;
   confirmDisabled?: boolean;
   hideFooter?: boolean;
+  Actions?: React.ReactNode;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -33,6 +34,7 @@ export const Modal: React.FC<ModalProps> = ({
   confirmText,
   cancelText,
   hideFooter,
+  Actions,
 }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,14 +44,10 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[90vh] flex flex-col">
-        {(title || description) && (
-          <DialogHeader>
-            {title && <DialogTitle>{title}</DialogTitle>}
-            {description && (
-              <DialogDescription>{description}</DialogDescription>
-            )}
-          </DialogHeader>
-        )}
+        <DialogHeader className="flex-1" Actions={Actions}>
+          <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
+        </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="overflow-y-auto flex-1 min-h-0">{children}</div>
           {!hideFooter && (

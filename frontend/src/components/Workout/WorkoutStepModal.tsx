@@ -1,4 +1,5 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
+import { EllipsisIcon } from "lucide-react";
 import React, { useState } from "react";
 import { ExerciseSets, WorkoutByDateQuery } from "../../generated/graphql";
 import { cn } from "../../lib/utils";
@@ -12,6 +13,9 @@ import {
   CardTitle,
   IncrementalEditor,
   Modal,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Tabs,
   TabsContent,
   TabsList,
@@ -19,7 +23,7 @@ import {
 } from "../shared";
 import { ExerciseStatsChart } from "./ExerciseStatsChart";
 
-type Workout = WorkoutByDateQuery["workouts"][number];
+type Workout = NonNullable<WorkoutByDateQuery["workout"]>;
 type WorkoutStep = Workout["steps"][number];
 type Set = WorkoutStep["sets"][number];
 
@@ -127,20 +131,14 @@ export const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
         title={step.exercises[0]?.name}
         description={`Add a set for ${step.exercises[0]?.name}`}
         hideFooter
+        Actions={
+          <StepActions
+            onEditExercise={() => setIsEditExerciseOpen(true)}
+            onDeleteStep={handleDeleteStep}
+          />
+        }
       >
         <div className="flex flex-col gap-4">
-          <div className="flex gap-2 justify-end">
-            <Button
-              variant="outline"
-              onClick={() => setIsEditExerciseOpen(true)}
-            >
-              Edit Exercise
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteStep}>
-              Remove Step
-            </Button>
-          </div>
-
           <Tabs defaultValue="track" className="flex flex-col flex-1 gap-2">
             <div className="flex items-center justify-center">
               <TabsList>
@@ -175,6 +173,43 @@ export const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
         exerciseId={step.exercises[0]?.id || ""}
       />
     </>
+  );
+};
+
+type StepActionsProps = {
+  onEditExercise: () => void;
+  onDeleteStep: () => void;
+};
+const StepActions: React.FC<StepActionsProps> = ({
+  onEditExercise,
+  onDeleteStep,
+}) => {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <EllipsisIcon />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48">
+        <div className="flex flex-col gap-2">
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={onEditExercise}
+          >
+            Edit Exercise
+          </Button>
+          <Button
+            variant="destructive"
+            className="w-full justify-start"
+            onClick={onDeleteStep}
+          >
+            Remove Step
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 
