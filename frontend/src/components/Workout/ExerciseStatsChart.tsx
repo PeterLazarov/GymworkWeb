@@ -9,43 +9,84 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { ExerciseSets, ExerciseSetsQuery } from "../../generated/graphql";
+import { ExerciseSets, IExerciseSetsQuery } from "../../generated/graphql";
 import { ChartContainer, ToggleGroup, ToggleGroupItem } from "../shared";
 
 type WorkoutSet = NonNullable<
-  ExerciseSetsQuery["exercise"]
+  IExerciseSetsQuery["exercise"]
 >["steps"][number]["sets"][number];
 
 type ExerciseStatsChartProps = {
   exerciseId: string;
 };
 
+type SetCharts = {
+  date: string;
+  reps?: number;
+  weight?: number;
+  duration?: number;
+  distance?: number;
+};
+
+type ChartTypes = "reps" | "weight" | "duration" | "distance";
+
+const chartNames = {
+  reps: "Reps",
+  weight: "Weight",
+  duration: "Duration",
+  distance: "Distance",
+} as const;
+
 export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
   exerciseId,
 }) => {
-  const { data, loading, error } = useQuery(ExerciseSets, {
+  const { data, loading, error } = useQuery<IExerciseSetsQuery>(ExerciseSets, {
     variables: { exerciseId },
+    onCompleted(data) {
+      const exercise = data.exercise;
+      if (exercise?.activeMeasurements.includes("reps")) {
+        setMetric("reps");
+      } else if (exercise?.activeMeasurements.includes("weight")) {
+        setMetric("weight");
+      } else if (exercise?.activeMeasurements.includes("distance")) {
+        setMetric("distance");
+      } else if (exercise?.activeMeasurements.includes("duration")) {
+        setMetric("duration");
+      }
+    },
   });
-  const [metric, setMetric] = useState<"reps" | "weight">("reps");
+  const [metric, setMetric] = useState<ChartTypes>();
 
   const chartData = useMemo(() => {
-    if (!data?.exercise) return [];
+    const exercise = data?.exercise;
+    if (!exercise) return [];
 
-    const allSets: WorkoutSet[] = data.exercise.steps.flatMap(
-      (step) => step.sets
-    );
+    const allSets: WorkoutSet[] = exercise.steps.flatMap((step) => step.sets);
 
     const groupedSets = groupBy(allSets, (set) => set.date);
 
-    return Object.entries(groupedSets).map(([date, sets]) => ({
-      date,
-      reps: maxBy(sets, "reps").reps,
-      weight: maxBy(sets, "weightMcg").weightMcg / 1000000,
-    }));
+    return Object.entries(groupedSets).map(([date, sets]) => {
+      let setCharts: SetCharts = { date };
+
+      if (exercise.activeMeasurements.includes("reps")) {
+        setCharts.reps = maxBy(sets, "reps").reps;
+      }
+      if (exercise.activeMeasurements.includes("weight")) {
+        setCharts.weight = maxBy(sets, "weightMcg").weightMcg / 1000000;
+      }
+      if (exercise.activeMeasurements.includes("duration")) {
+        setCharts.duration = maxBy(sets, "durationMs").durationMs;
+      }
+      if (exercise.activeMeasurements.includes("distance")) {
+        setCharts.distance = maxBy(sets, "distanceMm").distanceMm;
+      }
+
+      return setCharts;
+    });
   }, [data]);
 
   if (loading) return <div>Loading data...</div>;
-  if (error) return <div>Error loading data</div>;
+  if (error) return <div>{`Error loading data: ${error.message}`}</div>;
   if (!data?.exercise) return <div>No data found</div>;
 
   return (
@@ -53,12 +94,13 @@ export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
       <ToggleGroup
         type="single"
         value={metric}
-        onValueChange={(value) =>
-          value && setMetric(value as "reps" | "weight")
-        }
+        onValueChange={(value) => value && setMetric(value as ChartTypes)}
       >
-        <ToggleGroupItem value="reps">Reps</ToggleGroupItem>
-        <ToggleGroupItem value="weight">Weight</ToggleGroupItem>
+        {data.exercise.activeMeasurements.map((measurement) => (
+          <ToggleGroupItem key={measurement} value={measurement}>
+            {chartNames[measurement]}
+          </ToggleGroupItem>
+        ))}
       </ToggleGroup>
       <ChartContainer config={{}}>
         <LineChart

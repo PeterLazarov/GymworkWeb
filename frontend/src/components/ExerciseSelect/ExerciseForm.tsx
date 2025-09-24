@@ -33,6 +33,7 @@ export type ExerciseFormData = {
   muscles: string[];
   instructions: string[];
   measurements: Record<string, any>;
+  activeMeasurements: string[];
 };
 
 type Props = {
@@ -50,12 +51,14 @@ export const ExerciseForm: React.FC<Props> = ({
 }) => {
   const [showMuscleMap, setShowMuscleMap] = useState(false);
   const handleMeasurementsInput = (measurements: string[]) => {
+    const updatedMeasurements = measurements.reduce((acc, measurement) => {
+      acc[measurement] = measurementDefaults[measurement];
+      return acc;
+    }, {});
     onChange({
       ...exercise,
-      measurements: measurements.reduce((acc, measurement) => {
-        acc[measurement] = measurementDefaults[measurement];
-        return acc;
-      }, {}),
+      measurements: updatedMeasurements,
+      activeMeasurements: Object.keys(updatedMeasurements),
     });
   };
 
@@ -86,9 +89,7 @@ export const ExerciseForm: React.FC<Props> = ({
       <div className="mb-4">
         <Label htmlFor="measurements">Measurements</Label>
         <MultiSelect
-          values={Object.keys(exercise.measurements).filter(
-            (measurement) => !!exercise.measurements[measurement]
-          )}
+          values={exercise.activeMeasurements}
           onValuesChange={handleMeasurementsInput}
         >
           <MultiSelectTrigger id="measurements" className="w-full">

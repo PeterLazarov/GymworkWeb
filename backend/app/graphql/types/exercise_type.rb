@@ -13,6 +13,7 @@ module Types
     field :muscle_areas, [String], null: false
     field :muscles, [String], null: false
     field :measurements, Types::MeasurementsType, null: false
+    field :active_measurements, [String], null: false
     field :is_favorite, Boolean, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
@@ -24,6 +25,10 @@ module Types
 
     def steps
       object.workout_steps.joins(:workout).order('workouts.date DESC')
+    end
+
+    def active_measurements
+      object.measurements.keys.select { |key| object.measurements[key].present? }
     end
   end
 end

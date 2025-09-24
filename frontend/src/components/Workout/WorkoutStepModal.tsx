@@ -396,7 +396,7 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
 
 type SetListItemProps = {
   set: Set;
-  isFocused: boolean;
+  isFocused?: boolean;
   onSetClick: (set: Set) => void;
   number: number;
 };
@@ -482,13 +482,13 @@ const HistoryStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
               <CardTitle>{formatDateIso(step.sets[0].date, "long")}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-1">
-              {step.sets?.map((set) => (
-                <div key={set.id} className="flex gap-4 items-center">
-                  {set.reps && <span>{set.reps} reps</span>}
-                  {set.weightMcg && (
-                    <span>{set.weightMcg / 1000000000} kg</span>
-                  )}
-                </div>
+              {step.sets?.map((set, index) => (
+                <SetListItem
+                  key={set.id}
+                  set={set}
+                  onSetClick={() => {}}
+                  number={index + 1}
+                />
               ))}
             </CardContent>
           </Card>

@@ -6,28 +6,15 @@ import { ExerciseForm, ExerciseFormData } from "./ExerciseForm";
 import MeasurementsFragment from "./MeasurementsFragment.graphql";
 
 const CREATE_EXERCISE_MUTATION = gql`
-  mutation CreateExercise(
-    $name: String!
-    $muscleAreas: [String!]!
-    $muscles: [String!]!
-    $instructions: [String!]
-    $measurements: JSON!
-  ) {
-    createExercise(
-      input: {
-        name: $name
-        muscleAreas: $muscleAreas
-        muscles: $muscles
-        instructions: $instructions
-        measurements: $measurements
-      }
-    ) {
+  mutation CreateExercise($input: CreateExerciseInput!) {
+    createExercise(input: $input) {
       exercise {
         id
         name
         muscleAreas
         muscles
         instructions
+        activeMeasurements
         measurements {
           ...MeasurementsFragment
         }
@@ -58,6 +45,7 @@ export const AddExerciseModal: React.FC<Props> = ({
       reps: measurementDefaults.reps,
       weight: measurementDefaults.weight,
     },
+    activeMeasurements: ["reps", "weight"],
   });
 
   const [createExercise, { loading, error }] = useMutation(
@@ -68,7 +56,7 @@ export const AddExerciseModal: React.FC<Props> = ({
     try {
       const result = await createExercise({
         variables: {
-          ...formData,
+          input: formData,
         },
       });
 

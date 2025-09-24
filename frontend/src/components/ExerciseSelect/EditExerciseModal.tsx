@@ -12,6 +12,7 @@ const EXERCISE_QUERY = gql`
       muscleAreas
       muscles
       instructions
+      activeMeasurements
       measurements {
         ...MeasurementsFragment
       }
@@ -22,30 +23,15 @@ const EXERCISE_QUERY = gql`
 `;
 
 const UPDATE_EXERCISE_MUTATION = gql`
-  mutation UpdateExercise(
-    $exerciseId: ID!
-    $name: String!
-    $muscleAreas: [String!]
-    $muscles: [String!]
-    $instructions: [String!]
-    $measurements: JSON
-  ) {
-    updateExercise(
-      input: {
-        exerciseId: $exerciseId
-        name: $name
-        muscleAreas: $muscleAreas
-        muscles: $muscles
-        instructions: $instructions
-        measurements: $measurements
-      }
-    ) {
+  mutation UpdateExercise($input: UpdateExerciseInput!) {
+    updateExercise(input: $input) {
       exercise {
         id
         name
         muscleAreas
         muscles
         instructions
+        activeMeasurements
         measurements {
           ...MeasurementsFragment
         }
@@ -96,8 +82,10 @@ export const EditExerciseModal: React.FC<Props> = ({
     try {
       const result = await updateExercise({
         variables: {
-          exerciseId,
-          ...formData,
+          input: {
+            exerciseId,
+            ...formData,
+          },
         },
       });
 

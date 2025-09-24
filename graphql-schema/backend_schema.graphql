@@ -228,6 +228,7 @@ type DeleteWorkoutPayload {
 }
 
 type Exercise implements Node {
+  activeMeasurements: [String!]!
   createdAt: ISO8601DateTime!
   equipment: [String!]!
   id: ID!
