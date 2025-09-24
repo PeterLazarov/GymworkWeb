@@ -1,3 +1,10 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 16.2
+-- Dumped by pg_dump version 17.5 (Homebrew)
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -14,7 +21,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: -
+-- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.ar_internal_metadata (
@@ -25,8 +32,10 @@ CREATE TABLE public.ar_internal_metadata (
 );
 
 
+ALTER TABLE public.ar_internal_metadata OWNER TO postgres;
+
 --
--- Name: workout_sets; Type: TABLE; Schema: public; Owner: -
+-- Name: workout_sets; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.workout_sets (
@@ -48,8 +57,10 @@ CREATE TABLE public.workout_sets (
 );
 
 
+ALTER TABLE public.workout_sets OWNER TO postgres;
+
 --
--- Name: exercise_records; Type: VIEW; Schema: public; Owner: -
+-- Name: exercise_records; Type: VIEW; Schema: public; Owner: postgres
 --
 
 CREATE VIEW public.exercise_records AS
@@ -73,8 +84,10 @@ CREATE VIEW public.exercise_records AS
   ORDER BY exercise_id, reps;
 
 
+ALTER VIEW public.exercise_records OWNER TO postgres;
+
 --
--- Name: exercises; Type: TABLE; Schema: public; Owner: -
+-- Name: exercises; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.exercises (
@@ -95,8 +108,10 @@ CREATE TABLE public.exercises (
 );
 
 
+ALTER TABLE public.exercises OWNER TO postgres;
+
 --
--- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
+-- Name: schema_migrations; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.schema_migrations (
@@ -104,8 +119,10 @@ CREATE TABLE public.schema_migrations (
 );
 
 
+ALTER TABLE public.schema_migrations OWNER TO postgres;
+
 --
--- Name: settings; Type: TABLE; Schema: public; Owner: -
+-- Name: settings; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.settings (
@@ -120,8 +137,10 @@ CREATE TABLE public.settings (
 );
 
 
+ALTER TABLE public.settings OWNER TO postgres;
+
 --
--- Name: workout_step_exercises; Type: TABLE; Schema: public; Owner: -
+-- Name: workout_step_exercises; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.workout_step_exercises (
@@ -133,8 +152,10 @@ CREATE TABLE public.workout_step_exercises (
 );
 
 
+ALTER TABLE public.workout_step_exercises OWNER TO postgres;
+
 --
--- Name: workout_steps; Type: TABLE; Schema: public; Owner: -
+-- Name: workout_steps; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.workout_steps (
@@ -146,8 +167,10 @@ CREATE TABLE public.workout_steps (
 );
 
 
+ALTER TABLE public.workout_steps OWNER TO postgres;
+
 --
--- Name: workouts; Type: TABLE; Schema: public; Owner: -
+-- Name: workouts; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.workouts (
@@ -164,8 +187,10 @@ CREATE TABLE public.workouts (
 );
 
 
+ALTER TABLE public.workouts OWNER TO postgres;
+
 --
--- Name: ar_internal_metadata ar_internal_metadata_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: ar_internal_metadata ar_internal_metadata_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.ar_internal_metadata
@@ -173,7 +198,7 @@ ALTER TABLE ONLY public.ar_internal_metadata
 
 
 --
--- Name: exercises exercises_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: exercises exercises_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.exercises
@@ -181,7 +206,7 @@ ALTER TABLE ONLY public.exercises
 
 
 --
--- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.schema_migrations
@@ -189,7 +214,7 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
--- Name: settings settings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: settings settings_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.settings
@@ -197,7 +222,7 @@ ALTER TABLE ONLY public.settings
 
 
 --
--- Name: workout_sets workout_sets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: workout_sets workout_sets_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.workout_sets
@@ -205,7 +230,7 @@ ALTER TABLE ONLY public.workout_sets
 
 
 --
--- Name: workout_step_exercises workout_step_exercises_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: workout_step_exercises workout_step_exercises_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.workout_step_exercises
@@ -213,7 +238,7 @@ ALTER TABLE ONLY public.workout_step_exercises
 
 
 --
--- Name: workout_steps workout_steps_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: workout_steps workout_steps_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.workout_steps
@@ -221,7 +246,7 @@ ALTER TABLE ONLY public.workout_steps
 
 
 --
--- Name: workouts workouts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: workouts workouts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.workouts
@@ -229,70 +254,70 @@ ALTER TABLE ONLY public.workouts
 
 
 --
--- Name: index_exercises_on_name; Type: INDEX; Schema: public; Owner: -
+-- Name: index_exercises_on_name; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX index_exercises_on_name ON public.exercises USING btree (name);
 
 
 --
--- Name: index_workout_sets_on_date; Type: INDEX; Schema: public; Owner: -
+-- Name: index_workout_sets_on_date; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX index_workout_sets_on_date ON public.workout_sets USING btree (date);
 
 
 --
--- Name: index_workout_sets_on_exercise_id; Type: INDEX; Schema: public; Owner: -
+-- Name: index_workout_sets_on_exercise_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX index_workout_sets_on_exercise_id ON public.workout_sets USING btree (exercise_id);
 
 
 --
--- Name: index_workout_sets_on_is_weak_ass_record; Type: INDEX; Schema: public; Owner: -
+-- Name: index_workout_sets_on_is_weak_ass_record; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX index_workout_sets_on_is_weak_ass_record ON public.workout_sets USING btree (is_weak_ass_record);
 
 
 --
--- Name: index_workout_sets_on_workout_step_id; Type: INDEX; Schema: public; Owner: -
+-- Name: index_workout_sets_on_workout_step_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX index_workout_sets_on_workout_step_id ON public.workout_sets USING btree (workout_step_id);
 
 
 --
--- Name: index_workout_step_exercises_on_exercise_id; Type: INDEX; Schema: public; Owner: -
+-- Name: index_workout_step_exercises_on_exercise_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX index_workout_step_exercises_on_exercise_id ON public.workout_step_exercises USING btree (exercise_id);
 
 
 --
--- Name: index_workout_step_exercises_on_workout_step_id; Type: INDEX; Schema: public; Owner: -
+-- Name: index_workout_step_exercises_on_workout_step_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX index_workout_step_exercises_on_workout_step_id ON public.workout_step_exercises USING btree (workout_step_id);
 
 
 --
--- Name: index_workout_steps_on_workout_id; Type: INDEX; Schema: public; Owner: -
+-- Name: index_workout_steps_on_workout_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX index_workout_steps_on_workout_id ON public.workout_steps USING btree (workout_id);
 
 
 --
--- Name: index_workouts_on_date; Type: INDEX; Schema: public; Owner: -
+-- Name: index_workouts_on_date; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX index_workouts_on_date ON public.workouts USING btree (date);
 
 
 --
--- Name: workout_sets fk_rails_4aaf1c47f3; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: workout_sets fk_rails_4aaf1c47f3; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.workout_sets
@@ -300,7 +325,7 @@ ALTER TABLE ONLY public.workout_sets
 
 
 --
--- Name: workout_steps fk_rails_5aa0ebe883; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: workout_steps fk_rails_5aa0ebe883; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.workout_steps
@@ -308,7 +333,7 @@ ALTER TABLE ONLY public.workout_steps
 
 
 --
--- Name: workout_step_exercises fk_rails_7211cca98e; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: workout_step_exercises fk_rails_7211cca98e; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.workout_step_exercises
@@ -316,7 +341,7 @@ ALTER TABLE ONLY public.workout_step_exercises
 
 
 --
--- Name: workout_sets fk_rails_a5b38aff21; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: workout_sets fk_rails_a5b38aff21; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.workout_sets
@@ -324,7 +349,7 @@ ALTER TABLE ONLY public.workout_sets
 
 
 --
--- Name: workout_step_exercises fk_rails_e4c15c4a22; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: workout_step_exercises fk_rails_e4c15c4a22; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.workout_step_exercises
@@ -335,3 +360,16 @@ ALTER TABLE ONLY public.workout_step_exercises
 -- PostgreSQL database dump complete
 --
 
+
+SET search_path TO "$user", public;
+
+INSERT INTO "schema_migrations" (version) VALUES
+('1'),
+('2'),
+('20250908105942'),
+('20250908111917'),
+('20250909120951'),
+('20250913000001'),
+('20250920000000'),
+('3'),
+('4');

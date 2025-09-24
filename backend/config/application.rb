@@ -20,6 +20,8 @@ Bundler.require(*Rails.groups)
 
 module Backend
   class Application < Rails::Application
+    # Use SQL schema format
+    config.active_record.schema_format = :sql
     config.middleware.use ActionDispatch::Cookies
     # config.time_zone = "Tokyo"
     # config.active_record.default_timezone = :local
