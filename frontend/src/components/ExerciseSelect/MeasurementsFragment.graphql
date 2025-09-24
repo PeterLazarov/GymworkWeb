@@ -1,0 +1,23 @@
+fragment MeasurementsFragment on Measurements {
+  weight {
+    unit
+    moreIsBetter
+    step
+  }
+  reps {
+    unit
+    moreIsBetter
+  }
+  duration {
+    unit
+    moreIsBetter
+  }
+  distance {
+    unit
+    moreIsBetter
+  }
+  speed {
+    unit
+    moreIsBetter
+  }
+}

@@ -69,16 +69,6 @@ export const ExerciseForm: React.FC<Props> = ({
     });
   };
 
-  const handleArrayInput = (field: keyof ExerciseFormData, value: string) => {
-    onChange({
-      ...exercise,
-      [field]: value
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean),
-    });
-  };
-
   return (
     <div className="max-w-2xl mx-auto p-4">
       {error && <div className="text-red-500 mb-4">{error.message}</div>}

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { measurementDefaults } from "../../constants/measurements";
 import { Modal } from "../shared";
 import { ExerciseForm, ExerciseFormData } from "./ExerciseForm";
+import MeasurementsFragment from "./MeasurementsFragment.graphql";
 
 const CREATE_EXERCISE_MUTATION = gql`
   mutation CreateExercise(
@@ -27,11 +28,14 @@ const CREATE_EXERCISE_MUTATION = gql`
         muscleAreas
         muscles
         instructions
-        measurements
+        measurements {
+          ...MeasurementsFragment
+        }
       }
       errors
     }
   }
+  ${MeasurementsFragment}
 `;
 
 type Props = {

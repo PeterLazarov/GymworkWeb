@@ -21,10 +21,11 @@ module ExerciseSeed
       has_weight_measurement = ['Resistance', 'Free Weights'].include?(category) && !name.include?('Bodyweight')
       has_duration_measurement = muscle_areas.include?('Cardio') || name.include?('Hold')
       is_cardio = muscle_areas.include?('Cardio')
+      has_reps_measurement = !has_duration_measurement
 
       measurements = {
         weight: has_weight_measurement ? MEASUREMENT_DEFAULTS[:weight] : nil,
-        reps: MEASUREMENT_DEFAULTS[:reps],
+        reps: has_reps_measurement ? MEASUREMENT_DEFAULTS[:reps] : nil,
         duration: has_duration_measurement ? MEASUREMENT_DEFAULTS[:duration] : nil,
         speed: is_cardio ? MEASUREMENT_DEFAULTS[:speed] : nil,
         distance: is_cardio ? MEASUREMENT_DEFAULTS[:distance] : nil

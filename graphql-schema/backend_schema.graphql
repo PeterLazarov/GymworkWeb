@@ -54,6 +54,11 @@ type AddStepPayload {
   step: WorkoutStep
 }
 
+type BaseMeasurementConfig {
+  moreIsBetter: Boolean!
+  unit: String
+}
+
 """
 Represents non-fractional signed whole numeric values. Since the value may
 exceed the size of a 32-bit integer, it's encoded as a string.
@@ -229,7 +234,7 @@ type Exercise implements Node {
   images: [String!]!
   instructions: [String!]!
   isFavorite: Boolean!
-  measurements: JSON!
+  measurements: Measurements!
   muscleAreas: [String!]!
   muscles: [String!]!
   name: String!
@@ -300,6 +305,14 @@ scalar ISO8601DateTime @specifiedBy(url: "https://tools.ietf.org/html/rfc3339")
 Represents untyped JSON
 """
 scalar JSON
+
+type Measurements {
+  distance: BaseMeasurementConfig
+  duration: BaseMeasurementConfig
+  reps: BaseMeasurementConfig
+  speed: BaseMeasurementConfig
+  weight: WeightMeasurementConfig
+}
 
 type Mutation {
   """
@@ -695,6 +708,12 @@ type UpdateWorkoutPayload {
   clientMutationId: String
   errors: [String!]!
   workout: Workout
+}
+
+type WeightMeasurementConfig {
+  moreIsBetter: Boolean!
+  step: Float!
+  unit: String
 }
 
 type Workout implements Node {

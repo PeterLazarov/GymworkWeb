@@ -11,11 +11,14 @@ generates:
       - 'typescript-operations'
       - 'typescript-document-nodes'
       - 'typescript-validation-schema'
+      - 'typescript-react-apollo'
     config:
       schema: zod
       scalars:
         ISO8601DateTime: 'string'
         ISO8601Date: 'string'
-        JSON: 'any'
+        JSON: './types#Measurements'
         BigInt: 'number'
       strictScalars: true
+      typesPrefix: I
+      enumsAsTypes: true

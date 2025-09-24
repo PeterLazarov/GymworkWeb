@@ -12,7 +12,9 @@ query WorkoutByDate($date: ISO8601Date!) {
       exercises {
         id
         name
-        measurements
+        measurements {
+          ...MeasurementsFragment
+        }
       }
       sets {
         id

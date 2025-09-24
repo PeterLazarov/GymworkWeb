@@ -2,6 +2,7 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import React, { useEffect, useState } from "react";
 import { Modal } from "../shared";
 import { ExerciseForm, ExerciseFormData } from "./ExerciseForm";
+import MeasurementsFragment from "./MeasurementsFragment.graphql";
 
 const EXERCISE_QUERY = gql`
   query Exercise($id: ID!) {
@@ -11,10 +12,13 @@ const EXERCISE_QUERY = gql`
       muscleAreas
       muscles
       instructions
-      measurements
+      measurements {
+        ...MeasurementsFragment
+      }
       images
     }
   }
+  ${MeasurementsFragment}
 `;
 
 const UPDATE_EXERCISE_MUTATION = gql`
@@ -42,11 +46,14 @@ const UPDATE_EXERCISE_MUTATION = gql`
         muscleAreas
         muscles
         instructions
-        measurements
+        measurements {
+          ...MeasurementsFragment
+        }
       }
       errors
     }
   }
+  ${MeasurementsFragment}
 `;
 
 type Props = {

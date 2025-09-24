@@ -12,7 +12,7 @@ module Types
     field :tips, [String], null: true
     field :muscle_areas, [String], null: false
     field :muscles, [String], null: false
-    field :measurements, GraphQL::Types::JSON, null: false
+    field :measurements, Types::MeasurementsType, null: false
     field :is_favorite, Boolean, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false

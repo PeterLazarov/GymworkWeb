@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "codegen": "cd backend && rails graphql:schema:dump && cd ../frontend && bun graphql-codegen",
+    "full-clean": "cd backend && bin/rails db:drop db:create db:migrate:reset db:migrate db:seed && cd ../frontend && bun run build:move"
+  }
+}

@@ -10,7 +10,7 @@
     "build:move": "bun run build && bun run move-assets",
     "move-assets": "rsync -av --delete dist/index.html ../backend/public/ && rsync -av --delete dist/assets/ ../backend/public/assets/ && touch ../backend/public/assets/.keep",
     "preview": "vite preview",
-    "graphql-codegen": "graphql-codegen",
+    "codegen": "bunx graphql-codegen",
     "lint": "bun run lint:code && bun run lint:style && bun run lint:check",
     "lint:code": "biome lint ./",
     "lint:style": "biome format ./",
@@ -70,6 +70,7 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.5.3",
     "vite": "^5.4.1",
+    "vite-plugin-graphql-loader": "^4.0.4",
     "zod": "^3.23.8"
   }
 }

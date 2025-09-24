@@ -57,17 +57,17 @@ module WorkoutSeed
             {
               exercise: exercise.id,
               is_warmup: j == 0,
-              reps: exercise.measurements.reps ? between(3, 12) : nil,
-              weight_mcg: exercise.measurements.weight ? (between(8, 40) * WEIGHT_INCREMENT_KG * 1_000_000_000).to_i : nil,
-              distance_mm: exercise.measurements.distance ? between(1, 10) * 1_000_000 : nil,
-              duration_ms: exercise.measurements.duration ? between(1, 10) * 60 * 1000 : nil,
-              speed_kph: exercise.measurements.speed ? between(1, 10) : nil,
+              reps: exercise.measurements["reps"] ? between(3, 12) : nil,
+              weight_mcg: exercise.measurements["weight"] ? (between(8, 40) * WEIGHT_INCREMENT_KG * 1_000_000_000).to_i : nil,
+              distance_mm: exercise.measurements["distance"] ? between(1, 10) * 1_000_000 : nil,
+              duration_ms: exercise.measurements["duration"] ? between(1, 10) * 60 * 1000 : nil,
+              speed_kph: exercise.measurements["speed"] ? between(1, 10) : nil,
               date: date,
               created_at: workout_time.to_i * 1000
             }
           end
 
-          generate_step([exercise_id], sets)
+          generate_step([exercise.id], sets)
         end
       end
 
