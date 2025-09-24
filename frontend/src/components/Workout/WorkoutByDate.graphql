@@ -20,6 +20,8 @@ query WorkoutByDate($date: ISO8601Date!) {
         id
         reps
         weightMcg
+        durationMs
+        distanceMm
       }
     }
   }

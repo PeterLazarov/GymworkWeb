@@ -2,7 +2,8 @@ import { gql, useMutation } from "@apollo/client";
 import { NotebookPenIcon, PlusIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { WorkoutByDateQuery } from "../../generated/graphql";
+import { IWorkoutByDateQuery } from "../../generated/graphql";
+import { msToTimeString } from "../../utils/time";
 import {
   Button,
   Card,
@@ -36,7 +37,7 @@ const UPDATE_WORKOUT_MUTATION = gql`
     }
   }
 `;
-type Workout = NonNullable<WorkoutByDateQuery["workout"]>;
+type Workout = NonNullable<IWorkoutByDateQuery["workout"]>;
 type WorkoutStep = Workout["steps"][number];
 
 const rpeTexts = {
@@ -158,8 +159,18 @@ const WorkoutStepCard: React.FC<{
     <CardContent className="flex flex-col gap-1">
       {step.sets.map((set) => (
         <div key={set.id} className="flex gap-4 items-center">
-          {set.reps && <span>{set.reps} reps</span>}
-          {set.weightMcg && <span>{set.weightMcg / 1000000000} kg</span>}
+          {set.reps !== undefined && set.reps !== null && (
+            <span>{set.reps} reps</span>
+          )}
+          {set.weightMcg !== undefined && set.weightMcg !== null && (
+            <span>{set.weightMcg / 1000000000} kg</span>
+          )}
+          {set.durationMs !== undefined && set.durationMs !== null && (
+            <span>{msToTimeString(set.durationMs)}</span>
+          )}
+          {set.distanceMm !== undefined && set.distanceMm !== null && (
+            <span>{set.distanceMm} mm</span>
+          )}
         </div>
       ))}
     </CardContent>

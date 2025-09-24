@@ -86,7 +86,9 @@ export const ExerciseForm: React.FC<Props> = ({
       <div className="mb-4">
         <Label htmlFor="measurements">Measurements</Label>
         <MultiSelect
-          values={Object.keys(exercise.measurements)}
+          values={Object.keys(exercise.measurements).filter(
+            (measurement) => !!exercise.measurements[measurement]
+          )}
           onValuesChange={handleMeasurementsInput}
         >
           <MultiSelectTrigger id="measurements" className="w-full">
@@ -210,14 +212,18 @@ export const ExerciseForm: React.FC<Props> = ({
         />
       </div>
 
-      {Object.keys(exercise.measurements).map((measurement) => (
-        <MeasurementSection
-          key={measurement}
-          measurementKey={measurement as keyof ExerciseMeasurementType}
-          measurement={exercise.measurements[measurement]}
-          onChange={onMeasurementChange}
-        />
-      ))}
+      {Object.keys(measurementUnits)
+        .filter((measurement) => !!exercise.measurements[measurement])
+        .map((measurement) => {
+          return (
+            <MeasurementSection
+              key={measurement}
+              measurementKey={measurement as keyof ExerciseMeasurementType}
+              measurement={exercise.measurements[measurement]}
+              onChange={onMeasurementChange}
+            />
+          );
+        })}
     </div>
   );
 };

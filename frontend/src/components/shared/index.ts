@@ -19,5 +19,6 @@ export * from "./Popover";
 export * from "./Select";
 export * from "./Tabs";
 export * from "./Textarea";
+export * from "./TimeInput";
 export * from "./Toggle";
 export * from "./ToggleGroup";

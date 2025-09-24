@@ -2,7 +2,7 @@ import { gql, useQuery } from "@apollo/client";
 import { FilterIcon, SearchIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { muscleAreas, muscles } from "../../constants/muscles";
-import { WorkoutsHistoryQuery } from "../../generated/graphql";
+import { IWorkoutsHistoryQuery } from "../../generated/graphql";
 import { formatDateIso } from "../../utils/date";
 import { useInfiniteScroll } from "../../utils/useInfiniteScroll";
 import {
@@ -85,7 +85,7 @@ const WORKOUTS_QUERY = gql`
 
 type Workout = NonNullable<
   NonNullable<
-    NonNullable<WorkoutsHistoryQuery["workouts"]["edges"]>[number]
+    NonNullable<IWorkoutsHistoryQuery["workouts"]["edges"]>[number]
   >["node"]
 >;
 

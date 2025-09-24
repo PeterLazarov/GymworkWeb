@@ -1,9 +1,10 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { EllipsisIcon } from "lucide-react";
 import React, { useState } from "react";
-import { ExerciseSets, WorkoutByDateQuery } from "../../generated/graphql";
+import { ExerciseSets, IWorkoutByDateQuery } from "../../generated/graphql";
 import { cn } from "../../lib/utils";
 import { formatDateIso } from "../../utils/date";
+import { msToTimeString, timeStringToMs } from "../../utils/time";
 import { EditExerciseModal } from "../ExerciseSelect/EditExerciseModal";
 import {
   Button,
@@ -13,6 +14,7 @@ import {
   CardTitle,
   IncrementalEditor,
   Modal,
+  NumericInput,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -20,36 +22,36 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  TimeInput,
 } from "../shared";
 import { ExerciseStatsChart } from "./ExerciseStatsChart";
 
-type Workout = NonNullable<WorkoutByDateQuery["workout"]>;
+type Workout = NonNullable<IWorkoutByDateQuery["workout"]>;
 type WorkoutStep = Workout["steps"][number];
 type Set = WorkoutStep["sets"][number];
 
 const ADD_SET_MUTATION = gql`
-  mutation AddSet(
-    $workoutStepId: ID!
-    $exerciseId: ID!
-    $date: ISO8601DateTime!
-    $reps: Int
-    $weightMcg: BigInt
-  ) {
-    addSet(
-      input: {
-        workoutStepId: $workoutStepId
-        exerciseId: $exerciseId
-        date: $date
-        reps: $reps
-        weightMcg: $weightMcg
-      }
-    ) {
+  mutation AddSet($input: AddSetInput!) {
+    addSet(input: $input) {
       set {
         id
         reps
         weightMcg
+        durationMs
+        distanceMm
       }
       errors
+    }
+  }
+`;
+
+const EXERCISE_RECORDS_QUERY = gql`
+  query ExerciseRecords($exerciseId: ID!) {
+    exerciseRecords(exerciseId: $exerciseId) {
+      id
+      reps
+      weightMcg
+      date
     }
   }
 `;
@@ -61,6 +63,8 @@ const UPDATE_SET_MUTATION = gql`
         id
         reps
         weightMcg
+        durationMs
+        distanceMm
       }
       errors
     }
@@ -219,24 +223,33 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
 }) => {
   const [focusedSet, setFocusedSet] = useState<Set | undefined>();
 
-  const [reps, setReps] = useState(0);
-  const [weight, setWeight] = useState(0);
+  const exercise = step.exercises[0]!;
+  const [reps, setReps] = useState(exercise.measurements.reps ? 0 : undefined);
+  const [weight, setWeight] = useState(
+    exercise.measurements.weight ? 0 : undefined
+  );
+  const [duration, setDuration] = useState(
+    exercise.measurements.duration ? 0 : undefined
+  );
+  const [distance, setDistance] = useState(
+    exercise.measurements.distance ? 0 : undefined
+  );
 
   const [addSet] = useMutation(ADD_SET_MUTATION);
   const [updateSet] = useMutation(UPDATE_SET_MUTATION);
   const [deleteSet] = useMutation(DELETE_SET_MUTATION);
 
-  const exercise = step.exercises[0]!;
   const handleUpdateSet = async () => {
     if (!focusedSet) return;
 
-    const weightMcg = weight * 1000000000; // Convert kg to mcg
     const result = await updateSet({
       variables: {
         input: {
           setId: focusedSet.id,
           reps,
-          weightMcg,
+          weightMcg: weight ? weight * 1000000000 : undefined,
+          durationMs: duration,
+          distanceMm: distance,
         },
       },
     });
@@ -279,14 +292,17 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
   };
 
   const handleAddSet = async () => {
-    const weightMcg = weight * 1000000000; // Convert kg to mcg
     const result = await addSet({
       variables: {
-        workoutStepId: step.id,
-        exerciseId: step.exercises[0]?.id || "",
-        date: workout.date,
-        reps,
-        weightMcg,
+        input: {
+          workoutStepId: step.id,
+          exerciseId: exercise.id,
+          date: workout.date,
+          reps,
+          weightMcg: weight ? weight * 1000000000 : undefined,
+          durationMs: duration,
+          distanceMm: distance,
+        },
       },
     });
 
@@ -300,46 +316,68 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
       return;
     }
 
-    setReps(0);
-    setWeight(0);
+    setReps(exercise.measurements.reps ? 0 : undefined);
+    setWeight(exercise.measurements.weight ? 0 : undefined);
+    setDuration(exercise.measurements.duration ? 0 : undefined);
+    setDistance(exercise.measurements.distance ? 0 : undefined);
+  };
+
+  const onSetClick = (set: Set) => {
+    setFocusedSet(focusedSet?.id === set.id ? undefined : set);
+    setReps(exercise.measurements.reps ? set.reps ?? 0 : undefined);
+    setWeight(
+      exercise.measurements.weight
+        ? (set.weightMcg ?? 0) / 1000000000
+        : undefined
+    );
+    setDuration(
+      exercise.measurements.duration ? set.durationMs ?? 0 : undefined
+    );
+    setDistance(
+      exercise.measurements.distance ? set.distanceMm ?? 0 : undefined
+    );
   };
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-1">
         {step.sets.map((set, index) => (
-          <div
+          <SetListItem
             key={set.id}
-            className={cn(
-              "flex gap-2 px-2 py-0.5 rounded-md",
-              focusedSet?.id === set.id && "bg-gray-200"
-            )}
-            onClick={() => {
-              setFocusedSet(focusedSet?.id === set.id ? undefined : set);
-              setReps(set.reps ?? 0);
-              setWeight((set.weightMcg ?? 0) / 1000000000);
-            }}
-          >
-            <span>{index + 1}.</span>
-            {set.reps !== undefined && <h2>{set.reps} reps</h2>}
-            {set.weightMcg && <h2>{set.weightMcg / 1000000000} kg</h2>}
-          </div>
+            set={set}
+            isFocused={focusedSet?.id === set.id}
+            onSetClick={onSetClick}
+            number={index + 1}
+          />
         ))}
       </div>
 
       {exercise.measurements.reps && (
         <IncrementalEditor
-          value={reps}
+          value={reps!}
           onChange={(value) => setReps(value ?? 0)}
-          unit={exercise.measurements.reps.unit}
+          unit={exercise.measurements.reps.unit ?? undefined}
         />
       )}
       {exercise.measurements.weight && (
         <IncrementalEditor
-          value={weight}
+          value={weight!}
           onChange={(value) => setWeight(value ?? 0)}
           step={exercise.measurements.weight.step}
-          unit={exercise.measurements.weight.unit}
+          unit={exercise.measurements.weight.unit ?? undefined}
+        />
+      )}
+      {exercise.measurements.duration && (
+        <TimeInput
+          id="time-picker"
+          value={msToTimeString(duration!)}
+          onChange={(e) => setDuration(timeStringToMs(e.target.value))}
+        />
+      )}
+      {exercise.measurements.distance && (
+        <NumericInput
+          value={distance!}
+          onChange={(value) => setDistance(value ?? 0)}
         />
       )}
       {focusedSet && (
@@ -361,16 +399,40 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
   );
 };
 
-const EXERCISE_RECORDS_QUERY = gql`
-  query ExerciseRecords($exerciseId: ID!) {
-    exerciseRecords(exerciseId: $exerciseId) {
-      id
-      reps
-      weightMcg
-      date
-    }
-  }
-`;
+type SetListItemProps = {
+  set: Set;
+  isFocused: boolean;
+  onSetClick: (set: Set) => void;
+  number: number;
+};
+const SetListItem: React.FC<SetListItemProps> = ({
+  set,
+  isFocused,
+  onSetClick,
+  number,
+}) => {
+  return (
+    <div
+      className={cn(
+        "flex gap-2 px-2 py-0.5 rounded-md",
+        isFocused && "bg-gray-200"
+      )}
+      onClick={() => onSetClick(set)}
+    >
+      <span>{number}.</span>
+      {set.reps !== undefined && set.reps !== null && <h2>{set.reps} reps</h2>}
+      {set.weightMcg !== undefined && set.weightMcg !== null && (
+        <h2>{set.weightMcg / 1000000000} kg</h2>
+      )}
+      {set.durationMs !== undefined && set.durationMs !== null && (
+        <h2>{msToTimeString(set.durationMs)}</h2>
+      )}
+      {set.distanceMm !== undefined && set.distanceMm !== null && (
+        <h2>{set.distanceMm} mm</h2>
+      )}
+    </div>
+  );
+};
 
 const RecordsStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
   const { data, loading, error } = useQuery(EXERCISE_RECORDS_QUERY, {
