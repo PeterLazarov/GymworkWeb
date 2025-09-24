@@ -1,3 +1,5 @@
+# import './WorkoutSetFragment.graphql'
+
 query WorkoutByDate($date: ISO8601Date!) {
   workout(date: $date) {
     id
@@ -17,11 +19,7 @@ query WorkoutByDate($date: ISO8601Date!) {
         }
       }
       sets {
-        id
-        reps
-        weightMcg
-        durationMs
-        distanceMm
+        ...WorkoutSetFragment
       }
     }
   }

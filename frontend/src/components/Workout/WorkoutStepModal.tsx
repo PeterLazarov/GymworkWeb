@@ -25,6 +25,7 @@ import {
   TimeInput,
 } from "../shared";
 import { ExerciseStatsChart } from "./ExerciseStatsChart";
+import WorkoutSetFragment from "./WorkoutSetFragment.graphql";
 
 type Workout = NonNullable<IWorkoutByDateQuery["workout"]>;
 type WorkoutStep = Workout["steps"][number];
@@ -34,15 +35,12 @@ const ADD_SET_MUTATION = gql`
   mutation AddSet($input: AddSetInput!) {
     addSet(input: $input) {
       set {
-        id
-        reps
-        weightMcg
-        durationMs
-        distanceMm
+        ...WorkoutSetFragment
       }
       errors
     }
   }
+  ${WorkoutSetFragment}
 `;
 
 const EXERCISE_RECORDS_QUERY = gql`
@@ -60,15 +58,12 @@ const UPDATE_SET_MUTATION = gql`
   mutation UpdateSet($input: UpdateSetInput!) {
     updateSet(input: $input) {
       set {
-        id
-        reps
-        weightMcg
-        durationMs
-        distanceMm
+        ...WorkoutSetFragment
       }
       errors
     }
   }
+  ${WorkoutSetFragment}
 `;
 
 const DELETE_SET_MUTATION = gql`

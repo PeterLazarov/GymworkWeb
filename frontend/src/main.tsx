@@ -1,29 +1,19 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App'
-import './index.css'
-import {
-  ApolloClient,
-  ApolloProvider,
-  HttpLink,
-  InMemoryCache,
-} from '@apollo/client'
+import { ApolloProvider } from "@apollo/client";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
+import "./index.css";
+import { createApolloClient } from "./utils/apollo";
 
-const client = new ApolloClient({
-  link: new HttpLink({
-    uri: '/graphql',
-    credentials: 'same-origin',
-  }),
-  cache: new InMemoryCache(),
-})
+const client = createApolloClient();
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ApolloProvider client={client}>
       <BrowserRouter>
         <App />
       </BrowserRouter>
     </ApolloProvider>
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);

@@ -114,7 +114,11 @@ export const Workout = () => {
     <>
       <WorkoutHeader date={date} />
       {(loading || creating) && <div>Loading...</div>}
-      {(error || createError) && <div>Error loading workout</div>}
+      {(error || createError) && (
+        <div>
+          {`Error loading workout: ${error?.message || createError?.message}`}
+        </div>
+      )}
       {!loading && !error && !data?.workout && !creating && (
         <div className="text-center p-4">
           <div className="mb-4">No workout found for this date</div>

@@ -1,13 +1,12 @@
+# import './WorkoutSetFragment.graphql'
+
 query ExerciseSets($exerciseId: ID!) {
   exercise(id: $exerciseId) {
     id
     steps {
       id
       sets {
-        id
-        reps
-        weightMcg
-        date
+        ...WorkoutSetFragment
       }
     }
   }

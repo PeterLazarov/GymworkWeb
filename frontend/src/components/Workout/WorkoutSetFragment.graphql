@@ -1,0 +1,8 @@
+fragment WorkoutSetFragment on WorkoutSet {
+  id
+  date
+  reps
+  weightMcg
+  durationMs
+  distanceMm
+}
