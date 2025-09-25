@@ -12,7 +12,7 @@ const TimeInput = React.forwardRef<
       id="time-picker"
       step="1"
       className={cn(
-        "bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none",
+        "[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none",
         className
       )}
       ref={ref}

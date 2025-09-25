@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Input } from "./Input";
 
-interface NumericInputProps
+export interface NumericInputProps
   extends Omit<
     React.ComponentProps<"input">,
     "type" | "value" | "onChange" | "defaultValue"
@@ -74,13 +74,9 @@ const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps>(
           value={stringValue}
           onChange={handleChange}
           ref={ref}
+          unit={unit}
           {...props}
         />
-        {unit && (
-          <span className="pointer-events-none absolute right-3 text-sm text-muted-foreground">
-            {unit}
-          </span>
-        )}
       </div>
     );
   }

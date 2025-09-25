@@ -8,6 +8,7 @@ export * from "./Checkbox";
 export * from "./Command";
 export * from "./Datepicker";
 export * from "./Dialog";
+export * from "./DistanceInput";
 export * from "./Header";
 export * from "./IncrementalEditor";
 export * from "./Input";

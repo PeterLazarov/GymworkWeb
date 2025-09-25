@@ -1,4 +1,5 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
+import { Length } from "convert";
 import { EllipsisIcon } from "lucide-react";
 import React, { useState } from "react";
 import {
@@ -15,9 +16,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  DistanceInput,
   IncrementalEditor,
   Modal,
-  NumericInput,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -369,15 +370,15 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
       )}
       {exercise.measurements.duration && (
         <TimeInput
-          id="time-picker"
           value={msToTimeString(duration!)}
           onChange={(e) => setDuration(timeStringToMs(e.target.value))}
         />
       )}
       {exercise.measurements.distance && (
-        <NumericInput
+        <DistanceInput
           value={distance!}
           onChange={(value) => setDistance(value ?? 0)}
+          unit={exercise.measurements.distance.unit as Length}
         />
       )}
       {focusedSet && (
