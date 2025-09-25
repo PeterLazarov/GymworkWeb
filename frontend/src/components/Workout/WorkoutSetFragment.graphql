@@ -3,6 +3,8 @@ fragment WorkoutSetFragment on WorkoutSet {
   date
   reps
   weightMcg
+  weight
   durationMs
   distanceMm
+  distance
 }

@@ -18,7 +18,6 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
-    # Relationships
     field :workout_steps, [Types::WorkoutStepType], null: false
     field :workout_sets, [Types::WorkoutSetType], null: false
     field :steps, [Types::WorkoutStepType], null: false

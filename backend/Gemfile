@@ -51,3 +51,4 @@ group :test do
 end
 gem "bcrypt"
 gem "graphql"
+gem "ruby-units"

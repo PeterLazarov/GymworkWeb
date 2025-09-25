@@ -1,8 +1,11 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { EllipsisIcon } from "lucide-react";
 import React, { useState } from "react";
-import { ExerciseSets, IWorkoutByDateQuery } from "../../generated/graphql";
-import { cn } from "../../lib/utils";
+import {
+  ExerciseSets,
+  IWorkoutByDateQuery,
+  WorkoutSetFragment,
+} from "../../generated/graphql";
 import { formatDateIso } from "../../utils/date";
 import { msToTimeString, timeStringToMs } from "../../utils/time";
 import { EditExerciseModal } from "../ExerciseSelect/EditExerciseModal";
@@ -25,7 +28,7 @@ import {
   TimeInput,
 } from "../shared";
 import { ExerciseStatsChart } from "./ExerciseStatsChart";
-import WorkoutSetFragment from "./WorkoutSetFragment.graphql";
+import { SetListItem } from "./SetListItem";
 
 type Workout = NonNullable<IWorkoutByDateQuery["workout"]>;
 type WorkoutStep = Workout["steps"][number];
@@ -49,6 +52,7 @@ const EXERCISE_RECORDS_QUERY = gql`
       id
       reps
       weightMcg
+      weight
       date
     }
   }
@@ -340,6 +344,7 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
           <SetListItem
             key={set.id}
             set={set}
+            measurements={exercise.measurements}
             isFocused={focusedSet?.id === set.id}
             onSetClick={onSetClick}
             number={index + 1}
@@ -394,44 +399,10 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
   );
 };
 
-type SetListItemProps = {
-  set: Set;
-  isFocused?: boolean;
-  onSetClick: (set: Set) => void;
-  number: number;
-};
-const SetListItem: React.FC<SetListItemProps> = ({
-  set,
-  isFocused,
-  onSetClick,
-  number,
-}) => {
-  return (
-    <div
-      className={cn(
-        "flex gap-2 px-2 py-0.5 rounded-md",
-        isFocused && "bg-gray-200"
-      )}
-      onClick={() => onSetClick(set)}
-    >
-      <span>{number}.</span>
-      {set.reps !== undefined && set.reps !== null && <h2>{set.reps} reps</h2>}
-      {set.weightMcg !== undefined && set.weightMcg !== null && (
-        <h2>{set.weightMcg / 1000000000} kg</h2>
-      )}
-      {set.durationMs !== undefined && set.durationMs !== null && (
-        <h2>{msToTimeString(set.durationMs)}</h2>
-      )}
-      {set.distanceMm !== undefined && set.distanceMm !== null && (
-        <h2>{set.distanceMm} mm</h2>
-      )}
-    </div>
-  );
-};
-
 const RecordsStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
+  const exercise = step.exercises[0]!;
   const { data, loading, error } = useQuery(EXERCISE_RECORDS_QUERY, {
-    variables: { exerciseId: step.exercises[0]!.id },
+    variables: { exerciseId: exercise.id },
   });
 
   if (loading) return <div>Loading records...</div>;
@@ -443,20 +414,12 @@ const RecordsStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
       <h3 className="font-semibold text-lg">Personal Records</h3>
       <div className="space-y-2">
         {data.exerciseRecords.map((record) => (
-          <div
+          <SetListItem
             key={record.id}
-            className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
-          >
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{record.reps} reps</span>
-              <span className="font-medium">
-                {record.weightMcg / 1000000000} kg
-              </span>
-            </div>
-            <div className="text-sm text-gray-500">
-              {new Date(record.date).toLocaleDateString()}
-            </div>
-          </div>
+            set={record}
+            measurements={exercise.measurements}
+            showDate
+          />
         ))}
       </div>
     </div>
@@ -486,7 +449,7 @@ const HistoryStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
                 <SetListItem
                   key={set.id}
                   set={set}
-                  onSetClick={() => {}}
+                  measurements={data.exercise.measurements}
                   number={index + 1}
                 />
               ))}

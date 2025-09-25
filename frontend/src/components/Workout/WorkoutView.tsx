@@ -3,7 +3,6 @@ import { NotebookPenIcon, PlusIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IWorkoutByDateQuery } from "../../generated/graphql";
-import { msToTimeString } from "../../utils/time";
 import {
   Button,
   Card,
@@ -21,6 +20,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "../shared";
+import { SetListItem } from "./SetListItem";
 import { WorkoutStepModal } from "./WorkoutStepModal";
 
 const UPDATE_WORKOUT_MUTATION = gql`
@@ -158,20 +158,11 @@ const WorkoutStepCard: React.FC<{
     </CardHeader>
     <CardContent className="flex flex-col gap-1">
       {step.sets.map((set) => (
-        <div key={set.id} className="flex gap-4 items-center">
-          {set.reps !== undefined && set.reps !== null && (
-            <span>{set.reps} reps</span>
-          )}
-          {set.weightMcg !== undefined && set.weightMcg !== null && (
-            <span>{set.weightMcg / 1000000000} kg</span>
-          )}
-          {set.durationMs !== undefined && set.durationMs !== null && (
-            <span>{msToTimeString(set.durationMs)}</span>
-          )}
-          {set.distanceMm !== undefined && set.distanceMm !== null && (
-            <span>{set.distanceMm} mm</span>
-          )}
-        </div>
+        <SetListItem
+          key={set.id}
+          set={set}
+          measurements={step.exercises[0]!.measurements}
+        />
       ))}
     </CardContent>
   </Card>

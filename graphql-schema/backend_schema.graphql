@@ -286,9 +286,11 @@ type ExerciseEdge {
 
 type ExerciseRecord {
   date: ISO8601Date!
+  distance: Float
   exercise: Exercise!
   id: ID!
   reps: Int!
+  weight: Float
   weightMcg: BigInt!
 }
 
@@ -775,6 +777,7 @@ type WorkoutSet implements Node {
   completedAt: ISO8601DateTime
   createdAt: ISO8601DateTime!
   date: ISO8601Date!
+  distance: Float
   distanceMm: Int
   durationMs: Int
   exercise: Exercise!
@@ -785,6 +788,7 @@ type WorkoutSet implements Node {
   restMs: Int
   speedKph: Float
   updatedAt: ISO8601DateTime!
+  weight: Float
   weightMcg: BigInt
   workoutStep: WorkoutStep!
 }

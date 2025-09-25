@@ -1,6 +1,9 @@
 query ExerciseSets($exerciseId: ID!) {
   exercise(id: $exerciseId) {
     id
+    measurements {
+      ...MeasurementsFragment
+    }
     activeMeasurements
     steps {
       id
