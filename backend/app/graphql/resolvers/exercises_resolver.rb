@@ -12,7 +12,7 @@ module Resolvers
     argument :name, String, required: false
 
     def resolve(id: nil, is_favorite: nil, muscle_areas: nil, muscles: nil, equipment: nil, name: nil)
-      scope = Exercise.all
+      scope = Exercise.includes(workout_steps: [:workout, { sets: :exercise }])
 
       scope = scope.where(id:) if id.present?
       scope = scope.where(is_favorite:) unless is_favorite.nil?

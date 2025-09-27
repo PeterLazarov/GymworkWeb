@@ -2,7 +2,7 @@
 module Types
   class BaseMeasurementConfigType < Types::BaseObject
     field :unit, String, null: true
-    field :more_is_better, Boolean, null: false
+    field :more_is_better, Boolean, null: true
   end
 
   class WeightMeasurementConfigType < Types::BaseMeasurementConfigType

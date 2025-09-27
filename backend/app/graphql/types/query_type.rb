@@ -33,14 +33,15 @@ module Types
     end
 
     def exercise(id:)
-      Exercise.find id
+      Exercise.includes(workout_steps: [:workout, { sets: :exercise }]).find id
     end
 
     def workout(id: nil, date: nil)
+      scope = Workout.includes(steps: [:exercises, { sets: :exercise }])
       if id
-        Workout.find id
+        scope.find id
       elsif date
-        Workout.find_by(date: date)
+        scope.find_by(date: date)
       else
         nil
       end

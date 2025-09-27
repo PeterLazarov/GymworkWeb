@@ -23,7 +23,7 @@ module Types
     field :steps, [Types::WorkoutStepType], null: false
 
     def steps
-      object.workout_steps.joins(:workout).order('workouts.date DESC')
+      object.workout_steps.sort_by { |step| step.workout.date }.reverse
     end
 
     def active_measurements

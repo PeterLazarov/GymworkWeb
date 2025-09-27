@@ -15,7 +15,7 @@ module Resolvers
     argument :notes, String, required: false
 
     def resolve(from_date: nil, to_date: nil, date: nil, feeling: nil, pain: nil, rpe: nil, muscles: nil, muscle_areas: nil, notes: nil)
-      scope = Workout.all
+      scope = Workout.includes(steps: [:exercises, { sets: :exercise }])
 
       scope = scope.where("date >= ?", from_date) if from_date.present?
       scope = scope.where("date <= ?", to_date) if to_date.present?
