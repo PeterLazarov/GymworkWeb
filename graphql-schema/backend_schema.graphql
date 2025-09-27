@@ -55,7 +55,7 @@ type AddStepPayload {
 }
 
 type BaseMeasurementConfig {
-  moreIsBetter: Boolean!
+  moreIsBetter: Boolean
   unit: String
 }
 
@@ -317,6 +317,28 @@ type Measurements {
   weight: WeightMeasurementConfig
 }
 
+type MuscleAreaStat {
+  """
+  The name of the muscle area
+  """
+  muscleArea: String!
+
+  """
+  Percentage of workouts that train this muscle area
+  """
+  percentage: Float!
+
+  """
+  Total number of workouts
+  """
+  totalWorkouts: Int!
+
+  """
+  Number of workouts that train this muscle area
+  """
+  workoutCount: Int!
+}
+
 type Mutation {
   """
   Add a set to a workout step with exercise metrics
@@ -504,6 +526,7 @@ type Query {
     muscles: [String!]
     name: String
   ): ExerciseConnection!
+  muscleAreaStats(ascending: Boolean = false): [MuscleAreaStat!]!
   settings: Settings!
   workout(date: ISO8601Date, id: ID): Workout
   workouts(
@@ -714,7 +737,7 @@ type UpdateWorkoutPayload {
 }
 
 type WeightMeasurementConfig {
-  moreIsBetter: Boolean!
+  moreIsBetter: Boolean
   step: Float!
   unit: String
 }

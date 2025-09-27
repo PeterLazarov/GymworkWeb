@@ -23,6 +23,7 @@ module Types
     field :workouts, resolver: Resolvers::WorkoutsResolver
     field :exercise_records, resolver: Resolvers::ExerciseRecordsResolver
     field :settings, resolver: Resolvers::SettingsResolver
+    field :muscle_area_stats, resolver: Resolvers::MuscleAreaStatsResolver
 
     def node(id:)
       context.schema.object_from_id(id, context)

@@ -3,10 +3,10 @@ import { debounce } from "lodash";
 import { ChevronLeft, InfoIcon, PencilIcon, SearchIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Exercise } from "../../generated/graphql";
+import { IExercisesQuery } from "../../generated/graphql";
 import { exerciseImages } from "../../utils/exerciseImages";
 import { useInfiniteScroll } from "../../utils/useInfiniteScroll";
-import { Button, Card, CardHeader, CardTitle, Input } from "../shared";
+import { Button, Card, CardHeader, CardTitle, Input, Spinner } from "../shared";
 import { AddExerciseModal } from "./AddExerciseModal";
 import { EditExerciseModal } from "./EditExerciseModal";
 
@@ -48,6 +48,11 @@ const ADD_STEP_MUTATION = gql`
     }
   }
 `;
+type Exercise = NonNullable<
+  NonNullable<
+    NonNullable<IExercisesQuery["exercises"]["edges"]>[number]
+  >["node"]
+>;
 
 export const ExerciseList: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -105,11 +110,7 @@ export const ExerciseList: React.FC = () => {
         ))}
       </div>
 
-      {infiniteScrollLoading && (
-        <div className="flex justify-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      )}
+      {infiniteScrollLoading && <Spinner />}
       <AddExerciseModal
         isOpen={showCreateForm}
         onClose={() => setShowCreateForm(false)}

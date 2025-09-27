@@ -20,26 +20,8 @@ const SETTINGS_QUERY = gql`
 `;
 
 const UPDATE_SETTINGS = gql`
-  mutation UpdateSettings(
-    $theme: String
-    $scientificMuscleNamesEnabled: Boolean
-    $showSetCompletion: Boolean
-    $previewNextSet: Boolean
-    $measureRest: Boolean
-    $showCommentsCard: Boolean
-    $showWorkoutTimer: Boolean
-  ) {
-    updateSettings(
-      input: {
-        theme: $theme
-        scientificMuscleNamesEnabled: $scientificMuscleNamesEnabled
-        showSetCompletion: $showSetCompletion
-        previewNextSet: $previewNextSet
-        measureRest: $measureRest
-        showCommentsCard: $showCommentsCard
-        showWorkoutTimer: $showWorkoutTimer
-      }
-    ) {
+  mutation UpdateSettings($input: UpdateSettingsInput!) {
+    updateSettings(input: $input) {
       settings {
         id
         theme
@@ -71,11 +53,7 @@ export const Settings: React.FC = () => {
 
   const handleToggle = async (field: string, checked: boolean) => {
     try {
-      await updateSettings({
-        variables: {
-          [field]: checked,
-        },
-      });
+      await updateSettings({ variables: { input: { [field]: checked } } });
     } catch (error) {
       console.error("Failed to update settings:", error);
     }

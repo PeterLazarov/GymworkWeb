@@ -18,6 +18,7 @@ export * from "./MultiSelect";
 export * from "./NumericInput";
 export * from "./Popover";
 export * from "./Select";
+export * from "./Spinner";
 export * from "./Tabs";
 export * from "./Textarea";
 export * from "./TimeInput";

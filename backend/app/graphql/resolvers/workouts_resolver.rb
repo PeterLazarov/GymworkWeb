@@ -23,11 +23,23 @@ module Resolvers
       scope = scope.where(feeling: feeling) if feeling.present?
       scope = scope.where(pain: pain) if pain.present?
       scope = scope.where(rpe: rpe) if rpe.present?
-      scope = scope.where("muscles && ARRAY[?]::varchar[]", muscles) if muscles.present?
-      scope = scope.where("muscle_areas && ARRAY[?]::varchar[]", muscle_areas) if muscle_areas.present?
+
+      if muscles.present?
+        scope = scope.
+          joins(:steps).
+          joins(:steps => :exercises).
+          where("exercises.muscles && ARRAY[?]::varchar[]", muscles)
+      end
+      if muscle_areas.present?
+        scope = scope.
+          joins(:steps).
+          joins(:steps => :exercises).
+          where("exercises.muscle_areas && ARRAY[?]::varchar[]", muscle_areas)
+      end
+
       scope = scope.where("notes ILIKE ?", "%#{notes}%") if notes.present?
 
-      scope.order(date: :desc)
+      scope.distinct.order(date: :desc)
     end
   end
 end
