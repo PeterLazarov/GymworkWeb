@@ -1,8 +1,8 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import React, { useEffect, useState } from "react";
+import { MeasurementsFragment } from "../../generated/graphql";
 import { Modal } from "../shared";
 import { ExerciseForm, ExerciseFormData } from "./ExerciseForm";
-import MeasurementsFragment from "./MeasurementsFragment.graphql";
 
 const EXERCISE_QUERY = gql`
   query Exercise($id: ID!) {
@@ -68,7 +68,14 @@ export const EditExerciseModal: React.FC<Props> = ({
   });
   useEffect(() => {
     if (data?.exercise) {
-      setFormData(data.exercise);
+      setFormData({
+        name: data.exercise.name,
+        muscleAreas: data.exercise.muscleAreas,
+        muscles: data.exercise.muscles,
+        instructions: data.exercise.instructions,
+        measurements: data.exercise.measurements,
+        activeMeasurements: data.exercise.activeMeasurements,
+      });
     }
   }, [data]);
 

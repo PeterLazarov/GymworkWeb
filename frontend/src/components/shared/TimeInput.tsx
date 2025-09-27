@@ -9,12 +9,14 @@ const TimeInput = React.forwardRef<
   return (
     <Input
       type="time"
-      id="time-picker"
       step="1"
       className={cn(
-        "[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none",
+        "pl-[36%] [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none",
         className
       )}
+      style={{
+        paddingLeft: "calc(50% - 4ch)",
+      }}
       ref={ref}
       {...props}
     />

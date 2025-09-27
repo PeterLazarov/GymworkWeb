@@ -21,7 +21,7 @@ const DistanceInput = React.forwardRef<HTMLInputElement, DistanceInputProps>(
     const [unit, setUnit] = React.useState<Length>(defaultUnit);
 
     const convertedValue = React.useMemo(() => {
-      if (!value) return null;
+      if (!value) return 0;
 
       return convert(value, "mm").to(unit);
     }, [value, unit]);
@@ -39,7 +39,7 @@ const DistanceInput = React.forwardRef<HTMLInputElement, DistanceInputProps>(
         <NumericInput
           value={convertedValue}
           onChange={onInputChange}
-          className={cn("flex-1 text-center", className)}
+          className={cn("flex-1 text-center pl-14", className)}
           ref={ref}
           {...props}
         />
