@@ -2,7 +2,6 @@ import { gql, useQuery } from "@apollo/client";
 import { FilterIcon, SearchIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { muscleAreas, muscles } from "../../constants/muscles";
-import { IWorkoutsHistoryQuery } from "../../generated/graphql";
 import { useInfiniteScroll } from "../../utils/useInfiniteScroll";
 import {
   Button,
@@ -29,33 +28,11 @@ import { WorkoutDayModal } from "../WorkoutCalendar";
 import { WorkoutCard } from "./WorkoutCard";
 
 const WORKOUTS_QUERY = gql`
-  query WorkoutsHistory(
-    $feeling: String
-    $fromDate: ISO8601Date
-    $pain: String
-    $toDate: ISO8601Date
-    $rpe: String
-    $muscles: [String!]
-    $muscleAreas: [String!]
-    $notes: String
-    $first: Int
-    $after: String
-  ) {
+  query WorkoutsHistory($filter: WorkoutFilter, $first: Int, $after: String) {
     settings {
       scientificMuscleNamesEnabled
     }
-    workouts(
-      feeling: $feeling
-      fromDate: $fromDate
-      pain: $pain
-      toDate: $toDate
-      rpe: $rpe
-      muscles: $muscles
-      muscleAreas: $muscleAreas
-      notes: $notes
-      first: $first
-      after: $after
-    ) {
+    workouts(filter: $filter, first: $first, after: $after) {
       totalCount
       edges {
         cursor
@@ -79,12 +56,6 @@ const WORKOUTS_QUERY = gql`
   }
 `;
 
-type Workout = NonNullable<
-  NonNullable<
-    NonNullable<IWorkoutsHistoryQuery["workouts"]["edges"]>[number]
-  >["node"]
->;
-
 type Filter = {
   notes: string;
   feeling: string;
@@ -92,8 +63,8 @@ type Filter = {
   rpe: string;
   muscles: string[];
   muscleAreas: string[];
-  dateFrom: string;
-  dateTo: string;
+  dateFrom?: string;
+  dateTo?: string;
 };
 
 export const WorkoutHistory: React.FC = () => {
@@ -106,15 +77,13 @@ export const WorkoutHistory: React.FC = () => {
     rpe: "",
     muscles: [],
     muscleAreas: [],
-    dateFrom: "",
-    dateTo: "",
   });
 
   const { data, fetchMore, refetch, loading, error } = useQuery(
     WORKOUTS_QUERY,
     {
       variables: {
-        ...filters,
+        filter: filters,
         first: 10,
       },
     }

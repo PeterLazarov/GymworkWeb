@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import React, { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { WorkoutByDate } from "../../generated/graphql";
+import { formatDate } from "../../utils/date";
 import { Button, Calendar, Modal } from "../shared";
 import { WorkoutView } from "../Workout/WorkoutView";
 
@@ -156,7 +157,7 @@ export const WorkoutDayModal: React.FC<WorkoutDayModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={day.toFormat("dd-MM-yyyy")}
+      title={formatDate(day, "long")}
       description="Do you want to navigate to this day?"
       cancelText="Close"
       confirmText="Navigate"

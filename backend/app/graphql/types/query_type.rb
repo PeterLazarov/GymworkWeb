@@ -19,8 +19,9 @@ module Types
       argument :date, GraphQL::Types::ISO8601Date, required: false
     end
 
-    field :exercises, Types::ExerciseType.connection_type, null: false, preload: { workout_steps: { workout: {}, sets: { exercise: {} } } } do
-      argument :id, ID, required: false
+    class ExerciseFilterType < GraphQL::Schema::InputObject
+      graphql_name 'ExerciseFilter'
+
       argument :is_favorite, Boolean, required: false
       argument :muscle_areas, [String], required: false
       argument :muscles, [String], required: false
@@ -28,9 +29,15 @@ module Types
       argument :name, String, required: false
     end
 
-    field :workouts, Types::WorkoutType.connection_type, null: false, preload: { steps: { exercises: {}, sets: { exercise: {} } } } do
-      argument :from_date, GraphQL::Types::ISO8601Date, required: false
-      argument :to_date, GraphQL::Types::ISO8601Date, required: false
+    field :exercises, Types::ExerciseType.connection_type, null: false, preload: { workout_steps: { workout: {}, sets: { exercise: {} } } } do
+      argument :filter, ExerciseFilterType, required: false
+    end
+
+    class WorkoutFilterType < GraphQL::Schema::InputObject
+      graphql_name 'WorkoutFilter'
+
+      argument :date_from, GraphQL::Types::ISO8601Date, required: false
+      argument :date_to, GraphQL::Types::ISO8601Date, required: false
       argument :date, GraphQL::Types::ISO8601Date, required: false
       argument :feeling, String, required: false
       argument :pain, String, required: false
@@ -38,6 +45,10 @@ module Types
       argument :muscles, [String], required: false
       argument :muscle_areas, [String], required: false
       argument :notes, String, required: false
+    end
+
+    field :workouts, Types::WorkoutType.connection_type, null: false, preload: { steps: { exercises: {}, sets: { exercise: {} } } } do
+      argument :filter, WorkoutFilterType, required: false
     end
 
     field :exercise_records, [Types::ExerciseRecordType], null: false, preload: :exercise do
@@ -72,43 +83,46 @@ module Types
       end
     end
 
-    def exercises(id: nil, is_favorite: nil, muscle_areas: nil, muscles: nil, equipment: nil, name: nil)
+    def exercises(filter: nil)
       scope = Exercise.includes(workout_steps: [:workout, { sets: :exercise }])
 
-      scope = scope.where(id:) if id.present?
-      scope = scope.where(is_favorite:) unless is_favorite.nil?
-      scope = scope.where("name ILIKE ?", "%#{name}%") if name.present?
-      scope = scope.where("muscle_areas && ARRAY[?]::varchar[]", muscle_areas) if muscle_areas.present?
-      scope = scope.where("muscles && ARRAY[?]::varchar[]", muscles) if muscles.present?
-      scope = scope.where("equipment && ARRAY[?]::varchar[]", equipment) if equipment.present?
+      if filter
+        scope = scope.where(is_favorite: filter[:is_favorite]) unless filter[:is_favorite].nil?
+        scope = scope.where("name ILIKE ?", "%#{filter[:name]}%") if filter[:name].present?
+        scope = scope.where("muscle_areas && ARRAY[?]::varchar[]", filter[:muscle_areas]) if filter[:muscle_areas].present?
+        scope = scope.where("muscles && ARRAY[?]::varchar[]", filter[:muscles]) if filter[:muscles].present?
+        scope = scope.where("equipment && ARRAY[?]::varchar[]", filter[:equipment]) if filter[:equipment].present?
+      end
 
       scope.order(:name)
     end
 
-    def workouts(from_date: nil, to_date: nil, date: nil, feeling: nil, pain: nil, rpe: nil, muscles: nil, muscle_areas: nil, notes: nil)
+    def workouts(filter: nil)
       scope = Workout.includes(steps: [:exercises, { sets: :exercise }], sets: :exercise)
 
-      scope = scope.where("date >= ?", from_date) if from_date.present?
-      scope = scope.where("date <= ?", to_date) if to_date.present?
-      scope = scope.where(date: date) if date.present?
-      scope = scope.where(feeling: feeling) if feeling.present?
-      scope = scope.where(pain: pain) if pain.present?
-      scope = scope.where(rpe: rpe) if rpe.present?
+      if filter
+        scope = scope.where("date >= ?", filter[:date_from]) if filter[:date_from].present?
+        scope = scope.where("date <= ?", filter[:date_to]) if filter[:date_to].present?
+        scope = scope.where(date: filter[:date]) if filter[:date].present?
+        scope = scope.where(feeling: filter[:feeling]) if filter[:feeling].present?
+        scope = scope.where(pain: filter[:pain]) if filter[:pain].present?
+        scope = scope.where(rpe: filter[:rpe]) if filter[:rpe].present?
 
-      if muscles.present?
-        scope = scope.
-          joins(:steps).
-          joins(:steps => :exercises).
-          where("exercises.muscles && ARRAY[?]::varchar[]", muscles)
-      end
-      if muscle_areas.present?
-        scope = scope.
-          joins(:steps).
-          joins(:steps => :exercises).
-          where("exercises.muscle_areas && ARRAY[?]::varchar[]", muscle_areas)
-      end
+        if filter[:muscles].present?
+          scope = scope.
+            joins(:steps).
+            joins(:steps => :exercises).
+            where("exercises.muscles && ARRAY[?]::varchar[]", filter[:muscles])
+        end
+        if filter[:muscle_areas].present?
+          scope = scope.
+            joins(:steps).
+            joins(:steps => :exercises).
+            where("exercises.muscle_areas && ARRAY[?]::varchar[]", filter[:muscle_areas])
+        end
 
-      scope = scope.where("notes ILIKE ?", "%#{notes}%") if notes.present?
+        scope = scope.where("notes ILIKE ?", "%#{filter[:notes]}%") if filter[:notes].present?
+      end
 
       scope.distinct.order(date: :desc)
     end

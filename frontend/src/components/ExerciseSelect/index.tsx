@@ -11,8 +11,8 @@ import { AddExerciseModal } from "./AddExerciseModal";
 import { EditExerciseModal } from "./EditExerciseModal";
 
 const EXERCISES_QUERY = gql`
-  query Exercises($name: String, $first: Int, $after: String) {
-    exercises(name: $name, first: $first, after: $after) {
+  query Exercises($filter: ExerciseFilter, $first: Int, $after: String) {
+    exercises(filter: $filter, first: $first, after: $after) {
       edges {
         node {
           id
@@ -73,7 +73,7 @@ export const ExerciseList: React.FC = () => {
   if (error) return <div>Error loading exercises: {error.message}</div>;
 
   const debouncedSearch = debounce((value: string) => {
-    refetch({ name: value, first: 20 });
+    refetch({ filter: { name: value }, first: 20 });
   }, 500);
 
   const handleBack = () => {

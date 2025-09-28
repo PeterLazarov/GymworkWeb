@@ -13,8 +13,8 @@ import {
 import { WorkoutCard } from "../WorkoutHistory/WorkoutCard";
 
 const WORKOUTS_BY_MUSCLE_AREA_QUERY = gql`
-  query WorkoutsByMuscleArea($muscleArea: String!) {
-    workouts(muscleAreas: [$muscleArea], first: 50) {
+  query WorkoutsByMuscleArea($filter: WorkoutFilter) {
+    workouts(filter: $filter) {
       edges {
         node {
           id
@@ -47,9 +47,7 @@ type MuscleAreaStat = IMuscleAreaStatsQuery["muscleAreaStats"][number];
 
 export const Statistics: React.FC = () => {
   const [isDescending, setIsDescending] = useState(true);
-  const [selectedMuscleArea, setSelectedMuscleArea] = useState<string | null>(
-    null
-  );
+  const [selectedMuscleArea, setSelectedMuscleArea] = useState<string | null>();
 
   const { data, loading, error } = useQuery(MUSCLE_AREA_STATS_QUERY, {
     variables: { ascending: !isDescending },
@@ -58,7 +56,7 @@ export const Statistics: React.FC = () => {
   const { data: workoutsData, loading: workoutsLoading } = useQuery(
     WORKOUTS_BY_MUSCLE_AREA_QUERY,
     {
-      variables: { muscleArea: selectedMuscleArea || "" },
+      variables: { filter: { muscleAreas: [selectedMuscleArea] } },
       skip: !selectedMuscleArea,
     }
   );

@@ -284,6 +284,14 @@ type ExerciseEdge {
   node: Exercise
 }
 
+input ExerciseFilter {
+  equipment: [String!]
+  isFavorite: Boolean
+  muscleAreas: [String!]
+  muscles: [String!]
+  name: String
+}
+
 type ExerciseRecord {
   date: ISO8601Date!
   distance: Float
@@ -509,22 +517,17 @@ type Query {
     Returns the elements in the list that come before the specified cursor.
     """
     before: String
-    equipment: [String!]
+    filter: ExerciseFilter
 
     """
     Returns the first _n_ elements from the list.
     """
     first: Int
-    id: ID
-    isFavorite: Boolean
 
     """
     Returns the last _n_ elements from the list.
     """
     last: Int
-    muscleAreas: [String!]
-    muscles: [String!]
-    name: String
   ): ExerciseConnection!
   muscleAreaStats(ascending: Boolean = false): [MuscleAreaStat!]!
   settings: Settings!
@@ -539,25 +542,17 @@ type Query {
     Returns the elements in the list that come before the specified cursor.
     """
     before: String
-    date: ISO8601Date
-    feeling: String
+    filter: WorkoutFilter
 
     """
     Returns the first _n_ elements from the list.
     """
     first: Int
-    fromDate: ISO8601Date
 
     """
     Returns the last _n_ elements from the list.
     """
     last: Int
-    muscleAreas: [String!]
-    muscles: [String!]
-    notes: String
-    pain: String
-    rpe: String
-    toDate: ISO8601Date
   ): WorkoutConnection!
 }
 
@@ -794,6 +789,18 @@ type WorkoutEdge {
   The item at the end of the edge.
   """
   node: Workout
+}
+
+input WorkoutFilter {
+  date: ISO8601Date
+  dateFrom: ISO8601Date
+  dateTo: ISO8601Date
+  feeling: String
+  muscleAreas: [String!]
+  muscles: [String!]
+  notes: String
+  pain: String
+  rpe: String
 }
 
 type WorkoutSet implements Node {
