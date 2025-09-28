@@ -10,11 +10,11 @@ module Types
       argument :ids, [ID], required: true, description: "IDs of the objects."
     end
 
-    field :exercise, Types::ExerciseType, null: true, preload: { workout_steps: { workout: {}, sets: { exercise: {} } } } do
+    field :exercise, Types::ExerciseType, null: true, preload: { workout_steps: [:workout, { sets: :exercise }] } do
       argument :id, ID, required: true
     end
 
-    field :workout, Types::WorkoutType, null: true, preload: { steps: { exercises: {}, sets: { exercise: {} } } } do
+    field :workout, Types::WorkoutType, null: true, preload: { steps: [:exercises, { sets: :exercise }] } do
       argument :id, ID, required: false
       argument :date, GraphQL::Types::ISO8601Date, required: false
     end
@@ -29,7 +29,7 @@ module Types
       argument :name, String, required: false
     end
 
-    field :exercises, Types::ExerciseType.connection_type, null: false, preload: { workout_steps: { workout: {}, sets: { exercise: {} } } } do
+    field :exercises, Types::ExerciseType.connection_type, null: false, preload: { workout_steps: [:workout, { sets: :exercise }] } do
       argument :filter, ExerciseFilterType, required: false
     end
 
@@ -47,7 +47,7 @@ module Types
       argument :notes, String, required: false
     end
 
-    field :workouts, Types::WorkoutType.connection_type, null: false, preload: { steps: { exercises: {}, sets: { exercise: {} } } } do
+    field :workouts, Types::WorkoutType.connection_type, null: false, preload: { steps: [:exercises, { sets: :exercise }] } do
       argument :filter, WorkoutFilterType, required: false
     end
 

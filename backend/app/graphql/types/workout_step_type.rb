@@ -9,7 +9,7 @@ module Types
 
     # Relationships
     field :workout, Types::WorkoutType, null: false, preload: :workout
-    field :sets, [Types::WorkoutSetType], null: false, preload: { sets: { exercise: {} } }
+    field :sets, [Types::WorkoutSetType], null: false, preload: { sets: :exercise }
     field :exercises, [Types::ExerciseType], null: false, preload: :exercises
   end
 end
