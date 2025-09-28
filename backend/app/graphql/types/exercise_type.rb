@@ -18,9 +18,9 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
-    field :workout_steps, [Types::WorkoutStepType], null: false
-    field :workout_sets, [Types::WorkoutSetType], null: false
-    field :steps, [Types::WorkoutStepType], null: false
+    field :workout_steps, [Types::WorkoutStepType], null: false, preload: { workout_steps: { workout: {}, sets: { exercise: {} } } }
+    field :workout_sets, [Types::WorkoutSetType], null: false, preload: { workout_steps: { sets: { exercise: {} } } }
+    field :steps, [Types::WorkoutStepType], null: false, preload: { workout_steps: { workout: {}, sets: { exercise: {} } } }
 
     def steps
       object.workout_steps.sort_by { |step| step.workout.date }.reverse

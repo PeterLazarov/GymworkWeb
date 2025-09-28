@@ -18,11 +18,11 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
-    field :workout_step, Types::WorkoutStepType, null: false
-    field :exercise, Types::ExerciseType, null: false
+    field :workout_step, Types::WorkoutStepType, null: false, preload: :workout_step
+    field :exercise, Types::ExerciseType, null: false, preload: :exercise
 
-    field :weight, Float, null: true
-    field :distance, Float, null: true
+    field :weight, Float, null: true, preload: :exercise
+    field :distance, Float, null: true, preload: :exercise
 
     def weight
       measurement = object.exercise.measurements["weight"]

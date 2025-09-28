@@ -8,8 +8,8 @@ module Types
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
     # Relationships
-    field :workout, Types::WorkoutType, null: false
-    field :sets, [Types::WorkoutSetType], null: false
-    field :exercises, [Types::ExerciseType], null: false
+    field :workout, Types::WorkoutType, null: false, preload: :workout
+    field :sets, [Types::WorkoutSetType], null: false, preload: { sets: { exercise: {} } }
+    field :exercises, [Types::ExerciseType], null: false, preload: :exercises
   end
 end

@@ -14,8 +14,8 @@ module Types
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
     # Relationships
-    field :steps, [Types::WorkoutStepType], null: false
-    field :workout_sets, [Types::WorkoutSetType], null: false
+    field :steps, [Types::WorkoutStepType], null: false, preload: { steps: { exercises: {}, sets: { exercise: {} } } }
+    field :workout_sets, [Types::WorkoutSetType], null: false, preload: { sets: { exercise: {} } }
 
     field :muscles, [String], null: false
     field :muscle_areas, [String], null: false
