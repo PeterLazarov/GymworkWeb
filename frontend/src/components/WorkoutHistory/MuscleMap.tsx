@@ -1,12 +1,15 @@
 import type { SVGProps } from "react";
 import * as React from "react";
 import { memo, useMemo } from "react";
+import {
+  muscleAreaToMusclesMapping,
+  muscleSvgMappings,
+} from "../../constants/muscleMappings";
 
 export interface MuscleMapProps extends SVGProps<SVGSVGElement> {
   back?: boolean;
   id: string;
   muscles: string[];
-  muscleAreas: string[];
   baseColor?: string;
   inactiveColor?: string;
   activeColor?: string;
@@ -17,11 +20,27 @@ function getMappedClasses(muscles: string[]) {
     new Set(
       muscles.flatMap((m) => {
         const normalized = m.trim().replace(/\s+/g, " ");
-        return (
-          muscleMappings[normalized as keyof typeof muscleMappings] ??
-          muscleAreaMappings[normalized as keyof typeof muscleAreaMappings] ??
-          []
-        );
+
+        // First check if it's a direct muscle
+        const muscleSvgClasses =
+          muscleSvgMappings[normalized as keyof typeof muscleSvgMappings];
+        if (muscleSvgClasses) {
+          return muscleSvgClasses;
+        }
+
+        // If it's a muscle area, get all muscles in that area and their SVG classes
+        const musclesInArea =
+          muscleAreaToMusclesMapping[
+            normalized as keyof typeof muscleAreaToMusclesMapping
+          ];
+        if (musclesInArea) {
+          return musclesInArea.flatMap(
+            (muscle) =>
+              muscleSvgMappings[muscle as keyof typeof muscleSvgMappings] ?? []
+          );
+        }
+
+        return [];
       })
     )
   );
@@ -30,17 +49,13 @@ function getMappedClasses(muscles: string[]) {
 const MuscleMapComponent = ({
   id,
   muscles,
-  muscleAreas,
   back = false,
   activeColor = "#F4C001",
   baseColor = "black",
   inactiveColor = "gray",
   ...rest
 }: MuscleMapProps) => {
-  const combined = useMemo(
-    () => muscles.concat(...muscleAreas),
-    [muscles, muscleAreas]
-  );
+  const combined = muscles;
   const activeClasses = useMemo(() => getMappedClasses(combined), [combined]);
   const styleSheet = useMemo(() => {
     const activeClassesStr = activeClasses
@@ -82,83 +97,6 @@ const MuscleMapComponent = ({
 };
 
 export const MuscleMap = memo(MuscleMapComponent);
-
-const muscleMappings = {
-  "Abductor Brevis": ["Hip-Abductors"],
-  "Adductor Brevis": ["Hip-Adductors"],
-  "Adductor Longus": ["Hip-Adductors"],
-  "Adductor Magnus": ["Hip-Adductors"],
-  "Anterior Deltoid": ["Anterior-Deltoid"],
-  "Biceps Brachii": ["Biceps"],
-  Brachialis: ["Upper-Arms"],
-  Brachioradialis: ["Brachioradialis", "Forearms"],
-  "Clavicular Head": ["Pectoralis-Major-Clavicular"],
-  "Erector Spinae": ["Erector-Spinae", "Core"],
-  Gastrocnemius: ["Gastrocnemius", "Calves"],
-  "Gluteus Maximus": ["Gluteus-Maximus"],
-  "Gluteus Medius": ["Hip-Abductors"],
-  Gracilis: ["Hip-Adductors"],
-  Hamstring: ["Hamstrings"],
-  "Hip Flexor": ["Hips"],
-  Iliopsoas: ["Hip-External-Rotators", "Hips"],
-  Infraspinatus: ["Infraspinatus"],
-  "Lateral Deltoid": ["Lateral-Deltoid"],
-  "Latissimus Dorsi": ["Latissimus-Dorsi"],
-  "Levator Scapulae": ["Levator-Scapulae"],
-  Obliques: ["Obliques", "Core"],
-  Pectineous: ["Hip-Adductors"],
-  "Pectoralis Major Clavicular Head": ["Pectoralis-Major-Clavicular"],
-  "Pectoralis Major Sternal Head": ["Pectoralis-Major-Sternocostal"],
-  Popliteus: ["Quadriceps"],
-  "Posterior Deltoid": ["Posterior-Deltoid"],
-  Quadriceps: ["Quadriceps"],
-  "Rectus Abdominis": ["Rectus-Abdominis", "Core"],
-  Sartorius: ["Quadriceps"],
-  "Serratus Anterior": ["Serratus-Anterior"],
-  Soleus: ["Soleus", "Calves"],
-  Splenius: ["Upper-Trapezius"],
-  Sternocleidomastoid: ["Upper-Trapezius"],
-  "Tensor Fasciae Latae": ["Hip-Abductors"],
-  "Teres Major": ["Back"],
-  "Teres Minor": ["Teres-Minor"],
-  "Tibialis Anterior": ["Tibialis-Anterior"],
-  "Trapezius Lower Fibers": ["Lower-Trapezius"],
-  "Trapezius Middle Fibers": ["Middle-Trapezius"],
-  "Trapezius Upper Fibers": ["Upper-Trapezius"],
-  "Triceps Brachii": ["Triceps"],
-  "Wrist Extensors": ["Wrist-Extensors", "Forearms"],
-  "Wrist Flexors": ["Wrist-Flexors", "Forearms"],
-};
-
-const muscleAreaMappings = {
-  Abdominals: ["Rectus-Abdominis", "Obliques", "Core"],
-  Abductors: ["Hip-Abductors"],
-  Adductors: ["Hip-Adductors"],
-  Arms: ["Biceps", "Triceps", "Upper-Arms", "Forearms"],
-  Back: ["Latissimus-Dorsi", "Erector-Spinae", "Teres Major", "Trapezius"],
-  Biceps: ["Biceps"],
-  Calves: ["Gastrocnemius", "Soleus"],
-  Cardio: ["Cardio"],
-  "Cardio-Functional": ["Cardio", "Full-Body"],
-  Chest: ["Pectoralis-Major-Clavicular", "Pectoralis-Major-Sternocostal"],
-  Forearms: ["Brachioradialis", "Wrist-Flexors", "Wrist-Extensors"],
-  "Full Body": ["Full-Body"],
-  Glutes: ["Gluteus-Maximus", "Hip-Abductors"],
-  Hamstrings: ["Hamstrings"],
-  "Hip Flexors": ["Hip-Flexors", "Iliopsoas"],
-  Legs: [
-    "Quadriceps",
-    "Hamstrings",
-    "Calves",
-    "Hip-Abductors",
-    "Hip-Adductors",
-  ],
-  Neck: ["Sternocleidomastoid", "Upper-Trapezius"],
-  Quads: ["Quadriceps"],
-  Shoulders: ["Anterior-Deltoid", "Lateral-Deltoid", "Posterior-Deltoid"],
-  Stretching: ["Stretching"],
-  Triceps: ["Triceps"],
-};
 
 const BackMuscleSVGMap = () => (
   <g>

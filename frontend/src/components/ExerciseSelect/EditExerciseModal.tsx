@@ -6,6 +6,9 @@ import { ExerciseForm, ExerciseFormData } from "./ExerciseForm";
 
 const EXERCISE_QUERY = gql`
   query Exercise($id: ID!) {
+    settings {
+      scientificMuscleNamesEnabled
+    }
     exercise(id: $id) {
       id
       name
@@ -130,6 +133,9 @@ export const EditExerciseModal: React.FC<Props> = ({
           exercise={formData}
           onChange={setFormData}
           error={mutationError}
+          scientificMuscleNamesEnabled={
+            data?.settings.scientificMuscleNamesEnabled
+          }
         />
       )}
     </Modal>

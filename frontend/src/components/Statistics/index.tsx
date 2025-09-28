@@ -14,6 +14,9 @@ import { WorkoutCard } from "../WorkoutHistory/WorkoutCard";
 
 const WORKOUTS_BY_MUSCLE_AREA_QUERY = gql`
   query WorkoutsByMuscleArea($filter: WorkoutFilter) {
+    settings {
+      scientificMuscleNamesEnabled
+    }
     workouts(filter: $filter) {
       edges {
         node {
@@ -119,7 +122,13 @@ export const Statistics: React.FC = () => {
               <Spinner />
             ) : (
               workoutsData?.workouts.edges.map(({ node: workout }) => (
-                <WorkoutCard key={workout.id} workout={workout} />
+                <WorkoutCard
+                  key={workout.id}
+                  workout={workout}
+                  scientificMuscleNamesEnabled={
+                    workoutsData?.settings.scientificMuscleNamesEnabled
+                  }
+                />
               ))
             )}
           </div>

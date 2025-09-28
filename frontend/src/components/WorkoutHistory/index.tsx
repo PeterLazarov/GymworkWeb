@@ -163,6 +163,9 @@ export const WorkoutHistory: React.FC = () => {
             key={workout.id}
             workout={workout}
             onClick={() => setOpenedWorkoutDate(workout.date)}
+            scientificMuscleNamesEnabled={
+              data?.settings.scientificMuscleNamesEnabled
+            }
           />
         ))}
       </div>

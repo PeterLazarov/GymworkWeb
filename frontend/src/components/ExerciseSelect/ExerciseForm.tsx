@@ -6,6 +6,10 @@ import {
 } from "../../constants/measurements";
 import { muscleAreas, muscles } from "../../constants/muscles";
 import {
+  syncMuscleAreasFromMuscles,
+  syncMusclesFromMuscleAreas,
+} from "../../utils/muscleSync";
+import {
   Button,
   Checkbox,
   Input,
@@ -50,6 +54,7 @@ export const ExerciseForm: React.FC<Props> = ({
   error,
 }) => {
   const [showMuscleMap, setShowMuscleMap] = useState(false);
+
   const handleMeasurementsInput = (measurements: string[]) => {
     const updatedMeasurements = measurements.reduce((acc, measurement) => {
       acc[measurement] = measurementDefaults[measurement];
@@ -124,9 +129,17 @@ export const ExerciseForm: React.FC<Props> = ({
 
           <MultiSelect
             values={exercise.muscleAreas}
-            onValuesChange={(values) =>
-              onChange({ ...exercise, muscleAreas: values })
-            }
+            onValuesChange={(values) => {
+              const syncedMuscles = syncMusclesFromMuscleAreas(
+                values,
+                exercise.muscles
+              );
+              onChange({
+                ...exercise,
+                muscleAreas: values,
+                muscles: syncedMuscles,
+              });
+            }}
           >
             <MultiSelectTrigger id="muscleAreas" className="w-full">
               <MultiSelectValue placeholder="Select muscle areas..." />
@@ -163,9 +176,17 @@ export const ExerciseForm: React.FC<Props> = ({
 
           <MultiSelect
             values={exercise.muscles}
-            onValuesChange={(values) =>
-              onChange({ ...exercise, muscles: values })
-            }
+            onValuesChange={(values) => {
+              const syncedMuscleAreas = syncMuscleAreasFromMuscles(
+                values,
+                exercise.muscleAreas
+              );
+              onChange({
+                ...exercise,
+                muscles: values,
+                muscleAreas: syncedMuscleAreas,
+              });
+            }}
           >
             <MultiSelectTrigger id="muscles" className="w-full">
               <MultiSelectValue placeholder="Select muscles..." />
@@ -186,15 +207,21 @@ export const ExerciseForm: React.FC<Props> = ({
       {showMuscleMap && (
         <div className="mb-4 flex gap-4 justify-center">
           <MuscleMap
-            id="muscle-map"
-            muscles={exercise.muscles}
-            muscleAreas={exercise.muscleAreas}
+            id="muscle-map-front"
+            muscles={
+              scientificMuscleNamesEnabled
+                ? exercise.muscles
+                : exercise.muscleAreas
+            }
             className="h-24"
           />
           <MuscleMap
-            id="muscle-map"
-            muscles={exercise.muscles}
-            muscleAreas={exercise.muscleAreas}
+            id="muscle-map-back"
+            muscles={
+              scientificMuscleNamesEnabled
+                ? exercise.muscles
+                : exercise.muscleAreas
+            }
             className="h-24"
             back
           />

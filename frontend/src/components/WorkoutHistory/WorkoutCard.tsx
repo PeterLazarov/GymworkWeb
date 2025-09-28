@@ -14,24 +14,32 @@ type Workout = NonNullable<
 type WorkoutCardProps = {
   workout: Workout;
   onClick?: () => void;
+  scientificMuscleNamesEnabled?: boolean;
 };
 export const WorkoutCard: React.FC<WorkoutCardProps> = ({
   workout,
   onClick,
+  scientificMuscleNamesEnabled,
 }) => {
   return (
     <Card onClick={onClick} variant="secondary" className="w-full">
       <div className="flex flex-row gap-4 items-center justify-center">
         <div className="flex gap-2 ml-4">
           <MuscleMap
-            muscles={workout.muscles}
-            muscleAreas={workout.muscleAreas}
+            muscles={
+              scientificMuscleNamesEnabled
+                ? workout.muscles
+                : workout.muscleAreas
+            }
             id={`front-map-${workout.date}`}
             className="h-24"
           />
           <MuscleMap
-            muscles={workout.muscles}
-            muscleAreas={workout.muscleAreas}
+            muscles={
+              scientificMuscleNamesEnabled
+                ? workout.muscles
+                : workout.muscleAreas
+            }
             id={`back-map-${workout.date}`}
             back
             className="h-24"

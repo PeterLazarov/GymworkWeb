@@ -1,9 +1,9 @@
 import { gql, useMutation } from "@apollo/client";
 import React, { useState } from "react";
 import { measurementDefaults } from "../../constants/measurements";
+import { MeasurementsFragment } from "../../generated/graphql";
 import { Modal } from "../shared";
 import { ExerciseForm, ExerciseFormData } from "./ExerciseForm";
-import MeasurementsFragment from "./MeasurementsFragment.graphql";
 
 const CREATE_EXERCISE_MUTATION = gql`
   mutation CreateExercise($input: CreateExerciseInput!) {
@@ -29,12 +29,14 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  scientificMuscleNamesEnabled?: boolean;
 };
 
 export const AddExerciseModal: React.FC<Props> = ({
   isOpen,
   onClose,
   onSuccess,
+  scientificMuscleNamesEnabled,
 }) => {
   const [formData, setFormData] = useState<ExerciseFormData>({
     name: "",
@@ -84,7 +86,12 @@ export const AddExerciseModal: React.FC<Props> = ({
       onSubmit={onSubmit}
       confirmDisabled={loading}
     >
-      <ExerciseForm exercise={formData} onChange={setFormData} error={error} />
+      <ExerciseForm
+        exercise={formData}
+        onChange={setFormData}
+        error={error}
+        scientificMuscleNamesEnabled={scientificMuscleNamesEnabled}
+      />
     </Modal>
   );
 };

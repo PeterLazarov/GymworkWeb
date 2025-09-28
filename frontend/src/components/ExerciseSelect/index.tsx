@@ -12,6 +12,9 @@ import { EditExerciseModal } from "./EditExerciseModal";
 
 const EXERCISES_QUERY = gql`
   query Exercises($filter: ExerciseFilter, $first: Int, $after: String) {
+    settings {
+      scientificMuscleNamesEnabled
+    }
     exercises(filter: $filter, first: $first, after: $after) {
       edges {
         node {
@@ -118,6 +121,9 @@ export const ExerciseList: React.FC = () => {
           setShowCreateForm(false);
           refetch();
         }}
+        scientificMuscleNamesEnabled={
+          data?.settings.scientificMuscleNamesEnabled
+        }
       />
       {editingExerciseId && (
         <EditExerciseModal
