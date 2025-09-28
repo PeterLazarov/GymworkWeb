@@ -2,6 +2,7 @@ import { gql, useMutation } from "@apollo/client";
 import { NotebookPenIcon, PlusIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { feelingTexts, painTexts } from "../../constants/enums";
 import { IWorkoutByDateQuery } from "../../generated/graphql";
 import {
   Button,
@@ -67,30 +68,10 @@ export const WorkoutView: React.FC<WorkoutViewProps> = ({
     <div className="p-4 flex-1 overflow-hidden flex flex-col gap-4">
       <div className="flex overflow-y-auto flex-col gap-4 flex-1">
         {workout.hasComments && (
-          <Card
+          <WorkoutCommentsCard
+            workout={workout}
             onClick={() => !readonly && setIsDetailsModalOpen(true)}
-            variant="outline"
-          >
-            <CardHeader>
-              <CardTitle>Comments</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2">
-              {workout.notes && (
-                <div className="text-sm text-gray-500">{workout.notes}</div>
-              )}
-              {workout.feeling && (
-                <div className="text-sm text-gray-500">{workout.feeling}</div>
-              )}
-              {workout.rpe && (
-                <div className="text-sm text-gray-500">RPE: {workout.rpe}</div>
-              )}
-              {workout.pain && (
-                <div className="text-sm text-gray-500">
-                  Pain: {workout.pain}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          />
         )}
         {workout.steps.map((step) => (
           <WorkoutStepCard
@@ -147,6 +128,40 @@ export const WorkoutView: React.FC<WorkoutViewProps> = ({
     </div>
   );
 };
+
+type WorkoutCommentsCardProps = {
+  workout: Workout;
+  onClick?: () => void;
+};
+
+const WorkoutCommentsCard: React.FC<WorkoutCommentsCardProps> = ({
+  workout,
+  onClick,
+}) => (
+  <Card onClick={onClick} variant="outline">
+    <CardHeader>
+      <CardTitle>Comments</CardTitle>
+    </CardHeader>
+    <CardContent className="flex flex-col gap-2">
+      {workout.notes && (
+        <div className="text-sm text-gray-500">{workout.notes}</div>
+      )}
+      {workout.feeling && (
+        <div className="text-sm text-gray-500">
+          Feeling: {feelingTexts[workout.feeling]}
+        </div>
+      )}
+      {workout.rpe && (
+        <div className="text-sm text-gray-500">RPE: {workout.rpe}</div>
+      )}
+      {workout.pain && (
+        <div className="text-sm text-gray-500">
+          Pain: {painTexts[workout.pain]}
+        </div>
+      )}
+    </CardContent>
+  </Card>
+);
 
 const WorkoutStepCard: React.FC<{
   step: WorkoutStep;
@@ -216,9 +231,11 @@ const WorkoutDetailsModal: React.FC<WorkoutDetailsModalProps> = ({
               <SelectValue placeholder="How are you feeling?" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="sad">Bad</SelectItem>
-              <SelectItem value="neutral">Good</SelectItem>
-              <SelectItem value="happy">Great</SelectItem>
+              {Object.entries(feelingTexts).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -251,9 +268,11 @@ const WorkoutDetailsModal: React.FC<WorkoutDetailsModalProps> = ({
               <SelectValue placeholder="Any pain?" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="noPain">None</SelectItem>
-              <SelectItem value="discomfort">Discomfort</SelectItem>
-              <SelectItem value="pain">Pain</SelectItem>
+              {Object.entries(painTexts).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

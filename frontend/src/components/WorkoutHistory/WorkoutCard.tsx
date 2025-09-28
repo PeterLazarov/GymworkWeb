@@ -1,4 +1,5 @@
 import React from "react";
+import { feelingTexts, painTexts } from "../../constants/enums";
 import { IWorkoutsHistoryQuery } from "../../generated/graphql";
 import { formatDateIso } from "../../utils/date";
 import { Card, CardContent, CardHeader, CardTitle } from "../shared";
@@ -45,7 +46,7 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({
               <div className="flex gap-2">
                 {workout.feeling && (
                   <span>
-                    <b>Feeling:</b> {workout.feeling}
+                    <b>Feeling:</b> {feelingTexts[workout.feeling]}
                   </span>
                 )}
                 {workout.rpe && (
@@ -55,7 +56,7 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({
                 )}
                 {workout.pain && (
                   <span>
-                    <b>Pain:</b> {workout.pain}
+                    <b>Pain:</b> {painTexts[workout.pain]}
                   </span>
                 )}
               </div>
