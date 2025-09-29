@@ -69,6 +69,7 @@ export const ExerciseList: React.FC = () => {
     data: data?.exercises,
     loading,
     fetchMore,
+    connectionKey: "exercises",
     pageSize: 20,
   });
 

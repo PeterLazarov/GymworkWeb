@@ -9,8 +9,6 @@ module Types
       super(*args, **kwargs, &block)
     end
 
-    attr_reader :preload_config
-
     def resolve(object, arguments, context)
       if @preload_config && object.object.is_a?(ActiveRecord::Base)
         associations_to_preload = []

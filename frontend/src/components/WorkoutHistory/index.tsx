@@ -112,6 +112,7 @@ export const WorkoutHistory: React.FC = () => {
           };
         },
       }),
+    connectionKey: "workouts",
     pageSize: 20,
     threshold: 200,
   });

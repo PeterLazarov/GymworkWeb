@@ -10,47 +10,22 @@ export const createApolloClient = () => {
       typePolicies: {
         Query: {
           fields: {
-            workout: {
-              read(_, { args, toReference }) {
-                return args?.date
-                  ? toReference({
-                      __typename: "Workout",
-                      id: `Workout:${args.date}`,
-                    })
-                  : undefined;
-              },
+            exercises: {
+              merge: (_, incoming) => incoming,
+            },
+            workouts: {
+              merge: (_, incoming) => incoming,
             },
             exerciseRecords: {
-              merge(existing = [], incoming) {
-                return incoming;
-              },
+              merge: (_, incoming) => incoming,
             },
           },
         },
         Workout: {
           keyFields: ["id"],
-          fields: {
-            steps: {
-              merge(existing = [], incoming) {
-                return incoming;
-              },
-            },
-          },
         },
         WorkoutStep: {
           keyFields: ["id"],
-          fields: {
-            sets: {
-              merge(existing = [], incoming) {
-                return incoming;
-              },
-            },
-            exercises: {
-              merge(existing = [], incoming) {
-                return incoming;
-              },
-            },
-          },
         },
         WorkoutSet: {
           keyFields: ["id"],

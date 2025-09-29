@@ -43,10 +43,10 @@ export const measurementDefaults = {
     unit: measurementUnits.distance.m,
     moreIsBetter: true,
   },
-  rest: {
-    unit: measurementUnits.duration.s,
-    moreIsBetter: false,
-  },
+  // rest: {
+  //   unit: measurementUnits.duration.s,
+  //   moreIsBetter: false,
+  // },
   speed: {
     unit: measurementUnits.speed.kph,
     moreIsBetter: true,

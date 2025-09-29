@@ -28,6 +28,7 @@ interface UseInfiniteScrollOptions<T> {
   };
   loading: boolean;
   fetchMore: (options: FetchMoreOptions<T>) => Promise<any>;
+  connectionKey: string;
   pageSize?: number;
   threshold?: number;
   getNodeId?: (node: T) => string | number;
@@ -37,6 +38,7 @@ export function useInfiniteScroll<T>({
   data,
   loading: externalLoading,
   fetchMore,
+  connectionKey,
   pageSize = 20,
   threshold = 800,
   getNodeId = (node: any) => node.id,
@@ -64,7 +66,6 @@ export function useInfiniteScroll<T>({
         ) => {
           if (!fetchMoreResult) return prev;
 
-          const connectionKey = Object.keys(fetchMoreResult)[0];
           const prevConnection = prev[connectionKey];
           const newConnection = fetchMoreResult[connectionKey];
 
