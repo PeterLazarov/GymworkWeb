@@ -93,6 +93,16 @@ export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
     });
   }, [data]);
 
+  const activeMeasurements = useMemo(
+    () =>
+      data?.exercise?.measurements
+        ? getActiveMeasurements(
+            data?.exercise?.measurements as ExerciseMeasurementType
+          )
+        : [],
+    [data?.exercise?.measurements]
+  );
+
   if (loading) return <div>Loading data...</div>;
   if (error) return <div>{`Error loading data: ${error.message}`}</div>;
   if (!data?.exercise) return <div>No data found</div>;
@@ -104,7 +114,7 @@ export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
         value={metric}
         onValueChange={(value) => value && setMetric(value as ChartTypes)}
       >
-        {data.exercise.activeMeasurements.map((measurement) => (
+        {activeMeasurements.map((measurement) => (
           <ToggleGroupItem key={measurement} value={measurement}>
             {chartNames[measurement]}
           </ToggleGroupItem>
