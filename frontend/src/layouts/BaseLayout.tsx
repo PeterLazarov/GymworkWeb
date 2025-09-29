@@ -17,14 +17,16 @@ export function BaseLayout({ children }: BaseLayoutProps) {
 
   return (
     <div className="flex flex-col h-screen min-h-screen overflow-hidden">
-      <header className="bg-primary text-white p-4 border-b border-gray-700 flex justify-between items-center">
-        <Button variant="ghost" asChild>
-          <Link to="/">
-            <h1 className="text-xl font-bold">Gymwork</h1>
-          </Link>
-        </Button>
+      <header className="bg-primary text-white p-4 border-b border-gray-700 grid grid-cols-3">
+        <div>
+          <Button variant="ghost" asChild>
+            <Link to="/">
+              <h1 className="text-xl font-bold">Gymwork</h1>
+            </Link>
+          </Button>
+        </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-center">
           <Button variant={isWorkoutPage ? "secondary" : "ghost"} asChild>
             {isWorkoutPage ? (
               <span className="cursor-default">Workouts</span>
@@ -56,11 +58,13 @@ export function BaseLayout({ children }: BaseLayoutProps) {
           </Button>
         </div>
 
-        <Button variant="ghost" asChild>
-          <Link to="/settings">
-            <SettingsIcon />
-          </Link>
-        </Button>
+        <div>
+          <Button className="float-right" variant="ghost" asChild>
+            <Link to="/settings">
+              <SettingsIcon />
+            </Link>
+          </Button>
+        </div>
       </header>
 
       <main className="flex flex-col flex-1 p-4 gap-4 overflow-hidden">

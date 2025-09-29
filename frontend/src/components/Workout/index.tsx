@@ -57,11 +57,18 @@ const WorkoutHeader: React.FC<Props> = ({ date }) => {
   };
 
   return (
-    <Header className="flex justify-between gap-4">
-      <Button variant="secondary" onClick={() => navigateToDate(-1)}>
-        <ChevronLeftIcon /> {formatDate(currentDate.minus({ days: 1 }), "long")}
-      </Button>
-      <div className="flex items-center gap-2">
+    <Header className="grid grid-cols-3 gap-4">
+      <div>
+        <Button
+          variant="secondary"
+          className="w-48"
+          onClick={() => navigateToDate(-1)}
+        >
+          <ChevronLeftIcon />{" "}
+          {formatDate(currentDate.minus({ days: 1 }), "long")}
+        </Button>
+      </div>
+      <div className="flex items-center gap-2 justify-center">
         <span>{dateLabel}</span>
         <Button variant="ghost" size="icon">
           <Link to={`/${currentDate.toISODate()}/calendar`}>
@@ -69,10 +76,16 @@ const WorkoutHeader: React.FC<Props> = ({ date }) => {
           </Link>
         </Button>
       </div>
-      <Button variant="secondary" onClick={() => navigateToDate(1)}>
-        {formatDate(currentDate.plus({ days: 1 }), "long")}
-        <ChevronRightIcon />
-      </Button>
+      <div className="justify-end">
+        <Button
+          variant="secondary"
+          className="float-right w-48"
+          onClick={() => navigateToDate(1)}
+        >
+          {formatDate(currentDate.plus({ days: 1 }), "long")}
+          <ChevronRightIcon />
+        </Button>
+      </div>
     </Header>
   );
 };
