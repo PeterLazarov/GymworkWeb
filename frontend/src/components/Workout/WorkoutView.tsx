@@ -166,22 +166,25 @@ const WorkoutCommentsCard: React.FC<WorkoutCommentsCardProps> = ({
 const WorkoutStepCard: React.FC<{
   step: WorkoutStep;
   onClick?: () => void;
-}> = ({ step, onClick }) => (
-  <Card onClick={onClick} variant="secondary">
-    <CardHeader>
-      <CardTitle>{step.exercises[0]?.name}</CardTitle>
-    </CardHeader>
-    <CardContent className="flex flex-col gap-1">
-      {step.sets.map((set) => (
-        <SetListItem
-          key={set.id}
-          set={set}
-          measurements={step.exercises[0]!.measurements}
-        />
-      ))}
-    </CardContent>
-  </Card>
-);
+}> = ({ step, onClick }) => {
+  const exercise = step.exercises[0]!;
+  return (
+    <Card onClick={onClick} variant="secondary">
+      <CardHeader>
+        <CardTitle>{exercise.name}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-1">
+        {step.sets.map((set) => (
+          <SetListItem
+            key={set.id}
+            set={set}
+            measurements={exercise.measurements}
+          />
+        ))}
+      </CardContent>
+    </Card>
+  );
+};
 
 type WorkoutDetailsModalProps = {
   isOpen: boolean;

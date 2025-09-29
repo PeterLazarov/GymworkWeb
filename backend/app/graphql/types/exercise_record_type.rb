@@ -10,14 +10,14 @@ module Types
     field :distance, Float, null: true, preload: :exercise
 
     def weight
-      measurement = object.exercise.measurements["weight"]
+      measurement = object.exercise.weight_measurement
       return nil unless measurement
 
       Unit.new("#{object.weight_mcg} mcg").convert_to(measurement['unit']).scalar
     end
 
     def distance
-      measurement = object.exercise.measurements["distance"]
+      measurement = object.exercise.distance_measurement
       return nil unless measurement
 
       Unit.new("#{object.distance_mm} mm").convert_to(measurement['unit']).scalar

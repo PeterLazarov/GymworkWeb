@@ -36,7 +36,7 @@ export type ExerciseFormData = {
   muscleAreas: string[];
   muscles: string[];
   instructions: string[];
-  measurements: Record<string, any>;
+  measurements: ExerciseMeasurementType;
   activeMeasurements: string[];
 };
 
@@ -59,7 +59,7 @@ export const ExerciseForm: React.FC<Props> = ({
     const updatedMeasurements = measurements.reduce((acc, measurement) => {
       acc[measurement] = measurementDefaults[measurement];
       return acc;
-    }, {});
+    }, {} as ExerciseMeasurementType);
     onChange({
       ...exercise,
       measurements: updatedMeasurements,
@@ -247,7 +247,11 @@ export const ExerciseForm: React.FC<Props> = ({
             <MeasurementSection
               key={measurement}
               measurementKey={measurement as keyof ExerciseMeasurementType}
-              measurement={exercise.measurements[measurement]}
+              measurement={
+                exercise.measurements[
+                  measurement
+                ] as ExerciseMeasurementType[keyof ExerciseMeasurementType]
+              }
               onChange={onMeasurementChange}
             />
           );

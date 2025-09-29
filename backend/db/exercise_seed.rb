@@ -22,15 +22,6 @@ module ExerciseSeed
       is_cardio = muscle_areas.include?('Cardio')
       has_reps_measurement = !has_duration_measurement
 
-      measurements = {
-        weight: has_weight_measurement ? MEASUREMENT_DEFAULTS[:weight] : nil,
-        reps: has_reps_measurement ? MEASUREMENT_DEFAULTS[:reps] : nil,
-        duration: has_duration_measurement ? MEASUREMENT_DEFAULTS[:duration] : nil,
-        speed: is_cardio ? MEASUREMENT_DEFAULTS[:speed] : nil,
-        distance: is_cardio ? MEASUREMENT_DEFAULTS[:distance] : nil
-      }.compact
-
-
       {
         name: name,
         equipment: [entry['equipment']].compact,
@@ -40,7 +31,11 @@ module ExerciseSeed
         muscle_areas: muscle_areas,
         position: entry['position'],
         stance: entry['stance'],
-        measurements: measurements,
+        reps_measurement:  has_reps_measurement ? MEASUREMENT_DEFAULTS[:reps] : nil,
+        weight_measurement: has_weight_measurement ? MEASUREMENT_DEFAULTS[:weight] : nil,
+        duration_measurement: has_duration_measurement ? MEASUREMENT_DEFAULTS[:duration] : nil,
+        speed_measurement: is_cardio ? MEASUREMENT_DEFAULTS[:speed] : nil,
+        distance_measurement: is_cardio ? MEASUREMENT_DEFAULTS[:distance] : nil,
         tips: entry['tips']
       }
     end

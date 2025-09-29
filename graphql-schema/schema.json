@@ -381,6 +381,41 @@
           "enumValues": null
         },
         {
+          "kind": "INPUT_OBJECT",
+          "name": "BaseMeasurementConfigInput",
+          "description": null,
+          "interfaces": null,
+          "possibleTypes": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "unit",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "moreIsBetter",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "enumValues": null
+        },
+        {
           "kind": "SCALAR",
           "name": "BigInt",
           "description": "Represents non-fractional signed whole numeric values. Since the value may exceed the size of a 32-bit integer, it's encoded as a string.",
@@ -500,9 +535,29 @@
               "name": "measurements",
               "description": "Optional measurements of the exercise",
               "type": {
-                "kind": "SCALAR",
-                "name": "JSON",
+                "kind": "INPUT_OBJECT",
+                "name": "MeasurementsInput",
                 "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "activeMeasurements",
+              "description": "Optional active measurements of the exercise",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
               },
               "defaultValue": null,
               "isDeprecated": false,
@@ -1824,16 +1879,6 @@
           "enumValues": null
         },
         {
-          "kind": "SCALAR",
-          "name": "JSON",
-          "description": "Represents untyped JSON",
-          "interfaces": null,
-          "possibleTypes": null,
-          "fields": null,
-          "inputFields": null,
-          "enumValues": null
-        },
-        {
           "kind": "OBJECT",
           "name": "Measurements",
           "description": null,
@@ -1902,6 +1947,77 @@
             }
           ],
           "inputFields": null,
+          "enumValues": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "MeasurementsInput",
+          "description": null,
+          "interfaces": null,
+          "possibleTypes": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "weight",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "WeightMeasurementConfigInput",
+                "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "reps",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseMeasurementConfigInput",
+                "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "duration",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseMeasurementConfigInput",
+                "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "distance",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseMeasurementConfigInput",
+                "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "speed",
+              "description": null,
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseMeasurementConfigInput",
+                "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
           "enumValues": null
         },
         {
@@ -3050,9 +3166,29 @@
               "name": "measurements",
               "description": "Optional measurements of the exercise",
               "type": {
-                "kind": "SCALAR",
-                "name": "JSON",
+                "kind": "INPUT_OBJECT",
+                "name": "MeasurementsInput",
                 "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "activeMeasurements",
+              "description": "Optional active measurements of the exercise",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
               },
               "defaultValue": null,
               "isDeprecated": false,
@@ -3687,6 +3823,53 @@
             }
           ],
           "inputFields": null,
+          "enumValues": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "WeightMeasurementConfigInput",
+          "description": null,
+          "interfaces": null,
+          "possibleTypes": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "unit",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "moreIsBetter",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "step",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "defaultValue": null,
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
           "enumValues": null
         },
         {

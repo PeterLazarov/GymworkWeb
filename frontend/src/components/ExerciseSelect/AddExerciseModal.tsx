@@ -4,6 +4,7 @@ import { measurementDefaults } from "../../constants/measurements";
 import { MeasurementsFragment } from "../../generated/graphql";
 import { Modal } from "../shared";
 import { ExerciseForm, ExerciseFormData } from "./ExerciseForm";
+import { ExerciseMeasurementType } from "./ExerciseMeasurementType";
 
 const CREATE_EXERCISE_MUTATION = gql`
   mutation CreateExercise($input: CreateExerciseInput!) {
@@ -46,7 +47,7 @@ export const AddExerciseModal: React.FC<Props> = ({
     measurements: {
       reps: measurementDefaults.reps,
       weight: measurementDefaults.weight,
-    },
+    } as ExerciseMeasurementType,
     activeMeasurements: ["reps", "weight"],
   });
 

@@ -27,7 +27,18 @@ module Types
     end
 
     def active_measurements
-      object.measurements.keys.select { |key| object.measurements[key].present? }
+      measurement_fields = %w[reps_measurement weight_measurement distance_measurement duration_measurement speed_measurement]
+      measurement_fields.select { |field| object.send(field).present? }.map { |field| field.gsub('_measurement', '') }
+    end
+
+    def measurements
+      output = {}
+      output[:reps] = object.reps_measurement if object.reps_measurement.present?
+      output[:weight] = object.weight_measurement if object.weight_measurement.present?
+      output[:distance] = object.distance_measurement if object.distance_measurement.present?
+      output[:duration] = object.duration_measurement if object.duration_measurement.present?
+      output[:speed] = object.speed_measurement if object.speed_measurement.present?
+      output
     end
   end
 end

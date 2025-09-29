@@ -58,9 +58,7 @@ export const EditExerciseModal: React.FC<Props> = ({
   onSuccess,
   exerciseId,
 }) => {
-  const [formData, setFormData] = useState<ExerciseFormData | undefined>(
-    undefined
-  );
+  const [formData, setFormData] = useState<ExerciseFormData | undefined>();
   const {
     data,
     loading: queryLoading,

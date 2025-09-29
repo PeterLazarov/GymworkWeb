@@ -16,4 +16,23 @@ module Types
     field :distance, Types::BaseMeasurementConfigType, null: true
     field :speed, Types::BaseMeasurementConfigType, null: true
   end
+
+  class BaseMeasurementConfigInputType < Types::BaseInputObject
+    argument :unit, String, required: false
+    argument :more_is_better, Boolean, required: false
+  end
+
+  class WeightMeasurementConfigInputType < Types::BaseInputObject
+    argument :unit, String, required: false
+    argument :more_is_better, Boolean, required: false
+    argument :step, Float, required: false
+  end
+
+  class MeasurementsInputType < Types::BaseInputObject
+    argument :weight, Types::WeightMeasurementConfigInputType, required: false
+    argument :reps, Types::BaseMeasurementConfigInputType, required: false
+    argument :duration, Types::BaseMeasurementConfigInputType, required: false
+    argument :distance, Types::BaseMeasurementConfigInputType, required: false
+    argument :speed, Types::BaseMeasurementConfigInputType, required: false
+  end
 end

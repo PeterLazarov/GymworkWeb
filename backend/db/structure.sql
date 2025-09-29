@@ -1,7 +1,6 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -89,10 +88,15 @@ CREATE TABLE public.exercises (
     tips character varying[],
     muscle_areas character varying[] DEFAULT '{}'::character varying[],
     muscles character varying[] DEFAULT '{}'::character varying[],
-    measurements jsonb DEFAULT '{"reps": null, "speed": null, "weight": null, "distance": null, "duration": null}'::jsonb,
     is_favorite boolean DEFAULT false NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    reps_measurement jsonb,
+    weight_measurement jsonb,
+    distance_measurement jsonb,
+    duration_measurement jsonb,
+    speed_measurement jsonb,
+    rest_measurement jsonb
 );
 
 
@@ -368,6 +372,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('4'),
 ('3'),
 ('20250926000000'),
+('20250924000000'),
 ('20250920000000'),
 ('20250913000001'),
 ('20250909120951'),

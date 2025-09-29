@@ -43,14 +43,14 @@ export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
   const { data, loading, error } = useQuery<IExerciseSetsQuery>(ExerciseSets, {
     variables: { exerciseId },
     onCompleted(data) {
-      const exercise = data.exercise;
-      if (exercise?.activeMeasurements.includes("reps")) {
+      const exercise = data.exercise!;
+      if (exercise.activeMeasurements.includes("reps")) {
         setMetric("reps");
-      } else if (exercise?.activeMeasurements.includes("weight")) {
+      } else if (exercise.activeMeasurements.includes("weight")) {
         setMetric("weight");
-      } else if (exercise?.activeMeasurements.includes("distance")) {
+      } else if (exercise.activeMeasurements.includes("distance")) {
         setMetric("distance");
-      } else if (exercise?.activeMeasurements.includes("duration")) {
+      } else if (exercise.activeMeasurements.includes("duration")) {
         setMetric("duration");
       }
     },
