@@ -1,7 +1,13 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
-import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CopyIcon,
+  PlusIcon,
+} from "lucide-react";
 import { DateTime } from "luxon";
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { WorkoutByDate } from "../../generated/graphql";
 import {
@@ -10,6 +16,7 @@ import {
   formatStringDateToIso,
 } from "../../utils/date";
 import { Button, Header } from "../shared";
+import { CopyWorkoutModal } from "./CopyWorkoutModal";
 import { WorkoutView } from "./WorkoutView";
 
 const CREATE_WORKOUT_MUTATION = gql`
@@ -93,6 +100,8 @@ const WorkoutHeader: React.FC<Props> = ({ date }) => {
 export const Workout = () => {
   const { date } = useParams();
   const currentDate = date || DateTime.now().toISODate();
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+
   const { data, loading, error, refetch } = useQuery(WorkoutByDate, {
     variables: { date: currentDate },
     skip: !currentDate,
@@ -135,10 +144,28 @@ export const Workout = () => {
       {!loading && !error && !data?.workout && !creating && (
         <div className="text-center p-4">
           <div className="mb-4">No workout found for this date</div>
-          <Button onClick={handleCreateWorkout}>Create Workout</Button>
+          <div className="flex gap-2 justify-center">
+            <Button onClick={handleCreateWorkout}>
+              <PlusIcon className="h-4 w-4" />
+              Create Workout
+            </Button>
+            <Button onClick={() => setIsCopyModalOpen(true)}>
+              <CopyIcon className="h-4 w-4" />
+              Copy Existing Workout
+            </Button>
+          </div>
         </div>
       )}
       {data?.workout && <WorkoutView workout={data.workout} />}
+      <CopyWorkoutModal
+        isOpen={isCopyModalOpen}
+        onClose={() => setIsCopyModalOpen(false)}
+        targetDate={currentDate}
+        onWorkoutCopied={() => {
+          refetch();
+          setIsCopyModalOpen(false);
+        }}
+      />
     </>
   );
 };

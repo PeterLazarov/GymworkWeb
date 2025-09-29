@@ -1,0 +1,88 @@
+module Mutations
+  class CopyWorkoutMutation < BaseMutation
+    graphql_name "CopyWorkout"
+    description "Copy an existing workout to a new date"
+
+    argument :source_workout_id, ID, required: true, description: "ID of the workout to copy"
+    argument :target_date, GraphQL::Types::ISO8601DateTime, required: true, description: "Date for the new workout"
+
+    field :workout, Types::WorkoutType, null: true
+    field :errors, [String], null: false
+
+    def resolve(source_workout_id:, target_date:)
+      source_workout = Workout.find_by(id: source_workout_id)
+
+      if source_workout.nil?
+        return {
+          workout: nil,
+          errors: ["Source workout not found"]
+        }
+      end
+
+      # Check if a workout already exists for the target date
+      existing_workout = Workout.find_by(date: target_date)
+      if existing_workout
+        return {
+          workout: nil,
+          errors: ["A workout already exists for #{target_date.strftime('%Y-%m-%d')}"]
+        }
+      end
+
+      new_workout = nil
+
+      ActiveRecord::Base.transaction do
+        # Create the new workout with copied attributes (excluding date-specific fields)
+        new_workout = Workout.create!(
+          date: target_date,
+          notes: source_workout.notes,
+          feeling: source_workout.feeling,
+          pain: source_workout.pain,
+          rpe: source_workout.rpe
+        )
+
+        # Copy all workout steps and their exercises
+        source_workout.steps.each do |source_step|
+          new_step = new_workout.steps.create!(
+            step_type: source_step.step_type
+          )
+
+          # Copy exercises for this step
+          source_step.exercises.each do |exercise|
+            new_step.workout_step_exercises.create!(exercise: exercise)
+          end
+
+          # Copy all sets for this step
+          source_step.sets.each do |source_set|
+            new_step.sets.create!(
+              exercise: source_set.exercise,
+              reps: source_set.reps,
+              weight_mcg: source_set.weight_mcg,
+              distance_mm: source_set.distance_mm,
+              duration_ms: source_set.duration_ms,
+              speed_kph: source_set.speed_kph,
+              is_warmup: source_set.is_warmup,
+              rest_ms: source_set.rest_ms,
+              date: target_date
+              # Note: completed_at is intentionally not copied as the new workout hasn't been performed yet
+            )
+          end
+        end
+      end
+
+      {
+        workout: new_workout,
+        errors: []
+      }
+    rescue ActiveRecord::RecordInvalid => e
+      {
+        workout: nil,
+        errors: e.record.errors.full_messages
+      }
+    rescue StandardError => e
+      {
+        workout: nil,
+        errors: ["Failed to copy workout: #{e.message}"]
+      }
+    end
+  end
+end

@@ -3,6 +3,7 @@
 module Types
   class MutationType < Types::BaseObject
     field :create_workout, mutation: Mutations::CreateWorkoutMutation
+    field :copy_workout, mutation: Mutations::CopyWorkoutMutation
     field :delete_workout, mutation: Mutations::DeleteWorkoutMutation
     field :update_workout, mutation: Mutations::UpdateWorkoutMutation
 
