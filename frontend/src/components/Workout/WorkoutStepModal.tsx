@@ -54,6 +54,10 @@ const EXERCISE_RECORDS_QUERY = gql`
       reps
       weightMcg
       weight
+      distanceMm
+      distance
+      durationMs
+      speedKph
       date
     }
   }

@@ -53,24 +53,69 @@ CREATE TABLE public.workout_sets (
 --
 
 CREATE VIEW public.exercise_records AS
- WITH ranked_sets AS (
+ WITH measurement_sets AS (
          SELECT workout_sets.id,
             workout_sets.exercise_id,
             workout_sets.reps,
             workout_sets.weight_mcg,
+            workout_sets.distance_mm,
+            workout_sets.duration_ms,
+            workout_sets.speed_kph,
             workout_sets.date,
-            row_number() OVER (PARTITION BY workout_sets.exercise_id, workout_sets.reps ORDER BY workout_sets.weight_mcg DESC, workout_sets.date DESC) AS rank
+                CASE
+                    WHEN ((workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN workout_sets.weight_mcg
+                    WHEN ((workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.duration_ms)::bigint
+                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.reps)::bigint
+                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN (workout_sets.distance_mm)::bigint
+                    WHEN ((workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN workout_sets.weight_mcg
+                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.reps)::bigint
+                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.duration_ms)::bigint
+                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN workout_sets.weight_mcg
+                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL)) THEN (workout_sets.distance_mm)::bigint
+                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN (workout_sets.reps)::bigint
+                    ELSE NULL::bigint
+                END AS grouping_value,
+                CASE
+                    WHEN ((workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN workout_sets.weight_mcg
+                    WHEN ((workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN ((- workout_sets.duration_ms))::bigint
+                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.reps)::bigint
+                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN (workout_sets.distance_mm)::bigint
+                    WHEN ((workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN ((- workout_sets.duration_ms))::bigint
+                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN workout_sets.weight_mcg
+                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.reps)::bigint
+                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN (workout_sets.distance_mm)::bigint
+                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL)) THEN ((- workout_sets.duration_ms))::bigint
+                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN (workout_sets.distance_mm)::bigint
+                    ELSE NULL::bigint
+                END AS measurement_value
            FROM public.workout_sets
-          WHERE ((workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NOT NULL) AND (workout_sets.is_warmup = false))
+        ), ranked_sets AS (
+         SELECT measurement_sets.id,
+            measurement_sets.exercise_id,
+            measurement_sets.reps,
+            measurement_sets.weight_mcg,
+            measurement_sets.distance_mm,
+            measurement_sets.duration_ms,
+            measurement_sets.speed_kph,
+            measurement_sets.date,
+            measurement_sets.grouping_value,
+            measurement_sets.measurement_value,
+            row_number() OVER (PARTITION BY measurement_sets.exercise_id, measurement_sets.grouping_value ORDER BY measurement_sets.measurement_value DESC, measurement_sets.date DESC) AS rank
+           FROM measurement_sets
         )
  SELECT id AS record_id,
     exercise_id,
     reps,
     weight_mcg,
-    date
+    distance_mm,
+    duration_ms,
+    speed_kph,
+    date,
+    grouping_value,
+    measurement_value
    FROM ranked_sets
   WHERE (rank = 1)
-  ORDER BY exercise_id, reps;
+  ORDER BY exercise_id, grouping_value;
 
 
 --
@@ -371,6 +416,7 @@ SET search_path TO "$user", public;
 INSERT INTO "schema_migrations" (version) VALUES
 ('4'),
 ('3'),
+('20250929210252'),
 ('20250926000000'),
 ('20250924000000'),
 ('20250920000000'),

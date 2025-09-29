@@ -297,11 +297,14 @@ input ExerciseFilter {
 type ExerciseRecord {
   date: ISO8601Date!
   distance: Float
+  distanceMm: Int
+  durationMs: Int
   exercise: Exercise!
   id: ID!
-  reps: Int!
+  reps: Int
+  speedKph: Float
   weight: Float
-  weightMcg: BigInt!
+  weightMcg: BigInt
 }
 
 """
