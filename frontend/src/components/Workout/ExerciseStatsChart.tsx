@@ -10,6 +10,8 @@ import {
   YAxis,
 } from "recharts";
 import { ExerciseSets, IExerciseSetsQuery } from "../../generated/graphql";
+import { getActiveMeasurements } from "../../utils/measurements";
+import { ExerciseMeasurementType } from "../ExerciseSelect/ExerciseMeasurementType";
 import { ChartContainer, ToggleGroup, ToggleGroupItem } from "../shared";
 
 type WorkoutSet = NonNullable<
@@ -44,13 +46,16 @@ export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
     variables: { exerciseId },
     onCompleted(data) {
       const exercise = data.exercise!;
-      if (exercise.activeMeasurements.includes("reps")) {
+      const activeMeasurements = getActiveMeasurements(
+        exercise.measurements as ExerciseMeasurementType
+      );
+      if (activeMeasurements.includes("reps")) {
         setMetric("reps");
-      } else if (exercise.activeMeasurements.includes("weight")) {
+      } else if (activeMeasurements.includes("weight")) {
         setMetric("weight");
-      } else if (exercise.activeMeasurements.includes("distance")) {
+      } else if (activeMeasurements.includes("distance")) {
         setMetric("distance");
-      } else if (exercise.activeMeasurements.includes("duration")) {
+      } else if (activeMeasurements.includes("duration")) {
         setMetric("duration");
       }
     },
@@ -68,16 +73,19 @@ export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
     return Object.entries(groupedSets).map(([date, sets]) => {
       let setCharts: SetCharts = { date };
 
-      if (exercise.activeMeasurements.includes("reps")) {
+      const activeMeasurements = getActiveMeasurements(
+        exercise.measurements as ExerciseMeasurementType
+      );
+      if (activeMeasurements.includes("reps")) {
         setCharts.reps = maxBy(sets, "reps").reps;
       }
-      if (exercise.activeMeasurements.includes("weight")) {
+      if (activeMeasurements.includes("weight")) {
         setCharts.weight = maxBy(sets, "weightMcg").weightMcg / 1000000;
       }
-      if (exercise.activeMeasurements.includes("duration")) {
+      if (activeMeasurements.includes("duration")) {
         setCharts.duration = maxBy(sets, "durationMs").durationMs;
       }
-      if (exercise.activeMeasurements.includes("distance")) {
+      if (activeMeasurements.includes("distance")) {
         setCharts.distance = maxBy(sets, "distanceMm").distanceMm;
       }
 

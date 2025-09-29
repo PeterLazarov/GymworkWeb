@@ -13,7 +13,6 @@ module Types
     field :muscle_areas, [String], null: false
     field :muscles, [String], null: false
     field :measurements, Types::MeasurementsType, null: false
-    field :active_measurements, [String], null: false
     field :is_favorite, Boolean, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
@@ -24,11 +23,6 @@ module Types
 
     def steps
       object.workout_steps.sort_by { |step| step.workout.date }.reverse
-    end
-
-    def active_measurements
-      measurement_fields = %w[reps_measurement weight_measurement distance_measurement duration_measurement speed_measurement]
-      measurement_fields.select { |field| object.send(field).present? }.map { |field| field.gsub('_measurement', '') }
     end
 
     def measurements

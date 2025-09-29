@@ -15,7 +15,6 @@ const CREATE_EXERCISE_MUTATION = gql`
         muscleAreas
         muscles
         instructions
-        activeMeasurements
         measurements {
           ...MeasurementsFragment
         }
@@ -48,7 +47,6 @@ export const AddExerciseModal: React.FC<Props> = ({
       reps: measurementDefaults.reps,
       weight: measurementDefaults.weight,
     } as ExerciseMeasurementType,
-    activeMeasurements: ["reps", "weight"],
   });
 
   const [createExercise, { loading, error }] = useMutation(

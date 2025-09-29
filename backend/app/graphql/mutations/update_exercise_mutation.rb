@@ -9,12 +9,11 @@ module Mutations
     argument :muscle_areas, [String], required: false, description: "General muscle groups"
     argument :instructions, [String], required: false, description: "Optional instructions of the exercise"
     argument :measurements, Types::MeasurementsInputType, required: false, description: "Optional measurements of the exercise"
-    argument :active_measurements, [String], required: false, description: "Optional active measurements of the exercise"
 
     field :exercise, Types::ExerciseType, null: true
     field :errors, [String], null: false
 
-    def resolve(exercise_id:, measurements:, active_measurements:, **attributes)
+    def resolve(exercise_id:, measurements:, **attributes)
       exercise = Exercise.find_by(id: exercise_id)
 
       if exercise.nil?

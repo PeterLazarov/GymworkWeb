@@ -4,7 +4,6 @@ query ExerciseSets($exerciseId: ID!) {
     measurements {
       ...MeasurementsFragment
     }
-    activeMeasurements
     steps {
       id
       sets {

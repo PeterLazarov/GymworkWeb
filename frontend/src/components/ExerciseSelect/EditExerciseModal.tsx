@@ -15,7 +15,6 @@ const EXERCISE_QUERY = gql`
       muscleAreas
       muscles
       instructions
-      activeMeasurements
       measurements {
         ...MeasurementsFragment
       }
@@ -34,7 +33,6 @@ const UPDATE_EXERCISE_MUTATION = gql`
         muscleAreas
         muscles
         instructions
-        activeMeasurements
         measurements {
           ...MeasurementsFragment
         }
@@ -75,7 +73,6 @@ export const EditExerciseModal: React.FC<Props> = ({
         muscles: data.exercise.muscles,
         instructions: data.exercise.instructions,
         measurements: data.exercise.measurements,
-        activeMeasurements: data.exercise.activeMeasurements,
       });
     }
   }, [data]);

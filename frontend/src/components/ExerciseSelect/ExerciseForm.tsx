@@ -1,10 +1,11 @@
 import { BicepsFlexedIcon } from "lucide-react";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   measurementDefaults,
   measurementUnits,
 } from "../../constants/measurements";
 import { muscleAreas, muscles } from "../../constants/muscles";
+import { getActiveMeasurements } from "../../utils/measurements";
 import {
   syncMuscleAreasFromMuscles,
   syncMusclesFromMuscleAreas,
@@ -37,7 +38,6 @@ export type ExerciseFormData = {
   muscles: string[];
   instructions: string[];
   measurements: ExerciseMeasurementType;
-  activeMeasurements: string[];
 };
 
 type Props = {
@@ -54,6 +54,10 @@ export const ExerciseForm: React.FC<Props> = ({
   error,
 }) => {
   const [showMuscleMap, setShowMuscleMap] = useState(false);
+  const activeMeasurements = useMemo(
+    () => getActiveMeasurements(exercise.measurements),
+    [exercise.measurements]
+  );
 
   const handleMeasurementsInput = (measurements: string[]) => {
     const updatedMeasurements = measurements.reduce((acc, measurement) => {
@@ -63,7 +67,6 @@ export const ExerciseForm: React.FC<Props> = ({
     onChange({
       ...exercise,
       measurements: updatedMeasurements,
-      activeMeasurements: Object.keys(updatedMeasurements),
     });
   };
 
@@ -94,7 +97,7 @@ export const ExerciseForm: React.FC<Props> = ({
       <div className="mb-4">
         <Label htmlFor="measurements">Measurements</Label>
         <MultiSelect
-          values={exercise.activeMeasurements}
+          values={activeMeasurements}
           onValuesChange={handleMeasurementsInput}
         >
           <MultiSelectTrigger id="measurements" className="w-full">
