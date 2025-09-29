@@ -63,7 +63,7 @@ export const Settings: React.FC = () => {
     try {
       await updateSettings({
         variables: {
-          theme,
+          input: { theme },
         },
       });
     } catch (error) {

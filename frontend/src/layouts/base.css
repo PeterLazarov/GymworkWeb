@@ -1,8 +1,4 @@
-/* Import the reset styles from PandaCSS */
-@layer reset, base, tokens, recipes, utilities;
-
 :root {
-  /* You can access these via token(colors.primary) in the css function */
   --colors-primary: #3182ce;
   --colors-primary-dark: #2c5282;
 }
@@ -12,7 +8,6 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f7fafc;
   overflow: hidden;
 }
 

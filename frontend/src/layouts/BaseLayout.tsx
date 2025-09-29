@@ -58,8 +58,8 @@ export function BaseLayout({ children }: BaseLayoutProps) {
           </Button>
         </div>
 
-        <div>
-          <Button className="float-right" variant="ghost" asChild>
+        <div className="flex gap-2 justify-end">
+          <Button variant="ghost" asChild>
             <Link to="/settings">
               <SettingsIcon />
             </Link>

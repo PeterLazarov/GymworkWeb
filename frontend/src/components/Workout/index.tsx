@@ -76,10 +76,10 @@ const WorkoutHeader: React.FC<Props> = ({ date }) => {
           </Link>
         </Button>
       </div>
-      <div className="justify-end">
+      <div className="flex justify-end">
         <Button
           variant="secondary"
-          className="float-right w-48"
+          className="w-48"
           onClick={() => navigateToDate(1)}
         >
           {formatDate(currentDate.plus({ days: 1 }), "long")}
