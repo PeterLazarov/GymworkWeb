@@ -1,6 +1,7 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -20,6 +21,24 @@ SET default_table_access_method = heap;
 CREATE TABLE public.ar_internal_metadata (
     key character varying NOT NULL,
     value character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: exercise_measurements; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.exercise_measurements (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    exercise_id uuid NOT NULL,
+    measurement_type character varying NOT NULL,
+    unit character varying NOT NULL,
+    more_is_better boolean DEFAULT true NOT NULL,
+    step_value numeric(10,3),
+    min_value numeric(10,3),
+    max_value numeric(10,3),
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL
 );
@@ -135,13 +154,7 @@ CREATE TABLE public.exercises (
     muscles character varying[] DEFAULT '{}'::character varying[],
     is_favorite boolean DEFAULT false NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL,
-    reps_measurement jsonb,
-    weight_measurement jsonb,
-    distance_measurement jsonb,
-    duration_measurement jsonb,
-    speed_measurement jsonb,
-    rest_measurement jsonb
+    updated_at timestamp(6) without time zone NOT NULL
 );
 
 
@@ -249,6 +262,14 @@ ALTER TABLE ONLY public.ar_internal_metadata
 
 
 --
+-- Name: exercise_measurements exercise_measurements_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.exercise_measurements
+    ADD CONSTRAINT exercise_measurements_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: exercises exercises_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -302,6 +323,27 @@ ALTER TABLE ONLY public.workout_steps
 
 ALTER TABLE ONLY public.workouts
     ADD CONSTRAINT workouts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: index_exercise_measurements_on_exercise_and_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_exercise_measurements_on_exercise_and_type ON public.exercise_measurements USING btree (exercise_id, measurement_type);
+
+
+--
+-- Name: index_exercise_measurements_on_exercise_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_exercise_measurements_on_exercise_id ON public.exercise_measurements USING btree (exercise_id);
+
+
+--
+-- Name: index_exercise_measurements_on_measurement_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_exercise_measurements_on_measurement_type ON public.exercise_measurements USING btree (measurement_type);
 
 
 --
@@ -384,6 +426,14 @@ ALTER TABLE ONLY public.workout_steps
 
 
 --
+-- Name: exercise_measurements fk_rails_6c2c94c1b6; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.exercise_measurements
+    ADD CONSTRAINT fk_rails_6c2c94c1b6 FOREIGN KEY (exercise_id) REFERENCES public.exercises(id);
+
+
+--
 -- Name: workout_step_exercises fk_rails_7211cca98e; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -424,6 +474,8 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20250909120951'),
 ('20250908111917'),
 ('20250908105942'),
+('20250101000001'),
+('20250101000000'),
 ('2'),
 ('1');
 

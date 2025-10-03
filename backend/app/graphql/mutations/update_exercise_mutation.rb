@@ -23,14 +23,26 @@ module Mutations
         }
       end
 
-      # Filter out nil values to only update provided attributes
       update_attributes = attributes.compact
 
-      update_attributes[:reps_measurement] = measurements[:reps]
-      update_attributes[:weight_measurement] = measurements[:weight]
-      update_attributes[:distance_measurement] = measurements[:distance]
-      update_attributes[:duration_measurement] = measurements[:duration]
-      update_attributes[:speed_measurement] = measurements[:speed]
+      if measurements.present?
+        exercise.exercise_measurements.destroy_all
+
+        exercise_measurements_attributes = measurements.map do |measurement_type, measurement_data|
+          next unless measurement_data.present?
+
+          attrs = {
+            measurement_type: measurement_type,
+            unit: measurement_data.unit,
+            more_is_better: measurement_data.more_is_better
+          }
+
+          attrs[:step_value] = measurement_data.step if measurement_data.respond_to?(:step)
+          attrs.compact
+        end.compact
+
+        update_attributes[:exercise_measurements_attributes] = exercise_measurements_attributes
+      end
 
       if update_attributes.empty?
         return {

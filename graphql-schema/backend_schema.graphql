@@ -267,6 +267,7 @@ type DeleteWorkoutPayload {
 type Exercise implements Node {
   createdAt: ISO8601DateTime!
   equipment: [String!]!
+  exerciseMeasurements: [ExerciseMeasurement!]!
   id: ID!
   images: [String!]!
   instructions: [String!]!
@@ -324,6 +325,18 @@ input ExerciseFilter {
   muscleAreas: [String!]
   muscles: [String!]
   name: String
+}
+
+type ExerciseMeasurement {
+  createdAt: ISO8601DateTime!
+  id: ID!
+  maxValue: Float
+  measurementType: String!
+  minValue: Float
+  moreIsBetter: Boolean!
+  stepValue: Float
+  unit: String!
+  updatedAt: ISO8601DateTime!
 }
 
 type ExerciseRecord {

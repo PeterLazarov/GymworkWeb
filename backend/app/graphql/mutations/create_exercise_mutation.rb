@@ -13,13 +13,26 @@ module Mutations
     field :errors, [String], null: false
 
     def resolve(measurements:, **attributes)
-      exercise = Exercise.new(**attributes)
+      exercise_attributes = attributes.compact
 
-      attributes[:reps_measurement] = measurements[:reps]
-      attributes[:weight_measurement] = measurements[:weight]
-      attributes[:distance_measurement] = measurements[:distance]
-      attributes[:duration_measurement] = measurements[:duration]
-      attributes[:speed_measurement] = measurements[:speed]
+      if measurements.present?
+        exercise_measurements_attributes = measurements.map do |measurement_type, measurement_data|
+          next unless measurement_data.present?
+
+          attrs = {
+            measurement_type: measurement_type,
+            unit: measurement_data.unit,
+            more_is_better: measurement_data.more_is_better
+          }
+
+          attrs[:step_value] = measurement_data.step if measurement_data.respond_to?(:step)
+          attrs.compact
+        end.compact
+
+        exercise_attributes[:exercise_measurements_attributes] = exercise_measurements_attributes
+      end
+
+      exercise = Exercise.new(exercise_attributes)
 
       if exercise.save
         {

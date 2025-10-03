@@ -21,21 +21,21 @@ module Types
     field :workout_step, Types::WorkoutStepType, null: false, preload: :workout_step
     field :exercise, Types::ExerciseType, null: false, preload: :exercise
 
-    field :weight, Float, null: true, preload: :exercise
-    field :distance, Float, null: true, preload: :exercise
+    field :weight, Float, null: true, preload: { exercise: :exercise_measurements }
+    field :distance, Float, null: true, preload: { exercise: :exercise_measurements }
 
     def weight
-      measurement = object.exercise.weight_measurement
+      measurement = object.exercise.exercise_measurements.find_by_type('weight')
       return nil unless measurement
 
-      Unit.new("#{object.weight_mcg || 0} mcg").convert_to(measurement['unit']).scalar
+      Unit.new("#{object.weight_mcg || 0} mcg").convert_to(measurement.unit).scalar
     end
 
     def distance
-      measurement = object.exercise.distance_measurement
+      measurement = object.exercise.exercise_measurements.find_by_type('distance')
       return nil unless measurement
 
-      Unit.new("#{object.distance_mm || 0} mm").convert_to(measurement['unit']).scalar
+      Unit.new("#{object.distance_mm || 0} mm").convert_to(measurement.unit).scalar
     end
   end
 end

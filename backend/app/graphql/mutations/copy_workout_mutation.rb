@@ -19,7 +19,6 @@ module Mutations
         }
       end
 
-      # Check if a workout already exists for the target date
       existing_workout = Workout.find_by(date: target_date)
       if existing_workout
         return {
@@ -31,7 +30,6 @@ module Mutations
       new_workout = nil
 
       ActiveRecord::Base.transaction do
-        # Create the new workout with copied attributes (excluding date-specific fields)
         new_workout = Workout.create!(
           date: target_date,
           notes: source_workout.notes,
@@ -40,18 +38,15 @@ module Mutations
           rpe: source_workout.rpe
         )
 
-        # Copy all workout steps and their exercises
         source_workout.steps.each do |source_step|
           new_step = new_workout.steps.create!(
             step_type: source_step.step_type
           )
 
-          # Copy exercises for this step
           source_step.exercises.each do |exercise|
             new_step.workout_step_exercises.create!(exercise: exercise)
           end
 
-          # Copy all sets for this step
           source_step.sets.each do |source_set|
             new_step.sets.create!(
               exercise: source_set.exercise,
@@ -63,7 +58,6 @@ module Mutations
               is_warmup: source_set.is_warmup,
               rest_ms: source_set.rest_ms,
               date: target_date
-              # Note: completed_at is intentionally not copied as the new workout hasn't been performed yet
             )
           end
         end
