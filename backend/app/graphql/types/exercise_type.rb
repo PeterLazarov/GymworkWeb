@@ -19,9 +19,14 @@ module Types
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
     field :steps, [Types::WorkoutStepType], null: false, preload: { workout_steps: [:workout, { sets: :exercise }] }
+    field :last_set, Types::WorkoutSetType, null: true, preload: { workout_sets: :exercise }
 
     def steps
       object.workout_steps.sort_by { |step| step.workout.date }.reverse
+    end
+
+    def last_set
+      object.workout_sets.order(created_at: :desc).first
     end
 
     def measurements

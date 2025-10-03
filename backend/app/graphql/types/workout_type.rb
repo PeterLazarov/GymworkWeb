@@ -13,7 +13,6 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 
-    # Relationships
     field :steps, [Types::WorkoutStepType], null: false, preload: { steps: [:exercises, { sets: :exercise }] }
     field :workout_sets, [Types::WorkoutSetType], null: false, preload: { sets: :exercise }
 

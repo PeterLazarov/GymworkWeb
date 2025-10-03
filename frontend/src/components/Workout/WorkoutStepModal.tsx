@@ -47,6 +47,18 @@ const ADD_SET_MUTATION = gql`
   ${WorkoutSetFragment}
 `;
 
+const LAST_SET_QUERY = gql`
+  query LastSet($exerciseId: ID!) {
+    exercise(id: $exerciseId) {
+      id
+      lastSet {
+        ...WorkoutSetFragment
+      }
+    }
+  }
+  ${WorkoutSetFragment}
+`;
+
 const EXERCISE_RECORDS_QUERY = gql`
   query ExerciseRecords($exerciseId: ID!) {
     exerciseRecords(exerciseId: $exerciseId) {
@@ -228,6 +240,18 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
   const [focusedSet, setFocusedSet] = useState<Set | undefined>();
 
   const exercise = step.exercises[0]!;
+  useQuery(LAST_SET_QUERY, {
+    variables: { exerciseId: exercise.id },
+    onCompleted: (data) => {
+      if (data.exercise.lastSet) {
+        setReps(data.exercise.lastSet.reps ?? 0);
+        setWeight(data.exercise.lastSet.weight ?? 0);
+        setDuration(data.exercise.lastSet.durationMs ?? 0);
+        setDistance(data.exercise.lastSet.distance ?? 0);
+      }
+    },
+  });
+
   const [reps, setReps] = useState(exercise.measurements.reps ? 0 : undefined);
   const [weight, setWeight] = useState(
     exercise.measurements.weight ? 0 : undefined
@@ -279,6 +303,7 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
         input: {
           setId: focusedSet.id,
         },
+        exerciseId: focusedSet.exercise.id,
       },
     });
 

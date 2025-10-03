@@ -7,7 +7,6 @@ module Mutations
     argument :exercise_id, ID, required: true
     argument :date, GraphQL::Types::ISO8601DateTime, required: true
 
-    # Optional exercise metrics
     argument :is_warmup, Boolean, required: false
     argument :reps, Integer, required: false
     argument :weight_mcg, GraphQL::Types::BigInt, required: false
@@ -20,7 +19,6 @@ module Mutations
     field :errors, [String], null: false
 
     def resolve(workout_step_id:, exercise_id:, date:, **metrics)
-      # Find workout step
       step = WorkoutStep.find_by(id: workout_step_id)
       if step.nil?
         return {
@@ -29,7 +27,6 @@ module Mutations
         }
       end
 
-      # Find and validate exercise
       exercise = Exercise.find_by(id: exercise_id)
       if exercise.nil?
         return {
@@ -38,7 +35,6 @@ module Mutations
         }
       end
 
-      # Validate exercise belongs to step
       unless step.exercises.include?(exercise)
         return {
           set: nil,
@@ -46,7 +42,6 @@ module Mutations
         }
       end
 
-      # Create set with metrics
       set = step.sets.new(
         exercise: exercise,
         date: date,

@@ -26,7 +26,6 @@ module Mutations
         }
       end
 
-      # Filter out nil values to only update provided attributes
       update_attributes = attributes.compact
 
       if update_attributes.empty?
