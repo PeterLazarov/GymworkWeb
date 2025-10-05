@@ -11,7 +11,6 @@ generates:
       - 'typescript-operations'
       - 'typed-document-node'
       - 'typescript-validation-schema'
-      - 'typescript-react-apollo'
     config:
       schema: zod
       scalars:
@@ -31,3 +30,6 @@ generates:
         object: false
         defaultValue: false
       maybeValue: T
+      withHooks: false
+      withMutationFn: false
+      documentMode: graphQLTag
