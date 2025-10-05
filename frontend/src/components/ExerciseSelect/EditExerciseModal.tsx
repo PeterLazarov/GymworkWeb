@@ -1,11 +1,18 @@
-import { gql, useMutation, useQuery } from "@apollo/client";
-import React, { useEffect, useState } from "react";
-import { MeasurementsFragment } from "../../generated/graphql";
+import { gql, TypedDocumentNode, useMutation, useQuery } from "@apollo/client";
+import React, { useState } from "react";
+import {
+  IExerciseQuery,
+  IExerciseQueryVariables,
+  MeasurementsFragment,
+} from "../../generated/graphql";
 import { excludeField } from "../../utils/object";
 import { Modal } from "../shared";
 import { ExerciseForm, ExerciseFormData } from "./ExerciseForm";
 
-const EXERCISE_QUERY = gql`
+const EXERCISE_QUERY: TypedDocumentNode<
+  IExerciseQuery,
+  IExerciseQueryVariables
+> = gql`
   query Exercise($id: ID!) {
     settings {
       scientificMuscleNamesEnabled
@@ -65,22 +72,22 @@ export const EditExerciseModal: React.FC<Props> = ({
   } = useQuery(EXERCISE_QUERY, {
     variables: { id: exerciseId },
     skip: !isOpen || !exerciseId,
+    onCompleted: (data) => {
+      if (data.exercise) {
+        setFormData({
+          name: data.exercise.name,
+          muscleAreas: data.exercise.muscleAreas,
+          muscles: data.exercise.muscles,
+          instructions: data.exercise.instructions,
+          measurements: excludeField(
+            "__typename",
+            data.exercise.measurements,
+            true
+          ) as any,
+        });
+      }
+    },
   });
-  useEffect(() => {
-    if (data?.exercise) {
-      setFormData({
-        name: data.exercise.name,
-        muscleAreas: data.exercise.muscleAreas,
-        muscles: data.exercise.muscles,
-        instructions: data.exercise.instructions,
-        measurements: excludeField(
-          "__typename",
-          data.exercise.measurements,
-          true
-        ),
-      });
-    }
-  }, [data]);
 
   const [updateExercise, { loading, error: mutationError }] = useMutation(
     UPDATE_EXERCISE_MUTATION

@@ -1,10 +1,17 @@
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, TypedDocumentNode, useMutation, useQuery } from "@apollo/client";
 import { ChevronLeft } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  ISettingsQuery,
+  ISettingsQueryVariables,
+} from "../../generated/graphql";
 import { Button, Checkbox } from "../shared";
 
-const SETTINGS_QUERY = gql`
+const SETTINGS_QUERY: TypedDocumentNode<
+  ISettingsQuery,
+  ISettingsQueryVariables
+> = gql`
   query Settings {
     settings {
       id
@@ -44,8 +51,9 @@ export const Settings: React.FC = () => {
 
   if (loading) return <div>Loading settings...</div>;
   if (error) return <div>Error loading settings: {error.message}</div>;
+  if (!data?.settings) return <div>No settings found</div>;
 
-  const settings = data?.settings;
+  const settings = data.settings;
 
   const handleBack = () => {
     navigate(-1);

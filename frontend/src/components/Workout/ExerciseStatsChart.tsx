@@ -42,7 +42,7 @@ const chartNames = {
 export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
   exerciseId,
 }) => {
-  const { data, loading, error } = useQuery<IExerciseSetsQuery>(ExerciseSets, {
+  const { data, loading, error } = useQuery(ExerciseSets, {
     variables: { exerciseId },
     onCompleted(data) {
       const exercise = data.exercise!;

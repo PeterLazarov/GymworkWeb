@@ -1,16 +1,22 @@
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, TypedDocumentNode, useMutation, useQuery } from "@apollo/client";
 import { debounce } from "lodash";
 import { ChevronLeft, InfoIcon, PencilIcon, SearchIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { IExercisesQuery } from "../../generated/graphql";
+import {
+  IExercisesQuery,
+  IExercisesQueryVariables,
+} from "../../generated/graphql";
 import { exerciseImages } from "../../utils/exerciseImages";
 import { useInfiniteScroll } from "../../utils/useInfiniteScroll";
 import { Button, Card, CardHeader, CardTitle, Input, Spinner } from "../shared";
 import { AddExerciseModal } from "./AddExerciseModal";
 import { EditExerciseModal } from "./EditExerciseModal";
 
-const EXERCISES_QUERY = gql`
+const EXERCISES_QUERY: TypedDocumentNode<
+  IExercisesQuery,
+  IExercisesQueryVariables
+> = gql`
   query Exercises($filter: ExerciseFilter, $first: Int, $after: String) {
     settings {
       scientificMuscleNamesEnabled
@@ -62,7 +68,13 @@ export const ExerciseList: React.FC = () => {
   const [editingExerciseId, setEditingExerciseId] = useState<string>();
   const { data, fetchMore, loading, error, refetch } = useQuery(
     EXERCISES_QUERY,
-    { variables: { first: 20 } }
+    {
+      variables: {
+        first: 20,
+        filter: {} as any,
+        after: "",
+      },
+    }
   );
   const navigate = useNavigate();
   const { containerRef, loading: infiniteScrollLoading } = useInfiniteScroll({
@@ -73,7 +85,7 @@ export const ExerciseList: React.FC = () => {
     pageSize: 20,
   });
 
-  if (loading) return <div>Loading exercises...</div>;
+  if (loading || !data) return <div>Loading exercises...</div>;
   if (error) return <div>Error loading exercises: {error.message}</div>;
 
   const debouncedSearch = debounce((value: string) => {
@@ -105,7 +117,7 @@ export const ExerciseList: React.FC = () => {
         ref={containerRef}
         className="p-4 flex-1 overflow-y-auto flex flex-col gap-2"
       >
-        {data?.exercises.edges.map(({ node: exercise }) => (
+        {data.exercises.edges!.map(({ node: exercise }) => (
           <ExerciseItem
             key={exercise.id}
             exercise={exercise}

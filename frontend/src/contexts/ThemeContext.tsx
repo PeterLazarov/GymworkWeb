@@ -1,8 +1,12 @@
-import { gql, useQuery } from "@apollo/client";
+import { gql, TypedDocumentNode, useQuery } from "@apollo/client";
 import React, { createContext, useContext, useEffect } from "react";
+import { ISettingsQuery, ISettingsQueryVariables } from "../generated/graphql";
 
-const SETTINGS_QUERY = gql`
-  query ThemeSettings {
+const SETTINGS_QUERY: TypedDocumentNode<
+  ISettingsQuery,
+  ISettingsQueryVariables
+> = gql`
+  query Settings {
     settings {
       id
       theme
@@ -32,11 +36,9 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const { data, loading } = useQuery(SETTINGS_QUERY, {
-    errorPolicy: "ignore", // Don't crash if settings don't exist yet
-  });
+  const { data, loading } = useQuery(SETTINGS_QUERY, { errorPolicy: "ignore" });
 
-  const theme: Theme = data?.settings?.theme || "light";
+  const theme: Theme = (data?.settings?.theme as Theme) || "light";
 
   useEffect(() => {
     const root = document.documentElement;

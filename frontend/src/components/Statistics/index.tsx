@@ -1,7 +1,12 @@
-import { gql, useQuery } from "@apollo/client";
+import { gql, TypedDocumentNode, useQuery } from "@apollo/client";
 import { ArrowDownIcon, ArrowUpIcon, EyeIcon } from "lucide-react";
 import React, { useState } from "react";
-import { IMuscleAreaStatsQuery } from "../../generated/graphql";
+import {
+  IMuscleAreaStatsQuery,
+  IMuscleAreaStatsQueryVariables,
+  IWorkoutsByMuscleAreaQuery,
+  IWorkoutsByMuscleAreaQueryVariables,
+} from "../../generated/graphql";
 import {
   Button,
   Dialog,
@@ -12,7 +17,10 @@ import {
 } from "../shared";
 import { WorkoutCard } from "../WorkoutHistory/WorkoutCard";
 
-const WORKOUTS_BY_MUSCLE_AREA_QUERY = gql`
+const WORKOUTS_BY_MUSCLE_AREA_QUERY: TypedDocumentNode<
+  IWorkoutsByMuscleAreaQuery,
+  IWorkoutsByMuscleAreaQueryVariables
+> = gql`
   query WorkoutsByMuscleArea($filter: WorkoutFilter) {
     settings {
       scientificMuscleNamesEnabled
@@ -35,7 +43,10 @@ const WORKOUTS_BY_MUSCLE_AREA_QUERY = gql`
   }
 `;
 
-const MUSCLE_AREA_STATS_QUERY = gql`
+const MUSCLE_AREA_STATS_QUERY: TypedDocumentNode<
+  IMuscleAreaStatsQuery,
+  IMuscleAreaStatsQueryVariables
+> = gql`
   query MuscleAreaStats($ascending: Boolean) {
     muscleAreaStats(ascending: $ascending) {
       muscleArea
@@ -59,12 +70,12 @@ export const Statistics: React.FC = () => {
   const { data: workoutsData, loading: workoutsLoading } = useQuery(
     WORKOUTS_BY_MUSCLE_AREA_QUERY,
     {
-      variables: { filter: { muscleAreas: [selectedMuscleArea] } },
+      variables: { filter: { muscleAreas: [selectedMuscleArea!] } },
       skip: !selectedMuscleArea,
     }
   );
 
-  if (loading) return <div>Loading statistics...</div>;
+  if (loading || !workoutsData) return <div>Loading statistics...</div>;
   if (error) return <div>Error loading statistics: {error.message}</div>;
 
   const stats = data?.muscleAreaStats || [];
@@ -121,7 +132,7 @@ export const Statistics: React.FC = () => {
             {workoutsLoading ? (
               <Spinner />
             ) : (
-              workoutsData?.workouts.edges.map(({ node: workout }) => (
+              workoutsData.workouts.edges!.map(({ node: workout }) => (
                 <WorkoutCard
                   key={workout.id}
                   workout={workout}

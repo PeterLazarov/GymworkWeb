@@ -9,7 +9,7 @@ generates:
     plugins:
       - 'typescript'
       - 'typescript-operations'
-      - 'typescript-document-nodes'
+      - 'typed-document-node'
       - 'typescript-validation-schema'
       - 'typescript-react-apollo'
     config:
@@ -22,3 +22,5 @@ generates:
       strictScalars: true
       typesPrefix: I
       enumsAsTypes: true
+      documentVariableSuffix: ''
+      fragmentVariableSuffix: ''

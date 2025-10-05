@@ -1002,14 +1002,14 @@
               "args": []
             },
             {
-              "name": "step",
+              "name": "success",
               "description": null,
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
-                  "kind": "OBJECT",
-                  "name": "WorkoutStep",
+                  "kind": "SCALAR",
+                  "name": "Boolean",
                   "ofType": null
                 }
               },
@@ -4907,37 +4907,20 @@
               "args": []
             },
             {
-              "name": "exercise",
+              "name": "date",
               "description": null,
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
-                  "kind": "OBJECT",
-                  "name": "Exercise",
+                  "kind": "SCALAR",
+                  "name": "ISO8601Date",
                   "ofType": null
                 }
               },
               "isDeprecated": false,
               "deprecationReason": null,
-              "args": [
-                {
-                  "name": "id",
-                  "description": null,
-                  "type": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "ID",
-                      "ofType": null
-                    }
-                  },
-                  "defaultValue": null,
-                  "isDeprecated": false,
-                  "deprecationReason": null
-                }
-              ]
+              "args": []
             },
             {
               "name": "exercises",

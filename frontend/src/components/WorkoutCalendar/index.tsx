@@ -1,14 +1,21 @@
-import { gql, useQuery } from "@apollo/client";
+import { gql, TypedDocumentNode, useQuery } from "@apollo/client";
 import { ChevronLeft, DotIcon } from "lucide-react";
 import { DateTime } from "luxon";
 import React, { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { WorkoutByDate } from "../../generated/graphql";
+import {
+  IWorkoutsQuery,
+  IWorkoutsQueryVariables,
+  WorkoutByDate,
+} from "../../generated/graphql";
 import { formatDate } from "../../utils/date";
 import { Button, Calendar, Modal } from "../shared";
 import { WorkoutView } from "../Workout/WorkoutView";
 
-const WORKOUTS_QUERY = gql`
+const WORKOUTS_QUERY: TypedDocumentNode<
+  IWorkoutsQuery,
+  IWorkoutsQueryVariables
+> = gql`
   query Workouts($first: Int, $after: String) {
     workouts(first: $first, after: $after) {
       edges {
@@ -66,7 +73,7 @@ export const WorkoutCalendar: React.FC = () => {
   };
 
   const workoutDates = useMemo(
-    () => data?.workouts.edges.map(({ node }) => node.date),
+    () => data?.workouts.edges?.map(({ node }) => node.date),
     [data]
   );
   if (loading) return <div>Loading workouts...</div>;

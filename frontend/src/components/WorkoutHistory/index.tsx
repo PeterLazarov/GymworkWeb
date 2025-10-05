@@ -1,7 +1,11 @@
-import { gql, useQuery } from "@apollo/client";
+import { gql, TypedDocumentNode, useQuery } from "@apollo/client";
 import { FilterIcon, SearchIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { muscleAreas, muscles } from "../../constants/muscles";
+import {
+  IWorkoutsHistoryQuery,
+  IWorkoutsHistoryQueryVariables,
+} from "../../generated/graphql";
 import { useInfiniteScroll } from "../../utils/useInfiniteScroll";
 import {
   Button,
@@ -27,7 +31,10 @@ import {
 import { WorkoutDayModal } from "../WorkoutCalendar";
 import { WorkoutCard } from "./WorkoutCard";
 
-const WORKOUTS_QUERY = gql`
+const WORKOUTS_QUERY: TypedDocumentNode<
+  IWorkoutsHistoryQuery,
+  IWorkoutsHistoryQueryVariables
+> = gql`
   query WorkoutsHistory($filter: WorkoutFilter, $first: Int, $after: String) {
     settings {
       scientificMuscleNamesEnabled
@@ -85,6 +92,7 @@ export const WorkoutHistory: React.FC = () => {
       variables: {
         filter: filters,
         first: 10,
+        after: "",
       },
     }
   );
@@ -125,7 +133,8 @@ export const WorkoutHistory: React.FC = () => {
     });
   };
 
-  if (loading && !infiniteScrollLoading) return <div>Loading workouts...</div>;
+  if (loading || !data || !infiniteScrollLoading)
+    return <div>Loading workouts...</div>;
   if (error) return <div>Error loading workouts: {error.message}</div>;
 
   return (
@@ -159,11 +168,11 @@ export const WorkoutHistory: React.FC = () => {
         className="flex flex-col gap-4 px-4 items-center overflow-y-auto"
         ref={containerRef}
       >
-        {data?.workouts.edges.map(({ node: workout }) => (
+        {data.workouts.edges!.map(({ node: workout }) => (
           <WorkoutCard
             key={workout.id}
             workout={workout}
-            onClick={() => setOpenedWorkoutDate(workout.date)}
+            onClick={() => setOpenedWorkoutDate(new Date(workout.date))}
             scientificMuscleNamesEnabled={
               data?.settings.scientificMuscleNamesEnabled
             }

@@ -10,5 +10,11 @@ module Types
     field :workout, Types::WorkoutType, null: false, preload: :workout
     field :sets, [Types::WorkoutSetType], null: false, preload: { sets: :exercise }
     field :exercises, [Types::ExerciseType], null: false, preload: :exercises
+
+    field :date, GraphQL::Types::ISO8601Date, null: false, preload: :workout
+
+    def date
+      object.workout.date
+    end
   end
 end

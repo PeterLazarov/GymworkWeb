@@ -215,7 +215,7 @@ type DeleteSetPayload {
   """
   clientMutationId: String
   errors: [String!]!
-  step: WorkoutStep!
+  success: Boolean!
 }
 
 """
@@ -895,7 +895,7 @@ type WorkoutSet implements Node {
 
 type WorkoutStep implements Node {
   createdAt: ISO8601DateTime!
-  exercise(id: ID!): Exercise!
+  date: ISO8601Date!
   exercises: [Exercise!]!
   id: ID!
   sets: [WorkoutSet!]!

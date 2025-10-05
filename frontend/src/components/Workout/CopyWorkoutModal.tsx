@@ -1,13 +1,20 @@
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, TypedDocumentNode, useMutation, useQuery } from "@apollo/client";
 import { CopyIcon } from "lucide-react";
 import React, { useState } from "react";
-import { IWorkoutsHistoryQuery } from "../../generated/graphql";
+import {
+  IWorkoutsForCopyQuery,
+  IWorkoutsForCopyQueryVariables,
+  IWorkoutsHistoryQuery,
+} from "../../generated/graphql";
 import { formatStringDateToIso } from "../../utils/date";
 import { useInfiniteScroll } from "../../utils/useInfiniteScroll";
 import { Button, Modal, Spinner } from "../shared";
 import { WorkoutCard } from "../WorkoutHistory/WorkoutCard";
 
-const WORKOUTS_QUERY = gql`
+const WORKOUTS_QUERY: TypedDocumentNode<
+  IWorkoutsForCopyQuery,
+  IWorkoutsForCopyQueryVariables
+> = gql`
   query WorkoutsForCopy($first: Int, $after: String) {
     settings {
       scientificMuscleNamesEnabled
@@ -91,6 +98,7 @@ export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
   const { data, fetchMore, loading, error } = useQuery(WORKOUTS_QUERY, {
     variables: {
       first: 10,
+      after: "",
     },
     skip: !isOpen,
   });
@@ -98,7 +106,7 @@ export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
   const [copyWorkout] = useMutation(COPY_WORKOUT_MUTATION);
 
   const { containerRef, loading: infiniteScrollLoading } = useInfiniteScroll({
-    data: data?.workouts,
+    data: data?.workouts as any,
     loading,
     fetchMore: (options) =>
       fetchMore({
@@ -179,7 +187,7 @@ export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
           </div>
         )}
 
-        {data?.workouts.edges.length === 0 && !loading && (
+        {data?.workouts.edges?.length === 0 && !loading && (
           <div className="text-center p-4 text-muted-foreground">
             No workouts found to copy
           </div>
@@ -187,31 +195,35 @@ export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
 
         <div className="flex flex-col gap-3 overflow-y-auto" ref={containerRef}>
           {data?.workouts.edges
-            .filter(({ node }) => node.date !== targetDate)
-            .map(({ node: workout }) => (
-              <div key={workout.id} className="relative">
-                <WorkoutCard
-                  workout={workout}
-                  scientificMuscleNamesEnabled={
-                    data?.settings.scientificMuscleNamesEnabled
-                  }
-                  onClick={() => handleCopyWorkout(workout)}
-                />
-                <div className="absolute top-2 right-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCopyWorkout(workout);
-                    }}
-                    disabled={copying === workout.id}
-                  >
-                    {copying === workout.id ? <Spinner /> : <CopyIcon />}
-                  </Button>
+            ?.filter((edge) => edge?.node?.date !== targetDate)
+            .map((edge) => {
+              const workout = edge?.node;
+              if (!workout) return null;
+              return (
+                <div key={workout.id} className="relative">
+                  <WorkoutCard
+                    workout={workout}
+                    scientificMuscleNamesEnabled={
+                      data?.settings.scientificMuscleNamesEnabled
+                    }
+                    onClick={() => handleCopyWorkout(workout)}
+                  />
+                  <div className="absolute top-2 right-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopyWorkout(workout);
+                      }}
+                      disabled={copying === workout.id}
+                    >
+                      {copying === workout.id ? <Spinner /> : <CopyIcon />}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </div>
 
         {infiniteScrollLoading && (

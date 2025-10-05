@@ -1,9 +1,13 @@
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, TypedDocumentNode, useMutation, useQuery } from "@apollo/client";
 import { Length } from "convert";
 import { EllipsisIcon } from "lucide-react";
 import React, { useState } from "react";
 import {
   ExerciseSets,
+  IExerciseRecordsQuery,
+  IExerciseRecordsQueryVariables,
+  ILastSetQuery,
+  ILastSetQueryVariables,
   IWorkoutByDateQuery,
   WorkoutSetFragment,
 } from "../../generated/graphql";
@@ -47,19 +51,23 @@ const ADD_SET_MUTATION = gql`
   ${WorkoutSetFragment}
 `;
 
-const LAST_SET_QUERY = gql`
-  query LastSet($exerciseId: ID!) {
-    exercise(id: $exerciseId) {
-      id
-      lastSet {
-        ...WorkoutSetFragment
+const LAST_SET_QUERY: TypedDocumentNode<ILastSetQuery, ILastSetQueryVariables> =
+  gql`
+    query LastSet($exerciseId: ID!) {
+      exercise(id: $exerciseId) {
+        id
+        lastSet {
+          ...WorkoutSetFragment
+        }
       }
     }
-  }
-  ${WorkoutSetFragment}
-`;
+    ${WorkoutSetFragment}
+  `;
 
-const EXERCISE_RECORDS_QUERY = gql`
+const EXERCISE_RECORDS_QUERY: TypedDocumentNode<
+  IExerciseRecordsQuery,
+  IExerciseRecordsQueryVariables
+> = gql`
   query ExerciseRecords($exerciseId: ID!) {
     exerciseRecords(exerciseId: $exerciseId) {
       id
@@ -243,7 +251,7 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
   useQuery(LAST_SET_QUERY, {
     variables: { exerciseId: exercise.id },
     onCompleted: (data) => {
-      if (data.exercise.lastSet) {
+      if (data.exercise?.lastSet) {
         setReps(data.exercise.lastSet.reps ?? 0);
         setWeight(data.exercise.lastSet.weight ?? 0);
         setDuration(data.exercise.lastSet.durationMs ?? 0);
@@ -446,7 +454,7 @@ const RecordsStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
         {data.exerciseRecords.map((record) => (
           <SetListItem
             key={record.id}
-            set={record}
+            set={record as any}
             measurements={exercise.measurements}
             showDate
           />
@@ -472,14 +480,14 @@ const HistoryStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
         {data.exercise.steps.map((step) => (
           <Card key={step.id} variant="secondary">
             <CardHeader>
-              <CardTitle>{formatDateIso(step.sets[0].date, "long")}</CardTitle>
+              <CardTitle>{formatDateIso(step.date, "long")}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-1">
-              {step.sets?.map((set, index) => (
+              {step.sets.map((set, index) => (
                 <SetListItem
                   key={set.id}
                   set={set}
-                  measurements={data.exercise.measurements}
+                  measurements={data.exercise!.measurements}
                   number={index + 1}
                 />
               ))}
