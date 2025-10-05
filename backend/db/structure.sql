@@ -10,6 +10,21 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: is_metric_match(text[], text[]); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.is_metric_match(target_metrics text[], measurement_types text[]) RETURNS boolean
+    LANGUAGE plpgsql IMMUTABLE
+    AS $$
+      BEGIN
+        RETURN target_metrics <@ measurement_types
+           AND measurement_types <@ target_metrics
+           AND array_length(target_metrics, 1) = array_length(measurement_types, 1);
+      END;
+      $$;
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -72,55 +87,98 @@ CREATE TABLE public.workout_sets (
 --
 
 CREATE VIEW public.exercise_records AS
- WITH measurement_sets AS (
-         SELECT workout_sets.id,
-            workout_sets.exercise_id,
-            workout_sets.reps,
-            workout_sets.weight_mcg,
-            workout_sets.distance_mm,
-            workout_sets.duration_ms,
-            workout_sets.speed_kph,
-            workout_sets.date,
+ WITH exercise_measurement_types AS (
+         SELECT exercise_measurements.exercise_id,
+            array_agg(exercise_measurements.measurement_type) AS measurement_types
+           FROM public.exercise_measurements
+          GROUP BY exercise_measurements.exercise_id
+        ), measurement_sets AS (
+         SELECT ws.id,
+            ws.exercise_id,
+            ws.reps,
+            ws.weight_mcg,
+            ws.distance_mm,
+            ws.duration_ms,
+            ws.speed_kph,
+            ws.date,
+            emt.measurement_types,
                 CASE
-                    WHEN ((workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN workout_sets.weight_mcg
-                    WHEN ((workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.duration_ms)::bigint
-                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.reps)::bigint
-                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN (workout_sets.distance_mm)::bigint
-                    WHEN ((workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN workout_sets.weight_mcg
-                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.reps)::bigint
-                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.duration_ms)::bigint
-                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN workout_sets.weight_mcg
-                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL)) THEN (workout_sets.distance_mm)::bigint
-                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN (workout_sets.reps)::bigint
+                    WHEN public.is_metric_match('{weight}'::text[], (emt.measurement_types)::text[]) THEN ws.weight_mcg
+                    WHEN public.is_metric_match('{duration}'::text[], (emt.measurement_types)::text[]) THEN (ws.duration_ms)::bigint
+                    WHEN public.is_metric_match('{reps}'::text[], (emt.measurement_types)::text[]) THEN (ws.reps)::bigint
+                    WHEN public.is_metric_match('{distance}'::text[], (emt.measurement_types)::text[]) THEN (ws.distance_mm)::bigint
+                    WHEN public.is_metric_match('{weight,duration}'::text[], (emt.measurement_types)::text[]) THEN ws.weight_mcg
+                    WHEN public.is_metric_match('{reps,weight}'::text[], (emt.measurement_types)::text[]) THEN (ws.reps)::bigint
+                    WHEN public.is_metric_match('{duration,reps}'::text[], (emt.measurement_types)::text[]) THEN (ws.duration_ms)::bigint
+                    WHEN public.is_metric_match('{weight,distance}'::text[], (emt.measurement_types)::text[]) THEN ws.weight_mcg
+                    WHEN public.is_metric_match('{distance,duration}'::text[], (emt.measurement_types)::text[]) THEN (ws.distance_mm)::bigint
+                    WHEN public.is_metric_match('{reps,distance}'::text[], (emt.measurement_types)::text[]) THEN (ws.reps)::bigint
                     ELSE NULL::bigint
                 END AS grouping_value,
                 CASE
-                    WHEN ((workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN workout_sets.weight_mcg
-                    WHEN ((workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN ((- workout_sets.duration_ms))::bigint
-                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.reps)::bigint
-                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN (workout_sets.distance_mm)::bigint
-                    WHEN ((workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN ((- workout_sets.duration_ms))::bigint
-                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.duration_ms IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN workout_sets.weight_mcg
-                    WHEN ((workout_sets.reps IS NOT NULL) AND (workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.distance_mm IS NULL)) THEN (workout_sets.reps)::bigint
-                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.weight_mcg IS NOT NULL) AND (workout_sets.reps IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN (workout_sets.distance_mm)::bigint
-                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.duration_ms IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.reps IS NULL)) THEN ((- workout_sets.duration_ms))::bigint
-                    WHEN ((workout_sets.distance_mm IS NOT NULL) AND (workout_sets.reps IS NOT NULL) AND (workout_sets.weight_mcg IS NULL) AND (workout_sets.duration_ms IS NULL)) THEN (workout_sets.distance_mm)::bigint
+                    WHEN public.is_metric_match('{weight}'::text[], (emt.measurement_types)::text[]) THEN ws.weight_mcg
+                    WHEN public.is_metric_match('{duration}'::text[], (emt.measurement_types)::text[]) THEN ((- ws.duration_ms))::bigint
+                    WHEN public.is_metric_match('{reps}'::text[], (emt.measurement_types)::text[]) THEN (ws.reps)::bigint
+                    WHEN public.is_metric_match('{distance}'::text[], (emt.measurement_types)::text[]) THEN (ws.distance_mm)::bigint
+                    WHEN public.is_metric_match('{weight,duration}'::text[], (emt.measurement_types)::text[]) THEN ((- ws.duration_ms))::bigint
+                    WHEN public.is_metric_match('{reps,weight}'::text[], (emt.measurement_types)::text[]) THEN ws.weight_mcg
+                    WHEN public.is_metric_match('{duration,reps}'::text[], (emt.measurement_types)::text[]) THEN (ws.reps)::bigint
+                    WHEN public.is_metric_match('{weight,distance}'::text[], (emt.measurement_types)::text[]) THEN (ws.distance_mm)::bigint
+                    WHEN public.is_metric_match('{distance,duration}'::text[], (emt.measurement_types)::text[]) THEN ((- ws.duration_ms))::bigint
+                    WHEN public.is_metric_match('{reps,distance}'::text[], (emt.measurement_types)::text[]) THEN (ws.distance_mm)::bigint
                     ELSE NULL::bigint
                 END AS measurement_value
-           FROM public.workout_sets
+           FROM (public.workout_sets ws
+             JOIN exercise_measurement_types emt ON ((ws.exercise_id = emt.exercise_id)))
+          WHERE (ws.is_warmup = false)
+        ), measurement_sets_with_direction AS (
+         SELECT ms.id,
+            ms.exercise_id,
+            ms.reps,
+            ms.weight_mcg,
+            ms.distance_mm,
+            ms.duration_ms,
+            ms.speed_kph,
+            ms.date,
+            ms.measurement_types,
+            ms.grouping_value,
+            ms.measurement_value,
+                CASE
+                    WHEN public.is_metric_match('{weight}'::text[], (ms.measurement_types)::text[]) THEN 'weight'::text
+                    WHEN public.is_metric_match('{duration}'::text[], (ms.measurement_types)::text[]) THEN 'duration'::text
+                    WHEN public.is_metric_match('{reps}'::text[], (ms.measurement_types)::text[]) THEN 'reps'::text
+                    WHEN public.is_metric_match('{distance}'::text[], (ms.measurement_types)::text[]) THEN 'distance'::text
+                    WHEN public.is_metric_match('{weight,duration}'::text[], (ms.measurement_types)::text[]) THEN 'duration'::text
+                    WHEN public.is_metric_match('{reps,weight}'::text[], (ms.measurement_types)::text[]) THEN 'weight'::text
+                    WHEN public.is_metric_match('{duration,reps}'::text[], (ms.measurement_types)::text[]) THEN 'reps'::text
+                    WHEN public.is_metric_match('{weight,distance}'::text[], (ms.measurement_types)::text[]) THEN 'distance'::text
+                    WHEN public.is_metric_match('{distance,duration}'::text[], (ms.measurement_types)::text[]) THEN 'duration'::text
+                    WHEN public.is_metric_match('{reps,distance}'::text[], (ms.measurement_types)::text[]) THEN 'distance'::text
+                    ELSE NULL::text
+                END AS measuring_metric_type
+           FROM measurement_sets ms
+          WHERE (ms.grouping_value IS NOT NULL)
         ), ranked_sets AS (
-         SELECT measurement_sets.id,
-            measurement_sets.exercise_id,
-            measurement_sets.reps,
-            measurement_sets.weight_mcg,
-            measurement_sets.distance_mm,
-            measurement_sets.duration_ms,
-            measurement_sets.speed_kph,
-            measurement_sets.date,
-            measurement_sets.grouping_value,
-            measurement_sets.measurement_value,
-            row_number() OVER (PARTITION BY measurement_sets.exercise_id, measurement_sets.grouping_value ORDER BY measurement_sets.measurement_value DESC, measurement_sets.date DESC) AS rank
-           FROM measurement_sets
+         SELECT mswd.id,
+            mswd.exercise_id,
+            mswd.reps,
+            mswd.weight_mcg,
+            mswd.distance_mm,
+            mswd.duration_ms,
+            mswd.speed_kph,
+            mswd.date,
+            mswd.measurement_types,
+            mswd.grouping_value,
+            mswd.measurement_value,
+            mswd.measuring_metric_type,
+            em.more_is_better,
+            row_number() OVER (PARTITION BY mswd.exercise_id, mswd.grouping_value ORDER BY
+                CASE
+                    WHEN em.more_is_better THEN mswd.measurement_value
+                    ELSE (- mswd.measurement_value)
+                END DESC, mswd.date DESC) AS rank
+           FROM (measurement_sets_with_direction mswd
+             LEFT JOIN public.exercise_measurements em ON (((mswd.exercise_id = em.exercise_id) AND (mswd.measuring_metric_type = (em.measurement_type)::text))))
         )
  SELECT id AS record_id,
     exercise_id,
@@ -466,6 +524,7 @@ SET search_path TO "$user", public;
 INSERT INTO "schema_migrations" (version) VALUES
 ('4'),
 ('3'),
+('20250930000000'),
 ('20250929210252'),
 ('20250926000000'),
 ('20250924000000'),

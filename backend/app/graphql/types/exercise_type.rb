@@ -30,6 +30,7 @@ module Types
     end
 
     def measurements
+      # TODO: use compact but make it work
       object.grouped_measurements
     end
   end

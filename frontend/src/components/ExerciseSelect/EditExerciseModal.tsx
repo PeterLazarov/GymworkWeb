@@ -1,6 +1,7 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import React, { useEffect, useState } from "react";
 import { MeasurementsFragment } from "../../generated/graphql";
+import { excludeField } from "../../utils/object";
 import { Modal } from "../shared";
 import { ExerciseForm, ExerciseFormData } from "./ExerciseForm";
 
@@ -72,7 +73,11 @@ export const EditExerciseModal: React.FC<Props> = ({
         muscleAreas: data.exercise.muscleAreas,
         muscles: data.exercise.muscles,
         instructions: data.exercise.instructions,
-        measurements: data.exercise.measurements,
+        measurements: excludeField(
+          "__typename",
+          data.exercise.measurements,
+          true
+        ),
       });
     }
   }, [data]);
