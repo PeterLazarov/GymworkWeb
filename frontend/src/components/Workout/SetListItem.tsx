@@ -27,7 +27,7 @@ export const SetListItem: React.FC<SetListItemProps> = ({
     <div
       className={cn(
         "flex items-center gap-2 px-2 py-0.5 rounded-md",
-        isFocused && "bg-gray-200"
+        isFocused && "bg-gray-200 dark:bg-gray-800"
       )}
       onClick={() => onSetClick?.(set)}
     >

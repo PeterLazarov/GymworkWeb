@@ -279,7 +279,7 @@ type Exercise implements Node {
   name: String!
   position: String
   stance: String
-  steps: [WorkoutStep!]!
+  steps(period: String): [WorkoutStep!]!
   tips: [String!]
   updatedAt: ISO8601DateTime!
 }

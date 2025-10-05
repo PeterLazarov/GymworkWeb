@@ -166,8 +166,11 @@ export const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
           />
         }
       >
-        <div className="flex flex-col gap-4">
-          <Tabs defaultValue="track" className="flex flex-col flex-1 gap-2">
+        <div className="flex flex-col gap-4 overflow-y-auto">
+          <Tabs
+            defaultValue="track"
+            className="grid grid-rows-[auto_1fr] overflow-hidden"
+          >
             <div className="flex items-center justify-center">
               <TabsList>
                 <TabsTrigger value="track">Track</TabsTrigger>
@@ -176,20 +179,18 @@ export const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
                 <TabsTrigger value="chart">Chart</TabsTrigger>
               </TabsList>
             </div>
-            <div className="flex-1 overflow-y-auto">
-              <TabsContent value="track">
-                <TrackStepTab step={step} workout={workout} />
-              </TabsContent>
-              <TabsContent value="records">
-                <RecordsStepTab step={step} />
-              </TabsContent>
-              <TabsContent value="history" className="flex-1 overflow-hidden">
-                <HistoryStepTab step={step} />
-              </TabsContent>
-              <TabsContent value="chart">
-                <ExerciseStatsChart exerciseId={step.exercises[0]!.id} />
-              </TabsContent>
-            </div>
+            <TabsContent value="track">
+              <TrackStepTab step={step} workout={workout} />
+            </TabsContent>
+            <TabsContent value="records">
+              <RecordsStepTab step={step} />
+            </TabsContent>
+            <TabsContent value="history" className="flex-1">
+              <HistoryStepTab step={step} />
+            </TabsContent>
+            <TabsContent value="chart">
+              <ExerciseStatsChart exerciseId={step.exercises[0]!.id} />
+            </TabsContent>
           </Tabs>
         </div>
       </Modal>
@@ -376,7 +377,7 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="pt-2 flex flex-col gap-2">
       <div className="flex flex-col gap-1">
         {step.sets.map((set, index) => (
           <SetListItem
@@ -448,7 +449,7 @@ const RecordsStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
   if (!data?.exerciseRecords) return <div>No records found</div>;
 
   return (
-    <div className="space-y-4">
+    <div className="pt-2 space-y-4">
       <h3 className="font-semibold text-lg">Personal Records</h3>
       <div className="space-y-2">
         {data.exerciseRecords.map((record) => (
@@ -474,9 +475,9 @@ const HistoryStepTab: React.FC<{ step: WorkoutStep }> = ({ step }) => {
   if (!data?.exercise) return <div>No sets found</div>;
 
   return (
-    <div className="space-y-4">
+    <div className="pt-2 h-full flex flex-col space-y-4 overflow-y-hidden">
       <h3 className="font-semibold text-lg">History</h3>
-      <div className="space-y-2">
+      <div className="flex-1 overflow-y-auto space-y-2">
         {data.exercise.steps.map((step) => (
           <Card key={step.id} variant="secondary">
             <CardHeader>

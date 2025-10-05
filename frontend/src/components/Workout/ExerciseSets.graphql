@@ -1,10 +1,10 @@
-query ExerciseSets($exerciseId: ID!) {
+query ExerciseSets($exerciseId: ID!, $period: String) {
   exercise(id: $exerciseId) {
     id
     measurements {
       ...MeasurementsFragment
     }
-    steps {
+    steps(period: $period) {
       id
       date
       sets {

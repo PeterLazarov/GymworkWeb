@@ -75,7 +75,8 @@ export const Statistics: React.FC = () => {
     }
   );
 
-  if (loading || !workoutsData) return <div>Loading statistics...</div>;
+  if (loading) return <div>Loading statistics...</div>;
+  if (!data) return <div>No workouts data</div>;
   if (error) return <div>Error loading statistics: {error.message}</div>;
 
   const stats = data?.muscleAreaStats || [];
@@ -109,7 +110,7 @@ export const Statistics: React.FC = () => {
           No workout data available yet. Start training to see your statistics!
         </div>
       ) : (
-        <div className="space-y-4 overflow-y-auto">
+        <div className="gap-4 overflow-y-auto grid grid-cols-3 ">
           {stats.map((stat) => (
             <MuscleAreaStat
               key={stat.muscleArea}
@@ -132,7 +133,7 @@ export const Statistics: React.FC = () => {
             {workoutsLoading ? (
               <Spinner />
             ) : (
-              workoutsData.workouts.edges.map(({ node: workout }) => (
+              workoutsData?.workouts.edges.map(({ node: workout }) => (
                 <WorkoutCard
                   key={workout.id}
                   workout={workout}
@@ -157,13 +158,10 @@ const MuscleAreaStat = ({
   onViewWorkouts: (muscleArea: string) => void;
 }) => {
   return (
-    <div className="space-y-2">
+    <div>
       <div className="flex justify-between items-center">
         <span className="font-medium">{stat.muscleArea}</span>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">
-            {stat.workoutCount} / {stat.totalWorkouts} workouts
-          </span>
           <Button
             variant="ghost"
             size="icon"
@@ -180,7 +178,13 @@ const MuscleAreaStat = ({
           style={{ width: `${stat.percentage}%` }}
         />
       </div>
-      <div className="text-right text-sm font-medium">{stat.percentage}%</div>
+      <span className="text-sm text-gray-500"></span>
+      <div className="w-full text-sm font-medium">
+        <span>
+          {stat.workoutCount} / {stat.totalWorkouts} workouts
+        </span>
+        <span className="float-right">{stat.percentage}%</span>
+      </div>
     </div>
   );
 };

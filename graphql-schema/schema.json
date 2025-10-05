@@ -1520,7 +1520,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null,
-              "args": []
+              "args": [
+                {
+                  "name": "period",
+                  "description": null,
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null,
+                  "isDeprecated": false,
+                  "deprecationReason": null
+                }
+              ]
             },
             {
               "name": "tips",

@@ -49,7 +49,7 @@ export const Modal: React.FC<ModalProps> = ({
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="overflow-y-auto flex-1 min-h-0">{children}</div>
+          <div className="flex flex-col flex-1 min-h-0">{children}</div>
           {!hideFooter && (
             <DialogFooter className="mt-2">
               <Button variant="outline" onClick={onClose}>
