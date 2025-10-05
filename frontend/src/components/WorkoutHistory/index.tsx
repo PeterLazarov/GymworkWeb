@@ -168,7 +168,7 @@ export const WorkoutHistory: React.FC = () => {
         className="flex flex-col gap-4 px-4 items-center overflow-y-auto"
         ref={containerRef}
       >
-        {data.workouts.edges!.map(({ node: workout }) => (
+        {data.workouts.edges.map(({ node: workout }) => (
           <WorkoutCard
             key={workout.id}
             workout={workout}

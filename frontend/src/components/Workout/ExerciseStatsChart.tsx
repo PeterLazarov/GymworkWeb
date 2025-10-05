@@ -14,9 +14,8 @@ import { getActiveMeasurements } from "../../utils/measurements";
 import { ExerciseMeasurementType } from "../ExerciseSelect/ExerciseMeasurementType";
 import { ChartContainer, ToggleGroup, ToggleGroupItem } from "../shared";
 
-type WorkoutSet = NonNullable<
-  IExerciseSetsQuery["exercise"]
->["steps"][number]["sets"][number];
+type WorkoutSet =
+  IExerciseSetsQuery["exercise"]["steps"][number]["sets"][number];
 
 type ExerciseStatsChartProps = {
   exerciseId: string;

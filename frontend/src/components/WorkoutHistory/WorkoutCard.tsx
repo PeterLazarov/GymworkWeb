@@ -5,11 +5,7 @@ import { formatDateIso } from "../../utils/date";
 import { Card, CardContent, CardHeader, CardTitle } from "../shared";
 import { MuscleMap } from "./MuscleMap";
 
-type Workout = NonNullable<
-  NonNullable<
-    NonNullable<IWorkoutsHistoryQuery["workouts"]["edges"]>[number]
-  >["node"]
->;
+type Workout = IWorkoutsHistoryQuery["workouts"]["edges"][number]["node"];
 
 type WorkoutCardProps = {
   workout: Workout;

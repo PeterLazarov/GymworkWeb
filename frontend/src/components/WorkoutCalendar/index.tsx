@@ -73,7 +73,7 @@ export const WorkoutCalendar: React.FC = () => {
   };
 
   const workoutDates = useMemo(
-    () => data?.workouts.edges?.map(({ node }) => node.date),
+    () => data?.workouts.edges.map(({ node }) => node.date),
     [data]
   );
   if (loading) return <div>Loading workouts...</div>;
@@ -154,7 +154,7 @@ export const WorkoutDayModal: React.FC<WorkoutDayModalProps> = ({
   const navigate = useNavigate();
   const day = DateTime.fromJSDate(date);
 
-  const { data, loading, error, refetch } = useQuery(WorkoutByDate, {
+  const { data } = useQuery(WorkoutByDate, {
     variables: { date: day.toISODate() },
   });
 

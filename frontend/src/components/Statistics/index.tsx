@@ -132,7 +132,7 @@ export const Statistics: React.FC = () => {
             {workoutsLoading ? (
               <Spinner />
             ) : (
-              workoutsData.workouts.edges!.map(({ node: workout }) => (
+              workoutsData.workouts.edges.map(({ node: workout }) => (
                 <WorkoutCard
                   key={workout.id}
                   workout={workout}

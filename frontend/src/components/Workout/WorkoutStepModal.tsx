@@ -35,7 +35,7 @@ import {
 import { ExerciseStatsChart } from "./ExerciseStatsChart";
 import { SetListItem } from "./SetListItem";
 
-type Workout = NonNullable<IWorkoutByDateQuery["workout"]>;
+type Workout = IWorkoutByDateQuery["workout"];
 type WorkoutStep = Workout["steps"][number];
 type Set = WorkoutStep["sets"][number];
 

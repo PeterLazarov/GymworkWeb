@@ -24,3 +24,10 @@ generates:
       enumsAsTypes: true
       documentVariableSuffix: ''
       fragmentVariableSuffix: ''
+      nonOptionalTypename: true
+      avoidOptionals:
+        field: true
+        inputValue: false
+        object: false
+        defaultValue: false
+      maybeValue: T

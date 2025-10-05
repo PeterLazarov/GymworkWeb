@@ -74,11 +74,7 @@ const COPY_WORKOUT_MUTATION = gql`
   }
 `;
 
-type Workout = NonNullable<
-  NonNullable<
-    NonNullable<IWorkoutsHistoryQuery["workouts"]["edges"]>[number]
-  >["node"]
->;
+type Workout = IWorkoutsHistoryQuery["workouts"]["edges"][number]["node"];
 
 type CopyWorkoutModalProps = {
   isOpen: boolean;
@@ -187,7 +183,7 @@ export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
           </div>
         )}
 
-        {data?.workouts.edges?.length === 0 && !loading && (
+        {data?.workouts.edges.length === 0 && !loading && (
           <div className="text-center p-4 text-muted-foreground">
             No workouts found to copy
           </div>
@@ -195,10 +191,8 @@ export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
 
         <div className="flex flex-col gap-3 overflow-y-auto" ref={containerRef}>
           {data?.workouts.edges
-            ?.filter((edge) => edge?.node?.date !== targetDate)
-            .map((edge) => {
-              const workout = edge?.node;
-              if (!workout) return null;
+            .filter((edge) => edge.node.date !== targetDate)
+            .map(({ node: workout }) => {
               return (
                 <div key={workout.id} className="relative">
                   <WorkoutCard

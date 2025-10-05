@@ -38,7 +38,7 @@ const UPDATE_WORKOUT_MUTATION = gql`
     }
   }
 `;
-type Workout = NonNullable<IWorkoutByDateQuery["workout"]>;
+type Workout = IWorkoutByDateQuery["workout"];
 type WorkoutStep = Workout["steps"][number];
 
 const rpeTexts = {

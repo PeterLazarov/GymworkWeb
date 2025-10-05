@@ -57,11 +57,7 @@ const ADD_STEP_MUTATION = gql`
     }
   }
 `;
-type Exercise = NonNullable<
-  NonNullable<
-    NonNullable<IExercisesQuery["exercises"]["edges"]>[number]
-  >["node"]
->;
+type Exercise = IExercisesQuery["exercises"]["edges"][number]["node"];
 
 export const ExerciseList: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -117,7 +113,7 @@ export const ExerciseList: React.FC = () => {
         ref={containerRef}
         className="p-4 flex-1 overflow-y-auto flex flex-col gap-2"
       >
-        {data.exercises.edges!.map(({ node: exercise }) => (
+        {data.exercises.edges.map(({ node: exercise }) => (
           <ExerciseItem
             key={exercise.id}
             exercise={exercise}

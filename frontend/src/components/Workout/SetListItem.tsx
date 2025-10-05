@@ -3,8 +3,7 @@ import { IWorkoutByDateQuery } from "../../generated/graphql";
 import { cn } from "../../lib/utils";
 import { msToTimeString } from "../../utils/time";
 
-type Workout = NonNullable<IWorkoutByDateQuery["workout"]>;
-type WorkoutStep = Workout["steps"][number];
+type WorkoutStep = IWorkoutByDateQuery["workout"]["steps"][number];
 type Set = WorkoutStep["sets"][number];
 type Measurements = WorkoutStep["exercises"][number]["measurements"];
 
