@@ -1,11 +1,11 @@
 import React from "react";
 import { feelingTexts, painTexts } from "../../constants/enums";
-import { IWorkoutsHistoryQuery } from "../../generated/graphql";
+import { IWorkoutsQuery } from "../../generated/graphql";
 import { formatDateIso } from "../../utils/date";
 import { Card, CardContent, CardHeader, CardTitle } from "../shared";
 import { MuscleMap } from "./MuscleMap";
 
-type Workout = IWorkoutsHistoryQuery["workouts"]["edges"][number]["node"];
+type Workout = IWorkoutsQuery["workouts"]["edges"][number]["node"];
 
 type WorkoutCardProps = {
   workout: Workout;

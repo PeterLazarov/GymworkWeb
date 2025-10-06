@@ -2,6 +2,7 @@ query WorkoutByDate($date: ISO8601Date!) {
   workout(date: $date) {
     id
     date
+    name
     feeling
     rpe
     notes

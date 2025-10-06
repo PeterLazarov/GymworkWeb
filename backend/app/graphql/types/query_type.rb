@@ -45,6 +45,7 @@ module Types
       argument :muscles, [String], required: false
       argument :muscle_areas, [String], required: false
       argument :notes, String, required: false
+      argument :is_template, Boolean, required: false
     end
 
     field :workouts, Types::WorkoutType.connection_type, null: false, preload: { steps: [:exercises, { sets: :exercise }] } do
@@ -107,6 +108,7 @@ module Types
         scope = scope.where(feeling: filter[:feeling]) if filter[:feeling].present?
         scope = scope.where(pain: filter[:pain]) if filter[:pain].present?
         scope = scope.where(rpe: filter[:rpe]) if filter[:rpe].present?
+        scope = scope.where(is_template: filter[:is_template]) unless filter[:is_template].nil?
 
         if filter[:muscles].present?
           scope = scope.

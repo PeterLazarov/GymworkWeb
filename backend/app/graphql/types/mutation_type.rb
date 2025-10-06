@@ -6,6 +6,7 @@ module Types
     field :copy_workout, mutation: Mutations::CopyWorkoutMutation
     field :delete_workout, mutation: Mutations::DeleteWorkoutMutation
     field :update_workout, mutation: Mutations::UpdateWorkoutMutation
+    field :create_workout_template, mutation: Mutations::CreateWorkoutTemplateMutation
 
     field :create_exercise, mutation: Mutations::CreateExerciseMutation
     field :delete_exercise, mutation: Mutations::DeleteExerciseMutation

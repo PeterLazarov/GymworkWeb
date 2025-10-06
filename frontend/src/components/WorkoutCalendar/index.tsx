@@ -1,37 +1,12 @@
-import { gql, TypedDocumentNode, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { ChevronLeft, DotIcon } from "lucide-react";
 import { DateTime } from "luxon";
 import React, { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  IWorkoutsQuery,
-  IWorkoutsQueryVariables,
-  WorkoutByDate,
-} from "../../generated/graphql";
+import { WorkoutByDate, Workouts } from "../../generated/graphql";
 import { formatDate } from "../../utils/date";
 import { Button, Calendar, Modal } from "../shared";
 import { WorkoutView } from "../Workout/WorkoutView";
-
-const WORKOUTS_QUERY: TypedDocumentNode<
-  IWorkoutsQuery,
-  IWorkoutsQueryVariables
-> = gql`
-  query Workouts($first: Int, $after: String) {
-    workouts(first: $first, after: $after) {
-      edges {
-        cursor
-        node {
-          id
-          date
-        }
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-    }
-  }
-`;
 
 export const WorkoutCalendar: React.FC = () => {
   const [hasMore, setHasMore] = useState(true);
@@ -39,9 +14,10 @@ export const WorkoutCalendar: React.FC = () => {
   const { date } = useParams();
   const [openedWorkoutDate, setOpenedWorkoutDate] = useState<Date | null>(null);
 
-  const { data, loading, error, fetchMore } = useQuery(WORKOUTS_QUERY, {
+  const { data, loading, error, fetchMore } = useQuery(Workouts, {
     variables: {
       first: 50,
+      filter: { isTemplate: false },
     },
   });
 

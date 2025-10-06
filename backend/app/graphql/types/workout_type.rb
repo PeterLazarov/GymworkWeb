@@ -3,7 +3,7 @@ module Types
     implements GraphQL::Types::Relay::Node
 
     field :id, ID, null: false
-    field :date, GraphQL::Types::ISO8601Date, null: false
+    field :date, GraphQL::Types::ISO8601Date, null: true
     field :notes, String, null: true
     field :feeling, String, null: true
     field :pain, String, null: true
@@ -12,6 +12,8 @@ module Types
     field :duration_ms, Integer, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
+    field :is_template, Boolean, null: false
+    field :name, String, null: true
 
     field :steps, [Types::WorkoutStepType], null: false, preload: { steps: [:exercises, { sets: :exercise }] }
     field :workout_sets, [Types::WorkoutSetType], null: false, preload: { sets: :exercise }

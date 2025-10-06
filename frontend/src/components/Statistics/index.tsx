@@ -30,6 +30,7 @@ const WORKOUTS_BY_MUSCLE_AREA_QUERY: TypedDocumentNode<
         node {
           id
           date
+          name
           feeling
           rpe
           notes
@@ -70,7 +71,9 @@ export const Statistics: React.FC = () => {
   const { data: workoutsData, loading: workoutsLoading } = useQuery(
     WORKOUTS_BY_MUSCLE_AREA_QUERY,
     {
-      variables: { filter: { muscleAreas: [selectedMuscleArea!] } },
+      variables: {
+        filter: { muscleAreas: [selectedMuscleArea!], isTemplate: false },
+      },
       skip: !selectedMuscleArea,
     }
   );

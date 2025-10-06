@@ -1,7 +1,6 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -248,7 +247,7 @@ CREATE TABLE public.workout_steps (
 
 CREATE TABLE public.workouts (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
-    date date NOT NULL,
+    date date,
     notes text,
     feeling character varying,
     pain character varying,
@@ -256,7 +255,9 @@ CREATE TABLE public.workouts (
     ended_at timestamp(6) without time zone,
     duration_ms integer,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
+    updated_at timestamp(6) without time zone NOT NULL,
+    is_template boolean DEFAULT false NOT NULL,
+    name character varying
 );
 
 
@@ -533,6 +534,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20250909120951'),
 ('20250908111917'),
 ('20250908105942'),
+('20250106000000'),
 ('20250101000001'),
 ('20250101000000'),
 ('2'),

@@ -1,5 +1,5 @@
 import { gql, useMutation } from "@apollo/client";
-import { NotebookPenIcon, PlusIcon } from "lucide-react";
+import { ClipboardCopyIcon, NotebookPenIcon, PlusIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { feelingTexts, painTexts } from "../../constants/enums";
@@ -10,6 +10,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  Input,
   Label,
   Modal,
   Select,
@@ -38,6 +39,17 @@ const UPDATE_WORKOUT_MUTATION = gql`
     }
   }
 `;
+
+const CREATE_WORKOUT_TEMPLATE_MUTATION = gql`
+  mutation CreateWorkoutTemplate($sourceWorkoutId: ID!) {
+    createWorkoutTemplate(input: { sourceWorkoutId: $sourceWorkoutId }) {
+      template {
+        id
+        name
+      }
+    }
+  }
+`;
 type Workout = IWorkoutByDateQuery["workout"];
 type WorkoutStep = Workout["steps"][number];
 
@@ -63,6 +75,7 @@ export const WorkoutView: React.FC<WorkoutViewProps> = ({
   const [focusedStep, setFocusedStep] = useState<WorkoutStep | undefined>();
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [updateWorkout] = useMutation(UPDATE_WORKOUT_MUTATION);
+  const [createWorkoutTemplate] = useMutation(CREATE_WORKOUT_TEMPLATE_MUTATION);
 
   return (
     <div className="p-4 flex-1 overflow-hidden flex flex-col gap-4">
@@ -84,6 +97,15 @@ export const WorkoutView: React.FC<WorkoutViewProps> = ({
 
       {!readonly && (
         <div className="flex gap-2 justify-center">
+          <Button
+            onClick={() =>
+              createWorkoutTemplate({
+                variables: { sourceWorkoutId: workout.id },
+              })
+            }
+          >
+            <ClipboardCopyIcon /> Save as Template
+          </Button>
           <Button onClick={() => navigate(`/${workout.date}/exercises`)}>
             <PlusIcon /> Add Exercise
           </Button>
@@ -143,6 +165,7 @@ const WorkoutCommentsCard: React.FC<WorkoutCommentsCardProps> = ({
       <CardTitle>Comments</CardTitle>
     </CardHeader>
     <CardContent className="flex flex-col gap-2">
+      {workout.name && <div className="text-sm text-bold">{workout.name}</div>}
       {workout.notes && (
         <div className="text-sm text-gray-500">{workout.notes}</div>
       )}
@@ -191,6 +214,7 @@ type WorkoutDetailsModalProps = {
   onClose: () => void;
   workout: Workout;
   onSave: (details: {
+    name?: string;
     feeling?: string;
     rpe?: number;
     notes?: string;
@@ -204,6 +228,7 @@ const WorkoutDetailsModal: React.FC<WorkoutDetailsModalProps> = ({
   workout,
   onSave,
 }) => {
+  const [name, setName] = useState(workout.name || "");
   const [feeling, setFeeling] = useState(workout.feeling || "");
   const [rpe, setRpe] = useState(workout.rpe?.toString() || "");
   const [notes, setNotes] = useState(workout.notes || "");
@@ -211,6 +236,7 @@ const WorkoutDetailsModal: React.FC<WorkoutDetailsModalProps> = ({
 
   const handleSave = () => {
     onSave({
+      name: name || undefined,
       feeling: feeling || undefined,
       rpe: rpe ? parseInt(rpe, 10) : undefined,
       notes: notes || undefined,
@@ -227,6 +253,11 @@ const WorkoutDetailsModal: React.FC<WorkoutDetailsModalProps> = ({
       hideFooter
     >
       <div className="space-y-4">
+        <div>
+          <Label>Name</Label>
+          <Input value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+
         <div>
           <Label>Feeling</Label>
           <Select value={feeling} onValueChange={setFeeling}>

@@ -1,0 +1,27 @@
+query Workouts($first: Int, $after: String, $filter: WorkoutFilter) {
+  settings {
+    scientificMuscleNamesEnabled
+  }
+  workouts(first: $first, after: $after, filter: $filter) {
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        date
+        name
+        feeling
+        rpe
+        notes
+        pain
+        hasComments
+        muscles
+        muscleAreas
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}

@@ -1,47 +1,11 @@
-import { gql, TypedDocumentNode, useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import { CopyIcon } from "lucide-react";
 import React, { useState } from "react";
-import {
-  IWorkoutsForCopyQuery,
-  IWorkoutsForCopyQueryVariables,
-  IWorkoutsHistoryQuery,
-} from "../../generated/graphql";
+import { IWorkoutsQuery, Workouts } from "../../generated/graphql";
 import { formatStringDateToIso } from "../../utils/date";
 import { useInfiniteScroll } from "../../utils/useInfiniteScroll";
 import { Button, Modal, Spinner } from "../shared";
 import { WorkoutCard } from "../WorkoutHistory/WorkoutCard";
-
-const WORKOUTS_QUERY: TypedDocumentNode<
-  IWorkoutsForCopyQuery,
-  IWorkoutsForCopyQueryVariables
-> = gql`
-  query WorkoutsForCopy($first: Int, $after: String) {
-    settings {
-      scientificMuscleNamesEnabled
-    }
-    workouts(first: $first, after: $after) {
-      totalCount
-      edges {
-        cursor
-        node {
-          id
-          date
-          feeling
-          rpe
-          notes
-          pain
-          hasComments
-          muscles
-          muscleAreas
-        }
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-    }
-  }
-`;
 
 const COPY_WORKOUT_MUTATION = gql`
   mutation CopyWorkout($sourceWorkoutId: ID!, $targetDate: ISO8601DateTime!) {
@@ -74,7 +38,7 @@ const COPY_WORKOUT_MUTATION = gql`
   }
 `;
 
-type Workout = IWorkoutsHistoryQuery["workouts"]["edges"][number]["node"];
+type Workout = IWorkoutsQuery["workouts"]["edges"][number]["node"];
 
 type CopyWorkoutModalProps = {
   isOpen: boolean;
@@ -91,8 +55,9 @@ export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
 }) => {
   const [copying, setCopying] = useState<string | null>(null);
 
-  const { data, fetchMore, loading, error } = useQuery(WORKOUTS_QUERY, {
+  const { data, fetchMore, loading, error } = useQuery(Workouts, {
     variables: {
+      filter: { isTemplate: false },
       first: 10,
       after: "",
     },

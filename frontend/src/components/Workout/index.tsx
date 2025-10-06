@@ -1,27 +1,59 @@
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, TypedDocumentNode, useMutation, useQuery } from "@apollo/client";
 import {
   CalendarIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ClipboardPasteIcon,
   CopyIcon,
   PlusIcon,
 } from "lucide-react";
 import { DateTime } from "luxon";
 import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { WorkoutByDate } from "../../generated/graphql";
+import {
+  IWorkoutTemplatesQuery,
+  IWorkoutTemplatesQueryVariables,
+  WorkoutByDate,
+} from "../../generated/graphql";
 import {
   formatDate,
   formatDateIso,
   formatStringDateToIso,
 } from "../../utils/date";
-import { Button, Header } from "../shared";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Header,
+  Modal,
+} from "../shared";
+import { MuscleMap } from "../WorkoutHistory/MuscleMap";
 import { CopyWorkoutModal } from "./CopyWorkoutModal";
 import { WorkoutView } from "./WorkoutView";
 
+const WORKOUT_TEMPLATES_QUERY: TypedDocumentNode<
+  IWorkoutTemplatesQuery,
+  IWorkoutTemplatesQueryVariables
+> = gql`
+  query WorkoutTemplates {
+    workouts(filter: { isTemplate: true }) {
+      edges {
+        node {
+          id
+          name
+          muscles
+        }
+      }
+      totalCount
+    }
+  }
+`;
+
 const CREATE_WORKOUT_MUTATION = gql`
-  mutation CreateWorkout($date: ISO8601DateTime!) {
-    createWorkout(input: { date: $date }) {
+  mutation CreateWorkout($input: CreateWorkoutInput!) {
+    createWorkout(input: $input) {
       workout {
         id
         date
@@ -47,6 +79,9 @@ const CREATE_WORKOUT_MUTATION = gql`
     }
   }
 `;
+
+type WorkoutTemplate =
+  IWorkoutTemplatesQuery["workouts"]["edges"][number]["node"];
 
 type Props = {
   date?: string;
@@ -76,10 +111,13 @@ const WorkoutHeader: React.FC<Props> = ({ date }) => {
         </Button>
       </div>
       <div className="flex items-center gap-2 justify-center">
-        <span>{dateLabel}</span>
-        <Button variant="ghost" size="icon">
-          <Link to={`/${currentDate.toISODate()}/calendar`}>
+        <Button variant="ghost">
+          <Link
+            to={`/${currentDate.toISODate()}/calendar`}
+            className="flex items-center gap-2"
+          >
             <CalendarIcon />
+            <span>{dateLabel}</span>
           </Link>
         </Button>
       </div>
@@ -101,7 +139,9 @@ export const Workout = () => {
   const { date } = useParams();
   const currentDate = date || DateTime.now().toISODate();
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
 
+  const { data: templatesData } = useQuery(WORKOUT_TEMPLATES_QUERY);
   const { data, loading, error, refetch } = useQuery(WorkoutByDate, {
     variables: { date: currentDate },
     skip: !currentDate,
@@ -110,11 +150,14 @@ export const Workout = () => {
   const [createWorkout, { loading: creating, error: createError }] =
     useMutation(CREATE_WORKOUT_MUTATION);
 
-  const handleCreateWorkout = async () => {
+  const handleCreateWorkout = async (templateId?: string) => {
     try {
       const result = await createWorkout({
         variables: {
-          date: formatStringDateToIso(currentDate),
+          input: {
+            date: formatStringDateToIso(currentDate),
+            templateId,
+          },
         },
       });
 
@@ -145,7 +188,14 @@ export const Workout = () => {
         <div className="text-center p-4">
           <div className="mb-4">No workout found for this date</div>
           <div className="flex gap-2 justify-center">
-            <Button onClick={handleCreateWorkout}>
+            <Button
+              onClick={() => setIsTemplateModalOpen(true)}
+              disabled={templatesData?.workouts.totalCount === 0}
+            >
+              <ClipboardPasteIcon className="h-4 w-4" />
+              Use template
+            </Button>
+            <Button onClick={() => handleCreateWorkout()}>
               <PlusIcon className="h-4 w-4" />
               Create Workout
             </Button>
@@ -166,6 +216,66 @@ export const Workout = () => {
           setIsCopyModalOpen(false);
         }}
       />
+      <TemplateSelectModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        onSelected={(template) => {
+          setIsTemplateModalOpen(false);
+          handleCreateWorkout(template.id);
+        }}
+        templates={templatesData?.workouts.edges.map(({ node }) => node) || []}
+      />
     </>
+  );
+};
+
+type TemplateSelectModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onSelected: (template: WorkoutTemplate) => void;
+  templates: WorkoutTemplate[];
+};
+
+const TemplateSelectModal: React.FC<TemplateSelectModalProps> = ({
+  isOpen,
+  onClose,
+  onSelected,
+  templates,
+}) => {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Select Workout Template"
+      description="Select a workout template to use"
+      hideFooter
+    >
+      <div className="space-y-2">
+        {templates.map((template) => (
+          <Card
+            key={template.id}
+            onClick={() => onSelected(template)}
+            variant="secondary"
+          >
+            <CardHeader>
+              <CardTitle>{template.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="flex gap-2">
+              <MuscleMap
+                muscles={template.muscles}
+                id={`muscle-map-${template.id}`}
+                className="h-24"
+              />
+              <MuscleMap
+                muscles={template.muscles}
+                id={`muscle-map-${template.id}`}
+                back
+                className="h-24"
+              />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </Modal>
   );
 };

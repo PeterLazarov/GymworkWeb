@@ -1,11 +1,8 @@
-import { gql, TypedDocumentNode, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { FilterIcon, SearchIcon } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { muscleAreas, muscles } from "../../constants/muscles";
-import {
-  IWorkoutsHistoryQuery,
-  IWorkoutsHistoryQueryVariables,
-} from "../../generated/graphql";
+import { Workouts } from "../../generated/graphql";
 import { useInfiniteScroll } from "../../utils/useInfiniteScroll";
 import {
   Button,
@@ -31,38 +28,6 @@ import {
 import { WorkoutDayModal } from "../WorkoutCalendar";
 import { WorkoutCard } from "./WorkoutCard";
 
-const WORKOUTS_QUERY: TypedDocumentNode<
-  IWorkoutsHistoryQuery,
-  IWorkoutsHistoryQueryVariables
-> = gql`
-  query WorkoutsHistory($filter: WorkoutFilter, $first: Int, $after: String) {
-    settings {
-      scientificMuscleNamesEnabled
-    }
-    workouts(filter: $filter, first: $first, after: $after) {
-      totalCount
-      edges {
-        cursor
-        node {
-          id
-          date
-          feeling
-          rpe
-          notes
-          pain
-          hasComments
-          muscles
-          muscleAreas
-        }
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-    }
-  }
-`;
-
 type Filter = {
   notes: string;
   feeling: string;
@@ -86,16 +51,13 @@ export const WorkoutHistory: React.FC = () => {
     muscleAreas: [],
   });
 
-  const { data, fetchMore, refetch, loading, error } = useQuery(
-    WORKOUTS_QUERY,
-    {
-      variables: {
-        filter: filters,
-        first: 10,
-        after: "",
-      },
-    }
-  );
+  const { data, fetchMore, refetch, loading, error } = useQuery(Workouts, {
+    variables: {
+      filter: { ...filters, isTemplate: false },
+      first: 10,
+      after: "",
+    },
+  });
 
   const { containerRef, loading: infiniteScrollLoading } = useInfiniteScroll({
     data: data?.workouts,
