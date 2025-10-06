@@ -11,21 +11,10 @@ module Mutations
 
     def resolve(source_workout_id:, target_date:)
       source_workout = Workout.find_by(id: source_workout_id)
-
-      if source_workout.nil?
-        return {
-          workout: nil,
-          errors: ["Source workout not found"]
-        }
-      end
-
       existing_workout = Workout.find_by(date: target_date)
-      if existing_workout
-        return {
-          workout: nil,
-          errors: ["A workout already exists for #{target_date.strftime('%Y-%m-%d')}"]
-        }
-      end
+
+      precondition source_workout.present?, "Source workout not found"
+      precondition existing_workout.nil?, "A workout already exists for #{target_date.strftime('%Y-%m-%d')}"
 
       new_workout = nil
 
@@ -63,20 +52,11 @@ module Mutations
         end
       end
 
-      {
-        workout: new_workout,
-        errors: []
-      }
+      { workout: new_workout, errors: [] }
     rescue ActiveRecord::RecordInvalid => e
-      {
-        workout: nil,
-        errors: e.record.errors.full_messages
-      }
+      { workout: nil, errors: e.record.errors.full_messages }
     rescue StandardError => e
-      {
-        workout: nil,
-        errors: ["Failed to copy workout: #{e.message}"]
-      }
+      { workout: nil, errors: ["Failed to copy workout: #{e.message}"] }
     end
   end
 end

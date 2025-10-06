@@ -11,23 +11,12 @@ module Mutations
     def resolve(set_id:)
       set = WorkoutSet.find_by(id: set_id)
 
-      if set.nil?
-        return {
-          success: false,
-          errors: ["Workout set not found"]
-        }
-      end
+      precondition set.present?, "Workout set not found"
 
       if set.destroy
-        {
-          success: true,
-          errors: []
-        }
+        { success: true, errors: [] }
       else
-        {
-          success: false,
-          errors: set.errors.full_messages
-        }
+        { success: false, errors: set.errors.full_messages }
       end
     end
   end

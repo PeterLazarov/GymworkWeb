@@ -20,27 +20,11 @@ module Mutations
 
     def resolve(workout_step_id:, exercise_id:, date:, **metrics)
       step = WorkoutStep.find_by(id: workout_step_id)
-      if step.nil?
-        return {
-          set: nil,
-          errors: ["Workout step not found"]
-        }
-      end
-
       exercise = Exercise.find_by(id: exercise_id)
-      if exercise.nil?
-        return {
-          set: nil,
-          errors: ["Exercise not found"]
-        }
-      end
 
-      unless step.exercises.include?(exercise)
-        return {
-          set: nil,
-          errors: ["Exercise does not belong to this workout step"]
-        }
-      end
+      precondition step.present?, "Workout step not found"
+      precondition exercise.present?, "Exercise not found"
+      precondition step.exercises.include?(exercise), "Exercise does not belong to this workout step"
 
       set = step.sets.new(
         exercise: exercise,
@@ -49,15 +33,9 @@ module Mutations
       )
 
       if set.save
-        {
-          set: set,
-          errors: []
-        }
+        { set:, errors: [] }
       else
-        {
-          set: nil,
-          errors: set.errors.full_messages
-        }
+        { set: nil, errors: set.errors.full_messages }
       end
     end
   end

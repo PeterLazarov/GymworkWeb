@@ -9,40 +9,22 @@ module Mutations
     argument :rpe, Integer, required: false
     argument :notes, String, required: false
     argument :pain, String, required: false
+    argument :name, String, required: false
 
     field :workout, Types::WorkoutType, null: true
     field :errors, [String], null: false
 
     def resolve(workout_id:, **attributes)
       workout = Workout.find_by(id: workout_id)
-
-      if workout.nil?
-        return {
-          workout: nil,
-          errors: ["Workout not found"]
-        }
-      end
-
-      # Filter out nil values to only update provided attributes
       update_attributes = attributes.compact
 
-      if update_attributes.empty?
-        return {
-          workout: workout,
-          errors: ["No attributes provided for update"]
-        }
-      end
+      precondition workout.present?, "Workout not found"
+      precondition update_attributes.present?, "No attributes provided for update"
 
       if workout.update(update_attributes)
-        {
-          workout: workout,
-          errors: []
-        }
+        { workout:, errors: [] }
       else
-        {
-          workout: nil,
-          errors: workout.errors.full_messages
-        }
+        { workout: nil, errors: workout.errors.full_messages }
       end
     end
   end

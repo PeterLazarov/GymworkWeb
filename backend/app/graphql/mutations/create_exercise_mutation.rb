@@ -35,15 +35,9 @@ module Mutations
       exercise = Exercise.new(exercise_attributes)
 
       if exercise.save
-        {
-          exercise: exercise,
-          errors: []
-        }
+        { exercise:, errors: [] }
       else
-        {
-          exercise: nil,
-          errors: exercise.errors.full_messages
-        }
+        { exercise: nil, errors: exercise.errors.full_messages }
       end
     end
   end

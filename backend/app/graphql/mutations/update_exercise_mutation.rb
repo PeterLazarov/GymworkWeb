@@ -15,15 +15,9 @@ module Mutations
 
     def resolve(exercise_id:, measurements:, **attributes)
       exercise = Exercise.find_by(id: exercise_id)
-
-      if exercise.nil?
-        return {
-          exercise: nil,
-          errors: ["Exercise not found"]
-        }
-      end
-
       update_attributes = attributes.compact
+
+      precondition exercise.present?, "Exercise not found"
 
       if measurements.present?
         exercise.exercise_measurements.destroy_all
@@ -44,23 +38,12 @@ module Mutations
         update_attributes[:exercise_measurements_attributes] = exercise_measurements_attributes
       end
 
-      if update_attributes.empty?
-        return {
-          exercise: exercise,
-          errors: ["No attributes provided for update"]
-        }
-      end
+      precondition update_attributes.present?, "No attributes provided for update"
 
       if exercise.update(update_attributes)
-        {
-          exercise: exercise,
-          errors: []
-        }
+        { exercise:, errors: [] }
       else
-        {
-          exercise: nil,
-          errors: exercise.errors.full_messages
-        }
+        { exercise: nil, errors: exercise.errors.full_messages }
       end
     end
   end

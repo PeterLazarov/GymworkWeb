@@ -20,15 +20,9 @@ module Mutations
       settings = Settings.first_or_create!
 
       if settings.update(attributes)
-        {
-          settings: settings,
-          errors: []
-        }
+        { settings:, errors: [] }
       else
-        {
-          settings: nil,
-          errors: settings.errors.full_messages
-        }
+        { settings: nil, errors: settings.errors.full_messages }
       end
     end
   end

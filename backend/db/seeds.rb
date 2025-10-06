@@ -14,13 +14,8 @@ ExerciseSeed.exercises.each do |id, exercise_data|
     muscle_areas: exercise_data[:muscle_areas],
     position: exercise_data[:position],
     stance: exercise_data[:stance],
-    reps_measurement: exercise_data[:reps_measurement],
-    weight_measurement: exercise_data[:weight_measurement],
-    distance_measurement: exercise_data[:distance_measurement],
-    duration_measurement: exercise_data[:duration_measurement],
-    speed_measurement: exercise_data[:speed_measurement],
-    rest_measurement: exercise_data[:rest_measurement],
-    tips: exercise_data[:tips]
+    tips: exercise_data[:tips],
+    exercise_measurements_attributes: exercise_data[:exercise_measurements_attributes] || []
   )
 end
 

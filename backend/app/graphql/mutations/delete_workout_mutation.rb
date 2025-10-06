@@ -11,23 +11,12 @@ module Mutations
     def resolve(workout_id:)
       workout = Workout.find_by(id: workout_id)
 
-      if workout.nil?
-        return {
-          success: false,
-          errors: ["Workout not found"]
-        }
-      end
+      precondition workout.present?, "Workout not found"
 
       if workout.destroy
-        {
-          success: true,
-          errors: []
-        }
+        { success: true, errors: [] }
       else
-        {
-          success: false,
-          errors: workout.errors.full_messages
-        }
+        { success: false, errors: workout.errors.full_messages }
       end
     end
   end

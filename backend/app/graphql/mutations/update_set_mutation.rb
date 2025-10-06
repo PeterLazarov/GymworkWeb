@@ -18,33 +18,15 @@ module Mutations
 
     def resolve(set_id:, **attributes)
       set = WorkoutSet.find_by(id: set_id)
-
-      if set.nil?
-        return {
-          set: nil,
-          errors: ["Workout set not found"]
-        }
-      end
-
       update_attributes = attributes.compact
 
-      if update_attributes.empty?
-        return {
-          set: set,
-          errors: ["No attributes provided for update"]
-        }
-      end
+      precondition set.present?, "Workout set not found"
+      precondition update_attributes.present?, "No attributes provided for update"
 
       if set.update(update_attributes)
-        {
-          set: set,
-          errors: []
-        }
+        { set:, errors: [] }
       else
-        {
-          set: nil,
-          errors: set.errors.full_messages
-        }
+        { set: nil, errors: set.errors.full_messages }
       end
     end
   end
