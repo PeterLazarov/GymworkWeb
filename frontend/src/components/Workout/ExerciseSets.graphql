@@ -1,4 +1,7 @@
 query ExerciseSets($exerciseId: ID!, $period: String) {
+  settings {
+    theme
+  }
   exercise(id: $exerciseId) {
     id
     measurements {

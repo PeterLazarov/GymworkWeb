@@ -117,6 +117,12 @@ export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
     [data?.exercise?.measurements]
   );
 
+  const metricUnit = useMemo(() => {
+    const measurement =
+      data?.exercise?.measurements?.[metric as keyof ExerciseMeasurementType];
+    return measurement?.unit;
+  }, [data?.exercise?.measurements, metric]);
+
   if (error) return <div>{`Error loading data: ${error.message}`}</div>;
   if (!data?.exercise && !loading) return <div>No data found</div>;
 
@@ -138,8 +144,15 @@ export const ExerciseStatsChart: React.FC<ExerciseStatsChartProps> = ({
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
+            <YAxis label={{ value: metricUnit, position: "insideLeft" }} />
+            <Tooltip
+              formatter={(value) => `${value} ${metricUnit}`}
+              contentStyle={{
+                backgroundColor:
+                  data?.settings?.theme === "dark" ? "#111827" : "#f3f4f6",
+                color: data?.settings?.theme === "dark" ? "#f3f4f6" : "#111827",
+              }}
+            />
             <Line type="monotone" dataKey={metric} stroke="#82ca9d" />
           </LineChart>
         </ChartContainer>
