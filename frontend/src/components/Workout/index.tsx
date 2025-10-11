@@ -20,15 +20,7 @@ import {
   formatDateIso,
   formatStringDateToIso,
 } from "../../utils/date";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Header,
-  Modal,
-} from "../shared";
+import { Button, Card, CardHeader, CardTitle, Header, Modal } from "../shared";
 import { MuscleMap } from "../WorkoutHistory/MuscleMap";
 import { CopyWorkoutModal } from "./CopyWorkoutModal";
 import { WorkoutView } from "./WorkoutView";
@@ -250,29 +242,31 @@ const TemplateSelectModal: React.FC<TemplateSelectModalProps> = ({
       description="Select a workout template to use"
       hideFooter
     >
-      <div className="space-y-2">
+      <div className="space-y-2 overflow-y-auto">
         {templates.map((template) => (
           <Card
             key={template.id}
             onClick={() => onSelected(template)}
             variant="secondary"
           >
-            <CardHeader>
-              <CardTitle>{template.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex gap-2">
-              <MuscleMap
-                muscles={template.muscles}
-                id={`muscle-map-${template.id}`}
-                className="h-24"
-              />
-              <MuscleMap
-                muscles={template.muscles}
-                id={`muscle-map-${template.id}`}
-                back
-                className="h-24"
-              />
-            </CardContent>
+            <div className="flex">
+              <div className="flex gap-2 p-2">
+                <MuscleMap
+                  muscles={template.muscles}
+                  id={`muscle-map-${template.id}`}
+                  className="h-24"
+                />
+                <MuscleMap
+                  muscles={template.muscles}
+                  id={`muscle-map-${template.id}`}
+                  back
+                  className="h-24"
+                />
+              </div>
+              <CardHeader>
+                <CardTitle>{template.name}</CardTitle>
+              </CardHeader>
+            </div>
           </Card>
         ))}
       </div>

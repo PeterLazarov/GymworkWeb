@@ -27,11 +27,11 @@ module Types
     end
 
     def muscles
-      object.sets.flat_map { |set| set.exercise.muscles }.uniq
+      object.steps.flat_map { |steps| steps.exercises.flat_map(&:muscles) }.uniq
     end
 
     def muscle_areas
-      object.sets.flat_map { |set| set.exercise.muscle_areas }.uniq
+      object.steps.flat_map { |steps| steps.exercises.flat_map(&:muscle_areas) }.uniq
     end
   end
 end

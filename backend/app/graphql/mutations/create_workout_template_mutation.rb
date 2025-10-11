@@ -4,17 +4,19 @@ module Mutations
     description "Creates a new workout template"
 
     argument :source_workout_id, ID, required: true
+    argument :name, String, required: true
 
     field :template, Types::WorkoutType, null: true
     field :errors, [String], null: false
 
-    def resolve(source_workout_id:)
+    def resolve(source_workout_id:, name:)
       workout = Workout.find source_workout_id
       precondition workout.present?, "Workout not found"
 
       template = workout.dup
       template.is_template = true
       template.date = nil
+      template.name = name
 
       workout.steps.each do |step|
         template_step = step.dup

@@ -41,8 +41,8 @@ const UPDATE_WORKOUT_MUTATION = gql`
 `;
 
 const CREATE_WORKOUT_TEMPLATE_MUTATION = gql`
-  mutation CreateWorkoutTemplate($sourceWorkoutId: ID!) {
-    createWorkoutTemplate(input: { sourceWorkoutId: $sourceWorkoutId }) {
+  mutation CreateWorkoutTemplate($input: CreateWorkoutTemplateInput!) {
+    createWorkoutTemplate(input: $input) {
       template {
         id
         name
@@ -76,6 +76,7 @@ export const WorkoutView: React.FC<WorkoutViewProps> = ({
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [updateWorkout] = useMutation(UPDATE_WORKOUT_MUTATION);
   const [createWorkoutTemplate] = useMutation(CREATE_WORKOUT_TEMPLATE_MUTATION);
+  const [isSaveTemplateModalOpen, setIsSaveTemplateModalOpen] = useState(false);
 
   return (
     <div className="p-4 flex-1 overflow-hidden flex flex-col gap-4">
@@ -97,13 +98,7 @@ export const WorkoutView: React.FC<WorkoutViewProps> = ({
 
       {!readonly && (
         <div className="flex gap-2 justify-center">
-          <Button
-            onClick={() =>
-              createWorkoutTemplate({
-                variables: { sourceWorkoutId: workout.id },
-              })
-            }
-          >
+          <Button onClick={() => setIsSaveTemplateModalOpen(true)}>
             <ClipboardCopyIcon /> Save as Template
           </Button>
           <Button onClick={() => navigate(`/${workout.date}/exercises`)}>
@@ -122,6 +117,17 @@ export const WorkoutView: React.FC<WorkoutViewProps> = ({
           workout={workout}
         />
       )}
+      <SaveTemplateModal
+        isOpen={isSaveTemplateModalOpen}
+        onClose={() => setIsSaveTemplateModalOpen(false)}
+        workout={workout}
+        onSave={({ name }) => {
+          createWorkoutTemplate({
+            variables: { input: { sourceWorkoutId: workout.id, name } },
+          });
+          setIsSaveTemplateModalOpen(false);
+        }}
+      />
       <WorkoutDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
@@ -222,6 +228,38 @@ type WorkoutDetailsModalProps = {
   }) => void;
 };
 
+const SaveTemplateModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  workout: Workout;
+  onSave: (details: { name?: string }) => void;
+}> = ({ isOpen, onClose, workout, onSave }) => {
+  const [name, setName] = useState(workout.name || "");
+
+  const handleSave = () => {
+    onSave({ name: name || undefined });
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      confirmText="Save"
+      onSubmit={handleSave}
+      confirmDisabled={!name}
+      title="Save Template"
+      description="Save this workout as a template"
+    >
+      <div className="space-y-4">
+        <div>
+          <Label>Name</Label>
+          <Input value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
 const WorkoutDetailsModal: React.FC<WorkoutDetailsModalProps> = ({
   isOpen,
   onClose,
@@ -248,9 +286,10 @@ const WorkoutDetailsModal: React.FC<WorkoutDetailsModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      confirmText="Save"
+      onSubmit={handleSave}
       title="Workout Details"
       description="Enter notes about your workout"
-      hideFooter
     >
       <div className="space-y-4">
         <div>
@@ -319,13 +358,6 @@ const WorkoutDetailsModal: React.FC<WorkoutDetailsModalProps> = ({
             placeholder="Add any notes about your workout..."
             className="h-32"
           />
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>Save</Button>
         </div>
       </div>
     </Modal>
