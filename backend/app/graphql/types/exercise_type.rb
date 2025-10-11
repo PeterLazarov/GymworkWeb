@@ -12,7 +12,7 @@ module Types
     field :tips, [String], null: true
     field :muscle_areas, [String], null: false
     field :muscles, [String], null: false
-    field :measurements, Types::MeasurementsType, null: false
+    field :measurements, Types::MeasurementsType, null: false, preload: :exercise_measurements
     field :exercise_measurements, [Types::ExerciseMeasurementType], null: false
     field :is_favorite, Boolean, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
@@ -47,9 +47,18 @@ module Types
       object.workout_sets.order(created_at: :desc).first
     end
 
+
     def measurements
       # TODO: use compact but make it work
-      object.grouped_measurements
+      object.exercise_measurements.to_a.index_by(&:measurement_type).transform_values do |measurement|
+        {
+          'unit' => measurement.unit,
+          'more_is_better' => measurement.more_is_better,
+          'step' => measurement.step_value,
+          'min' => measurement.min_value,
+          'max' => measurement.max_value
+        }.compact
+      end
     end
   end
 end

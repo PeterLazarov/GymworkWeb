@@ -13,14 +13,14 @@ module Types
     field :distance, Float, null: true, preload: { exercise: :exercise_measurements }
 
     def weight
-      measurement = object.exercise.exercise_measurements.find_by_type('weight')
+      measurement = object.exercise.exercise_measurements.find { |m| m.measurement_type == 'weight' }
       return nil unless measurement
 
       Unit.new("#{object.weight_mcg || 0} mcg").convert_to(measurement.unit).scalar
     end
 
     def distance
-      measurement = object.exercise.exercise_measurements.find_by_type('distance')
+      measurement = object.exercise.exercise_measurements.find { |m| m.measurement_type == 'distance' }
       return nil unless measurement
 
       Unit.new("#{object.distance_mm || 0} mm").convert_to(measurement.unit).scalar

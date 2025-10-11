@@ -2,21 +2,25 @@
 
 module Types
   class QueryType < Types::BaseObject
-    field :node, Types::NodeType, null: true, description: "Fetches an object given its ID." do
+    field :node, GraphQL::Types::Relay::Node, null: true, description: "Fetches an object given its ID." do
       argument :id, ID, required: true, description: "ID of the object."
     end
 
-    field :nodes, [Types::NodeType, null: true], null: true, description: "Fetches a list of objects given a list of IDs." do
+    field :nodes, [GraphQL::Types::Relay::Node, null: true], null: true, description: "Fetches a list of objects given a list of IDs." do
       argument :ids, [ID], required: true, description: "IDs of the objects."
     end
 
-    field :exercise, Types::ExerciseType, null: true, preload: { workout_steps: [:workout, { sets: :exercise }] } do
+    field :exercise, Types::ExerciseType, null: true, preload: [:exercise_measurements, { workout_sets: :exercise }] do
       argument :id, ID, required: true
     end
 
-    field :workout, Types::WorkoutType, null: true, preload: { steps: [:exercises, { sets: :exercise }] } do
+    field :workout, Types::WorkoutType, null: true, preload: { steps: [{ exercises: :exercise_measurements }, { sets: { exercise: :exercise_measurements } }] } do
       argument :id, ID, required: false
       argument :date, GraphQL::Types::ISO8601Date, required: false
+    end
+
+    field :workout_step, Types::WorkoutStepType, null: true, preload: [{ exercises: :exercise_measurements }, { sets: { exercise: :exercise_measurements } }] do
+      argument :id, ID, required: false
     end
 
     class ExerciseFilterType < GraphQL::Schema::InputObject
@@ -48,7 +52,7 @@ module Types
       argument :is_template, Boolean, required: false
     end
 
-    field :workouts, Types::WorkoutType.connection_type, null: false, preload: { steps: [:exercises, { sets: :exercise }] } do
+    field :workouts, Types::WorkoutType.connection_type, null: false, preload: { steps: [{ exercises: :exercise_measurements }, { sets: { exercise: :exercise_measurements } }] } do
       argument :filter, WorkoutFilterType, required: false
     end
 
@@ -72,6 +76,10 @@ module Types
 
     def exercise(id:)
       Exercise.find id
+    end
+
+    def workout_step(id:)
+      WorkoutStep.find id
     end
 
     def workout(id: nil, date: nil)

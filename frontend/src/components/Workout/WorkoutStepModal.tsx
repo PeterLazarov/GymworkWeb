@@ -9,6 +9,7 @@ import {
   ILastSetQuery,
   ILastSetQueryVariables,
   IWorkoutByDateQuery,
+  MeasurementsFragment,
   WorkoutSetFragment,
 } from "../../generated/graphql";
 import { formatDateIso } from "../../utils/date";
@@ -39,6 +40,25 @@ type Workout = IWorkoutByDateQuery["workout"];
 type WorkoutStep = Workout["steps"][number];
 type Set = WorkoutStep["sets"][number];
 
+const WORKOUT_STEP_QUERY = gql`
+  query WorkoutStep($stepId: ID!) {
+    workoutStep(id: $stepId) {
+      id
+      exercises {
+        id
+        name
+        measurements {
+          ...MeasurementsFragment
+        }
+      }
+      sets {
+        ...WorkoutSetFragment
+      }
+    }
+  }
+  ${WorkoutSetFragment}
+  ${MeasurementsFragment}
+`;
 const ADD_SET_MUTATION = gql`
   mutation AddSet($input: AddSetInput!) {
     addSet(input: $input) {
@@ -123,9 +143,16 @@ type WorkoutStepModalProps = {
 export const WorkoutStepModal: React.FC<WorkoutStepModalProps> = ({
   isOpen,
   onClose,
-  step,
+  step: initialStep,
   workout,
 }) => {
+  const { data } = useQuery(WORKOUT_STEP_QUERY, {
+    variables: { stepId: initialStep.id },
+    skip: !isOpen,
+  });
+
+  const step = data?.workoutStep || initialStep;
+
   const [isEditExerciseOpen, setIsEditExerciseOpen] = useState(false);
   const [deleteStep] = useMutation(DELETE_STEP_MUTATION);
 
@@ -344,13 +371,8 @@ const TrackStepTab: React.FC<{ step: WorkoutStep; workout: Workout }> = ({
       },
     });
 
-    if (result.data?.addSet?.errors.length) {
-      console.error("Failed to add set:", result.data.addSet.errors);
-      return;
-    }
-
-    if (!result.data?.addSet?.set) {
-      console.error("Failed to add set: No set data returned");
+    if (!result.data?.addSet?.set || result.data.addSet.errors.length > 0) {
+      console.error("Failed to add set:", result.data?.addSet?.errors);
       return;
     }
 

@@ -7,33 +7,62 @@ class BackendSchema < GraphQL::Schema
   # For batch-loading (see https://graphql-ruby.org/dataloader/overview.html)
   use GraphQL::Dataloader
 
-  # GraphQL-Ruby calls this when something goes wrong while running a query:
-  
-
-  # Union and Interface Resolution
-  def self.resolve_type(_abstract_type, _obj, _ctx)
-    # TODO: Implement this method
-    # to return the correct GraphQL object type for `obj`
-    raise(GraphQL::RequiredImplementationMissingError)
+  def self.type_error(err, context)
+    Rails.logger.error "GraphQL error: #{err.message}"
+    err
   end
 
-  # Limit the size of incoming queries:
+  def self.resolve_type(_abstract_type, _obj, _ctx)
+    case _obj
+    when Workout
+      Types::WorkoutType
+    when WorkoutStep
+      Types::WorkoutStepType
+    when WorkoutSet
+      Types::WorkoutSetType
+    when Exercise
+      Types::ExerciseType
+    when Settings
+      Types::SettingsType
+    else
+      raise(GraphQL::RequiredImplementationMissingError, "Unexpected object: #{_obj}")
+    end
+  end
+
   max_query_string_tokens(5000)
 
-  # Stop validating when it encounters this many errors:
   validate_max_errors(100)
 
   # Relay-style Object Identification:
 
   # Return a string UUID for `object`
   def self.id_from_object(object, _type_definition, _query_ctx)
-    # For example, use Rails' GlobalID library (https://github.com/rails/globalid):
-    object.to_gid_param
+    GraphQL::Schema::UniqueWithinType.encode(_type_definition.graphql_name, object.id)
   end
 
-  # Given a string UUID, find the object
-  def self.object_from_id(global_id, _query_ctx)
-    # For example, use Rails' GlobalID library (https://github.com/rails/globalid):
-    GlobalID.find(global_id)
+  def self.object_from_id(graphql_id, _query_ctx)
+    type_name, id = GraphQL::Schema::UniqueWithinType.decode graphql_id
+
+    model_class = get_model_from_type_name(type_name)
+    model_class.find(id)
+  end
+
+  private
+
+  def self.get_model_from_type_name(type_name)
+    case type_name
+    when 'WorkoutType'
+      Workout
+    when 'WorkoutStepType'
+      WorkoutStep
+    when 'WorkoutSetType'
+      WorkoutSet
+    when 'ExerciseType'
+      Exercise
+    when 'SettingsType'
+      Settings
+    else
+      raise "Unknown type name: #{type_name}"
+    end
   end
 end
