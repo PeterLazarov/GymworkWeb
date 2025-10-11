@@ -126,11 +126,24 @@ CREATE VIEW public.exercise_records AS
                     WHEN public.is_metric_match('{distance,duration}'::text[], (emt.measurement_types)::text[]) THEN ((- ws.duration_ms))::bigint
                     WHEN public.is_metric_match('{reps,distance}'::text[], (emt.measurement_types)::text[]) THEN (ws.distance_mm)::bigint
                     ELSE NULL::bigint
-                END AS measurement_value
+                END AS measurement_value,
+                CASE
+                    WHEN public.is_metric_match('{weight}'::text[], (emt.measurement_types)::text[]) THEN 'weight'::text
+                    WHEN public.is_metric_match('{duration}'::text[], (emt.measurement_types)::text[]) THEN 'duration'::text
+                    WHEN public.is_metric_match('{reps}'::text[], (emt.measurement_types)::text[]) THEN 'reps'::text
+                    WHEN public.is_metric_match('{distance}'::text[], (emt.measurement_types)::text[]) THEN 'distance'::text
+                    WHEN public.is_metric_match('{weight,duration}'::text[], (emt.measurement_types)::text[]) THEN 'duration'::text
+                    WHEN public.is_metric_match('{reps,weight}'::text[], (emt.measurement_types)::text[]) THEN 'weight'::text
+                    WHEN public.is_metric_match('{duration,reps}'::text[], (emt.measurement_types)::text[]) THEN 'reps'::text
+                    WHEN public.is_metric_match('{weight,distance}'::text[], (emt.measurement_types)::text[]) THEN 'distance'::text
+                    WHEN public.is_metric_match('{distance,duration}'::text[], (emt.measurement_types)::text[]) THEN 'duration'::text
+                    WHEN public.is_metric_match('{reps,distance}'::text[], (emt.measurement_types)::text[]) THEN 'distance'::text
+                    ELSE NULL::text
+                END AS measuring_metric_type
            FROM (public.workout_sets ws
              JOIN exercise_measurement_types emt ON ((ws.exercise_id = emt.exercise_id)))
           WHERE (ws.is_warmup = false)
-        ), measurement_sets_with_direction AS (
+        ), ranked_sets AS (
          SELECT ms.id,
             ms.exercise_id,
             ms.reps,
@@ -142,42 +155,15 @@ CREATE VIEW public.exercise_records AS
             ms.measurement_types,
             ms.grouping_value,
             ms.measurement_value,
-                CASE
-                    WHEN public.is_metric_match('{weight}'::text[], (ms.measurement_types)::text[]) THEN 'weight'::text
-                    WHEN public.is_metric_match('{duration}'::text[], (ms.measurement_types)::text[]) THEN 'duration'::text
-                    WHEN public.is_metric_match('{reps}'::text[], (ms.measurement_types)::text[]) THEN 'reps'::text
-                    WHEN public.is_metric_match('{distance}'::text[], (ms.measurement_types)::text[]) THEN 'distance'::text
-                    WHEN public.is_metric_match('{weight,duration}'::text[], (ms.measurement_types)::text[]) THEN 'duration'::text
-                    WHEN public.is_metric_match('{reps,weight}'::text[], (ms.measurement_types)::text[]) THEN 'weight'::text
-                    WHEN public.is_metric_match('{duration,reps}'::text[], (ms.measurement_types)::text[]) THEN 'reps'::text
-                    WHEN public.is_metric_match('{weight,distance}'::text[], (ms.measurement_types)::text[]) THEN 'distance'::text
-                    WHEN public.is_metric_match('{distance,duration}'::text[], (ms.measurement_types)::text[]) THEN 'duration'::text
-                    WHEN public.is_metric_match('{reps,distance}'::text[], (ms.measurement_types)::text[]) THEN 'distance'::text
-                    ELSE NULL::text
-                END AS measuring_metric_type
-           FROM measurement_sets ms
-          WHERE (ms.grouping_value IS NOT NULL)
-        ), ranked_sets AS (
-         SELECT mswd.id,
-            mswd.exercise_id,
-            mswd.reps,
-            mswd.weight_mcg,
-            mswd.distance_mm,
-            mswd.duration_ms,
-            mswd.speed_kph,
-            mswd.date,
-            mswd.measurement_types,
-            mswd.grouping_value,
-            mswd.measurement_value,
-            mswd.measuring_metric_type,
+            ms.measuring_metric_type,
             em.more_is_better,
-            row_number() OVER (PARTITION BY mswd.exercise_id, mswd.grouping_value ORDER BY
+            row_number() OVER (PARTITION BY ms.exercise_id, ms.grouping_value ORDER BY
                 CASE
-                    WHEN em.more_is_better THEN mswd.measurement_value
-                    ELSE (- mswd.measurement_value)
-                END DESC, mswd.date DESC) AS rank
-           FROM (measurement_sets_with_direction mswd
-             LEFT JOIN public.exercise_measurements em ON (((mswd.exercise_id = em.exercise_id) AND (mswd.measuring_metric_type = (em.measurement_type)::text))))
+                    WHEN em.more_is_better THEN ms.measurement_value
+                    ELSE (- ms.measurement_value)
+                END DESC, ms.date DESC) AS rank
+           FROM (measurement_sets ms
+             LEFT JOIN public.exercise_measurements em ON (((ms.exercise_id = em.exercise_id) AND (ms.measuring_metric_type = (em.measurement_type)::text))))
         )
  SELECT id AS record_id,
     exercise_id,
@@ -525,6 +511,7 @@ SET search_path TO "$user", public;
 INSERT INTO "schema_migrations" (version) VALUES
 ('4'),
 ('3'),
+('20251010133122'),
 ('20250930000000'),
 ('20250929210252'),
 ('20250926000000'),
